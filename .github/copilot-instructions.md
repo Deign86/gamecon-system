@@ -227,3 +227,14 @@ Before coding any UI, commit to a BOLD aesthetic direction:
 - Auth-gated sections check `profile?.role === "admin"` (or relevant role) — never trust client-side role alone for mutations (Cloud Functions re-verify)
 - `cn()` from `src/lib/utils.js` is the standard class merging utility (wraps `clsx`)
 - Data seeding scripts live in `src/data/` and are run with `npm run seed` (`seedFirestore.mjs`)
+
+---
+
+## 9 · Anthropic Agent Skills
+
+This workspace has 16 Anthropic Agent Skills installed at `.skills/anthropic-skills/skills/`.
+The full registry and trigger descriptions are in `.github/skills-instructions.md`.
+
+**How to use:** When a task matches a skill's description (frontend design, PDF/DOCX/XLSX/PPTX manipulation, webapp testing, MCP server building, etc.), read the relevant `SKILL.md` and follow its workflow before writing code. Skills provide battle-tested templates, scripts, and step-by-step processes.
+
+To update skills: `cd .skills/anthropic-skills && git pull`

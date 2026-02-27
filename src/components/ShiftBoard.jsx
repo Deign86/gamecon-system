@@ -287,7 +287,7 @@ export default function ShiftBoard() {
                 "shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition-all border",
                 isActive
                   ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
-                  : "bg-gc-iron/50 border-gc-steel/30 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"
+                  : "bg-gc-iron border-gc-steel/60 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"
               )}
             >
               {isCurrent && (
@@ -300,7 +300,7 @@ export default function ShiftBoard() {
       </div>
 
       {/* ── Summary bar ── */}
-      <div className="flex items-center justify-between rounded-xl border border-gc-steel/30 bg-gc-iron/30 px-4 py-2.5">
+      <div className="flex items-center justify-between rounded-xl border border-gc-steel/60 bg-gc-iron px-4 py-2.5">
         <div className="flex items-center gap-4 text-xs font-body">
           <span className="flex items-center gap-1.5 text-gc-cloud">
             <Calendar className="h-3.5 w-3.5 text-gc-crimson" />
@@ -332,13 +332,13 @@ export default function ShiftBoard() {
       ) : shifts.length === 0 ? (
         /* ── Empty state ── */
         <div className="text-center py-10">
-          <Clock className="mx-auto h-10 w-10 text-gc-mist/25 mb-3" />
+          <Clock className="mx-auto h-10 w-10 text-gc-faded mb-3" />
           {isAdmin ? (
             <>
-              <p className="text-sm text-gc-mist/70 mb-1">
+              <p className="text-sm text-gc-mist mb-1">
                 No shifts assigned for this block yet.
               </p>
-              <p className="text-xs text-gc-mist/50 mb-4">
+              <p className="text-xs text-gc-hint mb-4">
                 Start assigning committees below.
               </p>
               <button
@@ -356,10 +356,10 @@ export default function ShiftBoard() {
             </>
           ) : (
             <>
-              <p className="text-sm text-gc-mist/60">
+              <p className="text-sm text-gc-hint">
                 No shifts assigned for this block yet.
               </p>
-              <p className="text-xs text-gc-mist/40 mt-1">
+              <p className="text-xs text-gc-faded mt-1">
                 Check back later — an admin will set up shift assignments.
               </p>
             </>

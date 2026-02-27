@@ -133,7 +133,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
         </p>
 
         {assignments.length === 0 && (
-          <p className="py-3 text-center text-xs text-gc-mist/60 italic">
+          <p className="py-3 text-center text-xs text-gc-hint italic">
             No assignments yet
           </p>
         )}
@@ -146,7 +146,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
-              className="flex items-center gap-2 rounded-lg border border-gc-steel/30 bg-gc-iron/50 px-3 py-2"
+              className="flex items-center gap-2 rounded-lg border border-gc-steel/50 bg-gc-iron px-3 py-2"
             >
               <span
                 className="h-2.5 w-2.5 rounded-full shrink-0"
@@ -224,7 +224,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
                   "flex-1 rounded-lg px-2 py-1.5 text-[10px] font-bold border transition-all duration-200",
                   newDay === d
                     ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
-                    : "bg-gc-iron/40 text-gc-mist border-gc-steel/30 hover:text-gc-cloud"
+                    : "bg-gc-iron text-gc-mist border-gc-steel/50 hover:text-gc-cloud"
                 )}
               >
                 {d}

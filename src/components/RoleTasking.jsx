@@ -155,7 +155,7 @@ export default function RoleTasking() {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron/60 text-gc-mist">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron text-gc-mist">
           <ClipboardList className="h-8 w-8" />
         </div>
         <p className="font-display text-xl font-bold text-gc-cloud">ACCESS RESTRICTED</p>
@@ -230,7 +230,7 @@ export default function RoleTasking() {
               "flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200",
               view === key
                 ? "bg-gc-crimson/15 text-gc-crimson border border-gc-crimson/30"
-                : "bg-gc-iron/40 text-gc-mist border border-gc-steel/30 hover:text-gc-cloud hover:bg-gc-iron/60"
+                : "bg-gc-iron text-gc-mist border border-gc-steel/60 hover:text-gc-cloud hover:bg-gc-iron/80"
             )}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -245,7 +245,7 @@ export default function RoleTasking() {
           variants={itemVariant}
           className="flex flex-col items-center gap-4 py-20 text-center"
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron/60 text-gc-mist">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron text-gc-mist">
             <ClipboardList className="h-8 w-8" />
           </div>
           <div>
@@ -403,7 +403,7 @@ export default function RoleTasking() {
                             </div>
                           ))}
                           {(person.assignments || []).length === 0 && (
-                            <p className="text-xs text-gc-mist/60 italic">No assignments</p>
+                            <p className="text-xs text-gc-hint italic">No assignments</p>
                           )}
                         </div>
                       </motion.div>
@@ -483,7 +483,7 @@ export default function RoleTasking() {
                     "rounded-lg px-3.5 py-2 text-xs font-semibold border transition-all duration-200",
                     selectedDay === d
                       ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
-                      : "bg-gc-iron/40 text-gc-mist border-gc-steel/30 hover:text-gc-cloud"
+                      : "bg-gc-iron text-gc-mist border-gc-steel/60 hover:text-gc-cloud"
                   )}
                 >
                   {d}
@@ -525,7 +525,7 @@ export default function RoleTasking() {
                   "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border transition-all duration-200",
                   editingCommittee
                     ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
-                    : "bg-gc-iron/40 text-gc-mist border-gc-steel/30 hover:text-gc-cloud hover:bg-gc-iron/60"
+                    : "bg-gc-iron text-gc-mist border-gc-steel/60 hover:text-gc-cloud hover:bg-gc-iron/80"
                 )}
               >
                 <Pencil className="h-3 w-3" />
@@ -543,7 +543,7 @@ export default function RoleTasking() {
                     <motion.div
                       key={name}
                       variants={itemVariant}
-                      className="flex items-center gap-3 rounded-xl border border-gc-steel/30 bg-gc-iron/40 px-4 py-3"
+                      className="flex items-center gap-3 rounded-xl border border-gc-steel/60 bg-gc-iron px-4 py-3"
                     >
                       <div
                         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"

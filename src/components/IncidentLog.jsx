@@ -129,7 +129,7 @@ export default function IncidentLog() {
           {incidents.length === 0 && (
             <div className="text-center py-8">
               <Shield className="mx-auto h-8 w-8 text-gc-success/30 mb-2" />
-              <p className="text-sm text-gc-mist/60">No incidents reported. All clear!</p>
+              <p className="text-sm text-gc-hint">No incidents reported. All clear!</p>
             </div>
           )}
           {incidents.map((inc) => {
@@ -146,7 +146,7 @@ export default function IncidentLog() {
                     {inc.details && (
                       <p className="text-xs text-gc-mist mt-0.5 line-clamp-2">{inc.details}</p>
                     )}
-                    <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gc-mist/60 font-mono">
+                    <div className="flex items-center gap-2 mt-1.5 text-[10px] text-gc-hint font-mono">
                       {zoneName && <span className="inline-flex items-center gap-0.5"><MapPin className="h-3 w-3" /> {zoneName}</span>}
                       <span>· {inc.reporterName}</span>
                       <span>· {fmtDate(inc.timestamp)}</span>
@@ -213,7 +213,7 @@ export default function IncidentLog() {
                 </div>
 
                 {inc.status === "resolved" && inc.resolvedByName && (
-                  <div className="mt-1.5 pt-1.5 border-t border-gc-steel/30 flex items-center gap-1 text-[10px] text-gc-success/60 font-mono">
+                  <div className="mt-1.5 pt-1.5 border-t border-gc-steel/50 flex items-center gap-1 text-[10px] text-gc-success font-mono">
                     <CheckCircle className="h-3 w-3" />
                     Resolved by {inc.resolvedByName}
                   </div>

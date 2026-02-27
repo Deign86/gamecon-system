@@ -93,7 +93,7 @@ export default function CommitteeCard() {
               )}
 
               {commMembers.length === 0 && (
-                <p className="mt-2 text-xs text-gc-mist/40">No members assigned yet.</p>
+                <p className="mt-2 text-xs text-gc-hint">No members assigned yet.</p>
               )}
             </div>
           </div>

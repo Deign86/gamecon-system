@@ -107,7 +107,7 @@ export default function CommitteeScheduleEditor({
         </p>
 
         {members.length === 0 && (
-          <p className="py-3 text-center text-xs text-gc-mist/60 italic">
+          <p className="py-3 text-center text-xs text-gc-hint italic">
             No members assigned
           </p>
         )}
@@ -120,7 +120,7 @@ export default function CommitteeScheduleEditor({
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85, x: -20 }}
-              className="flex items-center gap-3 rounded-xl border border-gc-steel/30 bg-gc-iron/40 px-3 py-2"
+              className="flex items-center gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-3 py-2"
             >
               <div
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
@@ -173,7 +173,7 @@ export default function CommitteeScheduleEditor({
 
         {/* Suggestions dropdown */}
         {search.trim() && suggestions.length > 0 && (
-          <div className="max-h-36 overflow-y-auto rounded-lg border border-gc-steel/30 bg-gc-iron/80 divide-y divide-gc-steel/20">
+          <div className="max-h-36 overflow-y-auto rounded-lg border border-gc-steel/50 bg-gc-iron divide-y divide-gc-steel/40">
             {suggestions.map((p) => (
               <button
                 key={p.id}
@@ -192,7 +192,7 @@ export default function CommitteeScheduleEditor({
         )}
 
         {search.trim() && suggestions.length === 0 && (
-          <p className="text-[10px] text-gc-mist/60 italic px-1">
+          <p className="text-[10px] text-gc-hint italic px-1">
             No matching people found
           </p>
         )}

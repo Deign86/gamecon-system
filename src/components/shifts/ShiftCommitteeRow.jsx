@@ -41,12 +41,12 @@ export default function ShiftCommitteeRow({
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-gc-steel/40 bg-gc-slate/60 overflow-hidden"
+      className="rounded-xl border border-gc-steel/50 bg-gc-slate/80 overflow-hidden"
     >
       {/* ── Header ── */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gc-iron/40 transition-colors"
+        className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-gc-iron/60 transition-colors"
       >
         {/* Colour dot */}
         <span
@@ -96,7 +96,7 @@ export default function ShiftCommitteeRow({
             transition={{ duration: 0.2, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="border-t border-gc-steel/30 px-4 py-3 space-y-2">
+            <div className="border-t border-gc-steel/50 px-4 py-3 space-y-2">
               {/* Assignee pills */}
               {assignees.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
@@ -152,7 +152,7 @@ export default function ShiftCommitteeRow({
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-gc-mist/60 italic">
+                <p className="text-xs text-gc-hint italic">
                   No one assigned yet.
                 </p>
               )}
@@ -161,7 +161,7 @@ export default function ShiftCommitteeRow({
               {isAdmin && (
                 <button
                   onClick={() => onAdd(committee.id)}
-                  className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gc-steel/50 bg-gc-iron/30 px-3 py-1.5 text-xs font-body font-semibold text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5 transition-all"
+                  className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gc-steel bg-gc-iron px-3 py-1.5 text-xs font-body font-semibold text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5 transition-all"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
                   Add Member

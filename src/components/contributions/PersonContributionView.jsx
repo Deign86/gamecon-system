@@ -131,7 +131,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
       >
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gc-mist/50" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gc-hint" />
           <input
             type="text"
             value={search}
@@ -148,7 +148,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
               <span className="h-5 w-5 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
             </div>
           ) : filteredPeople.length === 0 ? (
-            <p className="text-center text-sm text-gc-mist/50 py-6">
+            <p className="text-center text-sm text-gc-hint py-6">
               {allPeople.length === 0 ? "No roster imported yet." : "No match."}
             </p>
           ) : (
@@ -163,7 +163,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                     "w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all",
                     active
                       ? "bg-gc-crimson/15 border border-gc-crimson/40 text-gc-cloud"
-                      : "border border-transparent bg-gc-iron/40 text-gc-mist hover:border-gc-steel/40 hover:bg-gc-iron/70"
+                      : "border border-transparent bg-gc-iron text-gc-mist hover:border-gc-steel/50 hover:bg-gc-iron/80"
                   )}
                 >
                   {/* Avatar */}
@@ -180,7 +180,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                       {p.name}
                     </p>
                     {/* Show first committee assignment */}
-                    <p className="text-[10px] font-mono text-gc-mist/50 truncate">
+                    <p className="text-[10px] font-mono text-gc-hint truncate">
                       {p.assignments?.[0]?.committee || "—"}
                     </p>
                   </div>
@@ -197,14 +197,14 @@ export default function PersonContributionView({ myEntriesOnly }) {
       {/* ── Right: Contribution list ─────────────── */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         {!selectedUser ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-gc-mist/40">
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-gc-faded">
             <UserRound className="h-10 w-10 opacity-30" />
             <p className="text-sm">Select a classmate to view their contributions</p>
           </div>
         ) : (
           <>
             {/* Selected person header */}
-            <div className="flex items-center gap-3 rounded-xl border border-gc-steel/20 bg-gc-iron/40 px-4 py-3">
+            <div className="flex items-center gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-4 py-3">
               {/* Back (mobile) */}
               <button
                 type="button"
@@ -225,7 +225,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
 
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold text-gc-white truncate">{selectedUser.name}</p>
-                <p className="flex items-center gap-1 text-[10px] font-mono text-gc-mist/60">
+                <p className="flex items-center gap-1 text-[10px] font-mono text-gc-hint">
                   <Shield className="h-2.5 w-2.5" />
                   {selectedUser.assignments?.[0]?.committee || "—"} · {displayedContribs.length} entr{displayedContribs.length === 1 ? "y" : "ies"}
                 </p>
@@ -250,7 +250,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                   <span className="h-5 w-5 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
                 </div>
               ) : displayedContribs.length === 0 ? (
-                <div className="flex flex-col items-center gap-2 py-12 text-gc-mist/40">
+                <div className="flex flex-col items-center gap-2 py-12 text-gc-faded">
                   <ClipboardList className="h-8 w-8 opacity-30" />
                   <p className="text-sm">No contributions logged yet.</p>
                   {canWrite && !myEntriesOnly && (
@@ -276,7 +276,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.15 }}
-                        className="flex items-start gap-3 rounded-xl border border-gc-steel/20 bg-gc-iron/40 px-3.5 py-3"
+                        className="flex items-start gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-3.5 py-3"
                       >
                         {/* Committee dot */}
                         <div
@@ -309,7 +309,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                                 Logged by you
                               </span>
                             )}
-                            <span className="text-[10px] font-mono text-gc-mist/50">
+                            <span className="text-[10px] font-mono text-gc-hint">
                               {fmtDate(c.createdAt || c.timestamp)}
                             </span>
                           </div>

@@ -60,7 +60,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
 
   if (total === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-16 text-gc-mist/40">
+      <div className="flex flex-col items-center gap-3 py-16 text-gc-faded">
         <BarChart3 className="h-10 w-10 opacity-30" />
         <p className="text-sm">No contributions logged yet.</p>
       </div>
@@ -70,12 +70,12 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
   return (
     <div className="space-y-3">
       {/* Summary bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gc-steel/20 bg-gc-iron/40 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-4 py-3">
         <BarChart3 className="h-4 w-4 text-gc-crimson shrink-0" />
         <span className="text-sm font-bold text-gc-cloud">
           {total} {total === 1 ? "entry" : "entries"}
         </span>
-        <span className="text-xs text-gc-mist/50">across {grouped.length} committee{grouped.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs text-gc-hint">across {grouped.length} committee{grouped.length !== 1 ? "s" : ""}</span>
         {/* Mini bar chart — colored segments proportional to counts */}
         <div className="ml-auto flex h-2 min-w-[80px] max-w-[140px] flex-1 overflow-hidden rounded-full bg-gc-steel/20">
           {grouped.map(([id, items]) => {
@@ -100,7 +100,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
           return (
             <div
               key={id}
-              className="overflow-hidden rounded-xl border border-gc-steel/20 bg-gc-iron/40"
+              className="overflow-hidden rounded-xl border border-gc-steel/50 bg-gc-iron"
             >
               {/* Header row */}
               <button
@@ -131,7 +131,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 shrink-0 text-gc-mist/50 transition-transform",
+                    "h-4 w-4 shrink-0 text-gc-hint transition-transform",
                     isOpen && "rotate-180"
                   )}
                 />
@@ -147,7 +147,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
                     transition={{ duration: 0.18 }}
                     className="overflow-hidden"
                   >
-                    <div className="border-t border-gc-steel/15 divide-y divide-gc-steel/10">
+                    <div className="border-t border-gc-steel/40 divide-y divide-gc-steel/30">
                       {items.map((c) => (
                         <div
                           key={c.id}
@@ -162,7 +162,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
                                 {c.details}
                               </p>
                             )}
-                            <p className="mt-1 text-[10px] font-mono text-gc-mist/50">
+                            <p className="mt-1 text-[10px] font-mono text-gc-hint">
                               {c.userName} · {fmtDate(c.createdAt || c.timestamp)}
                             </p>
                           </div>

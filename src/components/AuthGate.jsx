@@ -53,7 +53,7 @@ export default function AuthGate() {
           className="absolute -top-1/4 -right-1/4 w-[140%] h-[140%] opacity-[0.03]"
           style={{
             background:
-              "linear-gradient(135deg, transparent 45%, #C8102E 45%, #C8102E 47%, transparent 47%)",
+              "linear-gradient(135deg, transparent 45%, rgb(var(--gc-crimson) / 0.12) 45%, rgb(var(--gc-crimson) / 0.12) 47%, transparent 47%)",
           }}
         />
       </div>
@@ -76,7 +76,7 @@ export default function AuthGate() {
           <p className="mt-1 font-display text-lg tracking-widest text-gc-mist">
             IT GAMECON 2026
           </p>
-          <p className="mt-0.5 text-xs text-gc-mist/60 font-body tracking-wide">
+          <p className="mt-0.5 text-xs text-gc-hint font-body tracking-wide">
             INTERNAL OPS DASHBOARD
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function AuthGate() {
         {/* Form card */}
         <div className="gc-card-accent p-6">
           {/* Admin-only account notice */}
-          <div className="flex items-center justify-center gap-2.5 rounded-lg border border-gc-steel/30 bg-gc-iron/40 px-3.5 py-3 mb-5">
+          <div className="flex items-center justify-center gap-2.5 rounded-lg border border-gc-steel/60 bg-gc-iron px-3.5 py-3 mb-5">
             <Info className="h-4 w-4 text-gc-mist shrink-0" />
             <p className="text-[11px] text-gc-mist font-body leading-relaxed text-justify">
               Accounts are created by the GameCon admin. If you're a proctor
@@ -158,7 +158,7 @@ export default function AuthGate() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-[10px] uppercase tracking-widest text-gc-mist/40 font-body">
+        <p className="mt-6 text-center text-[10px] uppercase tracking-widest text-gc-faded font-body">
           Pamantasan ng Lungsod ng Valenzuela · CEIT · VITS
         </p>
       </motion.div>

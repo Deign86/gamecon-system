@@ -249,7 +249,7 @@ export default function CreateUserForm({ onCreated }) {
                         key={c.key}
                         className={cn(
                           "flex items-center gap-1.5 text-[10px] font-body transition-colors duration-150",
-                          c.passed ? "text-gc-success" : "text-gc-mist/60"
+                          c.passed ? "text-gc-success" : "text-gc-hint"
                         )}
                       >
                         {c.passed ? (

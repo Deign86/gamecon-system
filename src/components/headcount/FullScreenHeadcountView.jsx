@@ -171,7 +171,7 @@ function HeadcountInner() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
         onClick={() => navigate("/")}
-        className="absolute top-5 right-5 z-20 flex items-center gap-2 rounded-xl bg-gc-iron/60 border border-gc-steel/40 px-3.5 py-2 text-gc-mist/60 backdrop-blur-sm transition-all hover:border-gc-crimson/40 hover:text-gc-cloud hover:bg-gc-iron/80"
+        className="absolute top-5 right-5 z-20 flex items-center gap-2 rounded-xl bg-gc-iron border border-gc-steel/60 px-3.5 py-2 text-gc-hint backdrop-blur-sm transition-all hover:border-gc-crimson/40 hover:text-gc-cloud hover:bg-gc-iron/80"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         <span className="font-display text-xs tracking-[0.15em] uppercase">Dashboard</span>
@@ -247,7 +247,7 @@ function HeadcountInner() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="font-mono text-xs sm:text-sm tracking-[0.3em] uppercase text-gc-mist/40"
+              className="font-mono text-xs sm:text-sm tracking-[0.3em] uppercase text-gc-faded"
             >
               Headcount
             </motion.p>
@@ -318,7 +318,7 @@ function HeadcountInner() {
       </div>
 
       {/* Keyboard hint */}
-      <div className="absolute bottom-3 sm:bottom-5 flex items-center gap-2 text-gc-mist/20 text-[10px] font-mono z-10">
+      <div className="absolute bottom-3 sm:bottom-5 flex items-center gap-2 text-gc-faded text-[10px] font-mono z-10">
         <kbd className="px-1.5 py-0.5 rounded bg-gc-iron/50 border border-gc-steel/30 text-[9px]">↑</kbd>
         <span>/</span>
         <kbd className="px-1.5 py-0.5 rounded bg-gc-iron/50 border border-gc-steel/30 text-[9px]">↓</kbd>

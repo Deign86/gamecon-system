@@ -65,7 +65,7 @@ export default function ExpenseTracker() {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-gc-iron/40 border border-gc-steel/30 p-4">
+        <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-gc-iron border border-gc-steel/50 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
@@ -151,14 +151,14 @@ export default function ExpenseTracker() {
       {/* Expense list */}
       <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
         {expenses.length === 0 && (
-          <p className="text-sm text-gc-mist/60 text-center py-6">No expenses recorded yet.</p>
+          <p className="text-sm text-gc-hint text-center py-6">No expenses recorded yet.</p>
         )}
         {expenses.map((exp) => {
           const committee = COMMITTEES.find((c) => c.id === exp.committee);
           return (
             <div
               key={exp.id}
-              className="flex items-center gap-3 rounded-lg bg-gc-iron/50 border border-gc-steel/30 px-3 py-2.5"
+              className="flex items-center gap-3 rounded-lg bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
             >
               <div
                 className="h-2 w-2 shrink-0 rounded-full"
@@ -166,7 +166,7 @@ export default function ExpenseTracker() {
               />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-gc-cloud truncate">{exp.item}</p>
-                <p className="text-[10px] text-gc-mist/60 font-mono">
+                <p className="text-[10px] text-gc-hint font-mono">
                   {exp.category || "Uncategorized"} · {committee?.name || "General"} · {fmtDate(exp.timestamp)}
                 </p>
               </div>

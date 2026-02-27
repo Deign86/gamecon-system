@@ -184,14 +184,14 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
             <div className="flex-1 overflow-y-auto p-5 space-y-6">
               {/* ── Read-only info section ── */}
               <div className="space-y-3">
-                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gc-mist/70 font-body">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gc-mist font-body">
                   Account Information
                 </h3>
-                <div className="rounded-xl border border-gc-steel/30 bg-gc-slate/50 divide-y divide-gc-steel/20">
+                <div className="rounded-xl border border-gc-steel/60 bg-gc-slate/50 divide-y divide-gc-steel/40">
                   <div className="flex items-center gap-3 px-4 py-3">
                     <User className="h-4 w-4 text-gc-mist shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-wider text-gc-mist/60 font-body">Name</p>
+                      <p className="text-[10px] uppercase tracking-wider text-gc-hint font-body">Name</p>
                       <p className="text-sm text-gc-white font-body font-medium truncate">
                         {user?.name || "—"}
                       </p>
@@ -200,7 +200,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                   <div className="flex items-center gap-3 px-4 py-3">
                     <Mail className="h-4 w-4 text-gc-mist shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-wider text-gc-mist/60 font-body">Email</p>
+                      <p className="text-[10px] uppercase tracking-wider text-gc-hint font-body">Email</p>
                       <p className="text-sm text-gc-white font-body font-medium truncate">
                         {user?.email || "—"}
                       </p>
@@ -209,7 +209,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                   <div className="flex items-center gap-3 px-4 py-3">
                     <Calendar className="h-4 w-4 text-gc-mist shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-[10px] uppercase tracking-wider text-gc-mist/60 font-body">Created</p>
+                      <p className="text-[10px] uppercase tracking-wider text-gc-hint font-body">Created</p>
                       <p className="text-sm text-gc-white font-body font-medium">
                         {fmtDate(user?.createdAt)}
                       </p>
@@ -239,10 +239,10 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                         className={cn(
                           "flex items-center gap-2.5 rounded-xl border py-3 px-3.5 text-left transition-all duration-200",
                           isDowngrade
-                            ? "border-gc-steel/20 bg-gc-iron/10 text-gc-steel cursor-not-allowed opacity-40"
+                            ? "border-gc-steel/40 bg-gc-iron/30 text-gc-steel cursor-not-allowed opacity-40"
                             : selected
                               ? cn(colors.ring, colors.bg, colors.text, colors.shadow)
-                              : "border-gc-steel/50 bg-gc-iron/30 text-gc-cloud hover:border-gc-mist/50"
+                              : "border-gc-steel bg-gc-iron text-gc-cloud hover:border-gc-mist"
                         )}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
@@ -265,18 +265,18 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
               <div>
                 <label className="block text-[11px] font-body font-semibold uppercase tracking-wider text-gc-mist mb-2">
                   Committees
-                  <span className="ml-2 font-mono text-gc-mist/50 text-[10px]">{committees.length}/{MAX_COMMITTEES}</span>
+                  <span className="ml-2 font-mono text-gc-hint text-[10px]">{committees.length}/{MAX_COMMITTEES}</span>
                 </label>
 
                 {/* Existing assignment pills */}
                 <div className="space-y-1.5 mb-2">
                   {committees.length === 0 && (
-                    <p className="text-xs text-gc-mist/50 italic">No committees assigned.</p>
+                    <p className="text-xs text-gc-hint italic">No committees assigned.</p>
                   )}
                   {committees.map((c, i) => (
                     <div
                       key={`${c.committee}-${c.day}-${i}`}
-                      className="flex items-center gap-2 rounded-lg border border-gc-steel/30 bg-gc-iron/40 px-3 py-2 group"
+                      className="flex items-center gap-2 rounded-lg border border-gc-steel/60 bg-gc-iron px-3 py-2 group"
                     >
                       <span className="text-xs text-gc-cloud flex-1 truncate">
                         {c.committee}
@@ -343,7 +343,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                     Add committee assignment
                   </button>
                 ) : (
-                  <p className="text-[10px] text-gc-mist/40 italic">Maximum {MAX_COMMITTEES} committees reached.</p>
+                  <p className="text-[10px] text-gc-faded italic">Maximum {MAX_COMMITTEES} committees reached.</p>
                 )}
               </div>
 
@@ -378,7 +378,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                     <ToggleLeft className="h-5 w-5" />
                   )}
                 </button>
-                <p className="text-[10px] text-gc-mist/60 font-body mt-1.5 pl-1">
+                <p className="text-[10px] text-gc-hint font-body mt-1.5 pl-1">
                   {active
                     ? "User can sign in and access the system."
                     : "User is locked out and cannot sign in."}

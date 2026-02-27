@@ -76,8 +76,8 @@ export default function LogsPanel() {
       <div className="space-y-2">
         {allEvents.length === 0 && (
           <motion.div variants={fadeUp} className="text-center py-12">
-            <ScrollText className="mx-auto h-10 w-10 text-gc-mist/20 mb-3" />
-            <p className="text-sm text-gc-mist/60">No activity yet. Start using the dashboard!</p>
+            <ScrollText className="mx-auto h-10 w-10 text-gc-faded mb-3" />
+            <p className="text-sm text-gc-hint">No activity yet. Start using the dashboard!</p>
           </motion.div>
         )}
 
@@ -100,7 +100,7 @@ export default function LogsPanel() {
                 <p className="text-sm font-medium text-gc-cloud truncate">
                   {event.label}
                 </p>
-                <p className="text-[10px] text-gc-mist/60 font-mono">
+                <p className="text-[10px] text-gc-hint font-mono">
                   {event.type} · {event.userName || event.reporterName || event.updatedBy || "system"} · {fmtDate(event.timestamp)}
                 </p>
               </div>

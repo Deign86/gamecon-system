@@ -39,6 +39,7 @@ Thumbs.db
 
 # AI assistant config
 .claude/
+.skills/
 
 # Raw data / reference sheets — not part of the app source
 *.xlsx

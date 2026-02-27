@@ -2,13 +2,115 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Base ── */
+/* ══════════════════════════════════════════════════════════
+   THEME VARIABLES — Dark (default) & Light
+   ══════════════════════════════════════════════════════════ */
+
 @layer base {
+
+  /* ── Dark theme (default) ── */
+  :root,
+  html.dark {
+    /* Accent */
+    --gc-crimson: 200 16 46;
+    --gc-scarlet: 227 24 55;
+    --gc-blood:   122 0 25;
+    --gc-ember:   255 45 45;
+
+    /* Neutral scale (dark → light) */
+    --gc-void:  8 8 8;
+    --gc-night: 17 17 17;
+    --gc-slate: 26 26 26;
+    --gc-iron:  34 34 34;
+    --gc-steel: 51 51 51;
+    --gc-mist:  136 136 136;
+    --gc-cloud: 204 204 204;
+    --gc-bone:  229 231 235;
+    --gc-white: 255 255 255;
+
+    /* Semantic */
+    --gc-success: 34 197 94;
+    --gc-warning: 234 179 8;
+    --gc-danger:  239 68 68;
+
+    /* Text layers — pre-mixed for alpha-free usage */
+    --gc-hint:  90 90 90;      /* tertiary — labels, timestamps */
+    --gc-faded: 62 62 62;      /* quaternary — decorative, footnotes */
+
+    /* Component surface tokens */
+    --gc-card-bg:          #1a1a1a;
+    --gc-card-border:      #2a2a2a;
+    --gc-input-bg:         #111;
+    --gc-input-border:     #333;
+    --gc-input-text:       #E5E7EB;
+    --gc-input-placeholder:#666;
+    --gc-scrollbar-track:  #111;
+    --gc-scrollbar-thumb:  #333;
+    --gc-ghost-bg:         rgba(255,255,255,0.04);
+    --gc-ghost-bg-hover:   rgba(255,255,255,0.08);
+    --gc-ghost-border:     rgba(255,255,255,0.08);
+    --gc-ghost-border-hover: rgba(200,16,46,0.3);
+    --gc-diag-base:        #080808;
+    --gc-noise-opacity:    0.025;
+    --gc-overlay-bg:       rgba(0,0,0,0.60);
+    --gc-inset-highlight:  rgba(255,255,255,0.03);
+    color-scheme: dark;
+  }
+
+  /* ── Light theme ── */
+  html.light {
+    /* Accent — same crimson identity, micro-adjusted for light bg contrast */
+    --gc-crimson: 190 14 42;
+    --gc-scarlet: 210 20 48;
+    --gc-blood:   122 0 25;
+    --gc-ember:   220 38 38;
+
+    /* Neutral scale — warm paper / card-stock whites */
+    --gc-void:  249 247 245;
+    --gc-night: 240 237 235;
+    --gc-slate: 228 225 222;
+    --gc-iron:  215 212 209;
+    --gc-steel: 185 181 177;
+    --gc-mist:  105 100 95;
+    --gc-cloud: 72 67 62;
+    --gc-bone:  52 47 42;
+    --gc-white: 28 23 20;
+
+    /* Semantic — slightly deeper for light-bg legibility */
+    --gc-success: 22 163 74;
+    --gc-warning: 180 120 4;
+    --gc-danger:  220 38 38;
+
+    /* Text layers — tuned for light-bg readability */
+    --gc-hint:  125 120 115;   /* tertiary — labels, timestamps */
+    --gc-faded: 155 150 145;   /* quaternary — decorative, footnotes */
+
+    /* Component surface tokens */
+    --gc-card-bg:          #E8E5E2;
+    --gc-card-border:      #CCC9C5;
+    --gc-input-bg:         #F5F3F1;
+    --gc-input-border:     #B8B5B1;
+    --gc-input-text:       #2C2A28;
+    --gc-input-placeholder:#8A8784;
+    --gc-scrollbar-track:  #F0EDEB;
+    --gc-scrollbar-thumb:  #B8B5B1;
+    --gc-ghost-bg:         rgba(0,0,0,0.04);
+    --gc-ghost-bg-hover:   rgba(0,0,0,0.08);
+    --gc-ghost-border:     rgba(0,0,0,0.08);
+    --gc-ghost-border-hover: rgba(190,14,42,0.25);
+    --gc-diag-base:        #F9F7F5;
+    --gc-noise-opacity:    0.018;
+    --gc-overlay-bg:       rgba(0,0,0,0.35);
+    --gc-inset-highlight:  rgba(0,0,0,0.02);
+    color-scheme: light;
+  }
+
+  /* ── Scrollbars ── */
   *,
   *::before,
   *::after {
     scrollbar-width: thin;
-    scrollbar-color: #333 #111;
+    scrollbar-color: var(--gc-scrollbar-thumb) var(--gc-scrollbar-track);
   }
 
   ::-webkit-scrollbar {
@@ -16,10 +118,10 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #111;
+    background: var(--gc-scrollbar-track);
   }
   ::-webkit-scrollbar-thumb {
-    background: #333;
+    background: var(--gc-scrollbar-thumb);
     border-radius: 999px;
   }
 
@@ -33,15 +135,20 @@
   }
 }
 
-/* ── Noise overlay ── */
+/* ══════════════════════════════════════════════════════════
+   COMPONENT CLASSES
+   ══════════════════════════════════════════════════════════ */
+
 @layer components {
+
+  /* ── Noise overlay ── */
   .gc-noise::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: 9999;
     pointer-events: none;
-    opacity: 0.025;
+    opacity: var(--gc-noise-opacity);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 256px 256px;
     animation: grain 0.5s steps(1) infinite;
@@ -59,22 +166,28 @@
     right: -20%;
     width: 60%;
     height: 100%;
-    background: linear-gradient(135deg, transparent 40%, rgba(200, 16, 46, 0.06) 40%, rgba(200, 16, 46, 0.06) 42%, transparent 42%);
+    background: linear-gradient(
+      135deg,
+      transparent 40%,
+      rgb(var(--gc-crimson) / 0.06) 40%,
+      rgb(var(--gc-crimson) / 0.06) 42%,
+      transparent 42%
+    );
     pointer-events: none;
   }
 
   /* ── Card glow hover ── */
   .gc-card {
     @apply relative rounded-xl border transition-all duration-300;
-    background: #1a1a1a;
-    border-color: #2a2a2a;
+    background: var(--gc-card-bg);
+    border-color: var(--gc-card-border);
   }
   .gc-card:hover {
-    border-color: rgba(200, 16, 46, 0.5);
+    border-color: rgb(var(--gc-crimson) / 0.5);
     box-shadow:
-      0 0 20px rgba(200, 16, 46, 0.12),
-      0 0 60px rgba(200, 16, 46, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      0 0 20px rgb(var(--gc-crimson) / 0.12),
+      0 0 60px rgb(var(--gc-crimson) / 0.06),
+      inset 0 1px 0 var(--gc-inset-highlight);
   }
 
   /* ── Red accent bar on cards ── */
@@ -88,7 +201,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #C8102E, transparent);
+    background: linear-gradient(90deg, transparent, rgb(var(--gc-crimson)), transparent);
     border-radius: 12px 12px 0 0;
   }
 
@@ -97,10 +210,10 @@
     @apply inline-flex items-center justify-center rounded-full font-mono font-bold;
     min-width: 2.5rem;
     height: 2.5rem;
-    background: radial-gradient(circle at 30% 30%, #E31837, #C8102E);
+    background: radial-gradient(circle at 30% 30%, rgb(var(--gc-scarlet)), rgb(var(--gc-crimson)));
     color: #fff;
     box-shadow:
-      0 2px 8px rgba(200, 16, 46, 0.4),
+      0 2px 8px rgb(var(--gc-crimson) / 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
   }
 
@@ -110,21 +223,21 @@
   }
   .gc-chip-green {
     @apply gc-chip;
-    background: rgba(34, 197, 94, 0.12);
-    color: #22C55E;
-    border: 1px solid rgba(34, 197, 94, 0.2);
+    background: rgb(var(--gc-success) / 0.12);
+    color: rgb(var(--gc-success));
+    border: 1px solid rgb(var(--gc-success) / 0.2);
   }
   .gc-chip-yellow {
     @apply gc-chip;
-    background: rgba(234, 179, 8, 0.12);
-    color: #EAB308;
-    border: 1px solid rgba(234, 179, 8, 0.2);
+    background: rgb(var(--gc-warning) / 0.12);
+    color: rgb(var(--gc-warning));
+    border: 1px solid rgb(var(--gc-warning) / 0.2);
   }
   .gc-chip-red {
     @apply gc-chip;
-    background: rgba(239, 68, 68, 0.12);
-    color: #EF4444;
-    border: 1px solid rgba(239, 68, 68, 0.2);
+    background: rgb(var(--gc-danger) / 0.12);
+    color: rgb(var(--gc-danger));
+    border: 1px solid rgb(var(--gc-danger) / 0.2);
   }
 
   /* ── Button styles ── */
@@ -133,39 +246,42 @@
   }
   .gc-btn-primary {
     @apply gc-btn text-white;
-    background: linear-gradient(135deg, #C8102E, #E31837);
-    box-shadow: 0 2px 12px rgba(200, 16, 46, 0.35);
+    background: linear-gradient(135deg, rgb(var(--gc-crimson)), rgb(var(--gc-scarlet)));
+    box-shadow: 0 2px 12px rgb(var(--gc-crimson) / 0.35);
+    /* Always white text on crimson bg */
+    color: #fff;
   }
   .gc-btn-primary:hover {
-    box-shadow: 0 4px 24px rgba(200, 16, 46, 0.5);
+    box-shadow: 0 4px 24px rgb(var(--gc-crimson) / 0.5);
     transform: translateY(-1px);
   }
   .gc-btn-primary:active {
     transform: translateY(0);
   }
   .gc-btn-ghost {
-    @apply gc-btn text-gc-cloud;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    @apply gc-btn;
+    color: rgb(var(--gc-cloud));
+    background: var(--gc-ghost-bg);
+    border: 1px solid var(--gc-ghost-border);
   }
   .gc-btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(200, 16, 46, 0.3);
+    background: var(--gc-ghost-bg-hover);
+    border-color: var(--gc-ghost-border-hover);
   }
 
   /* ── Input styles ── */
   .gc-input {
     @apply w-full rounded-lg border px-3 py-2.5 text-sm font-body transition-all duration-200 outline-none;
-    background: #111;
-    border-color: #333;
-    color: #E5E7EB;
+    background: var(--gc-input-bg);
+    border-color: var(--gc-input-border);
+    color: var(--gc-input-text);
   }
   .gc-input:focus {
-    border-color: #C8102E;
-    box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.15);
+    border-color: rgb(var(--gc-crimson));
+    box-shadow: 0 0 0 3px rgb(var(--gc-crimson) / 0.15);
   }
   .gc-input::placeholder {
-    color: #666;
+    color: var(--gc-input-placeholder);
   }
 
   /* ── Stagger children animations ── */
@@ -173,15 +289,15 @@
     opacity: 0;
     animation: fadeUp 0.5s ease-out forwards;
   }
-  .gc-stagger > *:nth-child(1) { animation-delay: 0.05s; }
-  .gc-stagger > *:nth-child(2) { animation-delay: 0.1s; }
-  .gc-stagger > *:nth-child(3) { animation-delay: 0.15s; }
-  .gc-stagger > *:nth-child(4) { animation-delay: 0.2s; }
-  .gc-stagger > *:nth-child(5) { animation-delay: 0.25s; }
-  .gc-stagger > *:nth-child(6) { animation-delay: 0.3s; }
-  .gc-stagger > *:nth-child(7) { animation-delay: 0.35s; }
-  .gc-stagger > *:nth-child(8) { animation-delay: 0.4s; }
-  .gc-stagger > *:nth-child(9) { animation-delay: 0.45s; }
+  .gc-stagger > *:nth-child(1)  { animation-delay: 0.05s; }
+  .gc-stagger > *:nth-child(2)  { animation-delay: 0.1s; }
+  .gc-stagger > *:nth-child(3)  { animation-delay: 0.15s; }
+  .gc-stagger > *:nth-child(4)  { animation-delay: 0.2s; }
+  .gc-stagger > *:nth-child(5)  { animation-delay: 0.25s; }
+  .gc-stagger > *:nth-child(6)  { animation-delay: 0.3s; }
+  .gc-stagger > *:nth-child(7)  { animation-delay: 0.35s; }
+  .gc-stagger > *:nth-child(8)  { animation-delay: 0.4s; }
+  .gc-stagger > *:nth-child(9)  { animation-delay: 0.45s; }
   .gc-stagger > *:nth-child(10) { animation-delay: 0.5s; }
   .gc-stagger > *:nth-child(11) { animation-delay: 0.55s; }
   .gc-stagger > *:nth-child(12) { animation-delay: 0.6s; }
@@ -193,17 +309,20 @@
         135deg,
         transparent,
         transparent 60px,
-        rgba(200, 16, 46, 0.02) 60px,
-        rgba(200, 16, 46, 0.02) 61px
+        rgb(var(--gc-crimson) / 0.02) 60px,
+        rgb(var(--gc-crimson) / 0.02) 61px
       ),
-      #080808;
+      var(--gc-diag-base);
   }
 }
 
-/* ── Utility ── */
+/* ══════════════════════════════════════════════════════════
+   UTILITIES
+   ══════════════════════════════════════════════════════════ */
+
 @layer utilities {
   .text-shadow-red {
-    text-shadow: 0 0 40px rgba(200, 16, 46, 0.3);
+    text-shadow: 0 0 40px rgb(var(--gc-crimson) / 0.3);
   }
 
   .safe-bottom {

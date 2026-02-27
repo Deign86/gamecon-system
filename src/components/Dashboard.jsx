@@ -61,7 +61,7 @@ export default function Dashboard() {
           className="absolute inset-0 pointer-events-none"
           style={{
             background:
-              "linear-gradient(135deg, transparent 50%, rgba(200,16,46,0.08) 50%)",
+              "linear-gradient(135deg, transparent 50%, rgb(var(--gc-crimson) / 0.08) 50%)",
           }}
         />
         <div className="relative z-10">

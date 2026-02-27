@@ -196,7 +196,7 @@ export default function AdminResetPanel() {
                       <Loader2 className="h-8 w-8 animate-spin text-gc-danger" />
                       <p className="text-sm font-medium text-gc-mist">Resetting system data…</p>
                       {progress && (
-                        <p className="text-xs text-gc-mist/70 font-mono">{progress}</p>
+                        <p className="text-xs text-gc-mist font-mono">{progress}</p>
                       )}
                     </motion.div>
                   )}

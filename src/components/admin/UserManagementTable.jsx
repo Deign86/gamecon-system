@@ -214,11 +214,14 @@ export default function UserManagementTable({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <span
-                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
+                          className={cn(
+                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
+                            u.active ? "text-white" : "text-gc-white"
+                          )}
                           style={{
                             background: u.active
-                              ? "linear-gradient(135deg, #C8102E, #E31837)"
-                              : "linear-gradient(135deg, #333, #555)",
+                              ? "linear-gradient(135deg, rgb(var(--gc-crimson)), rgb(var(--gc-scarlet)))"
+                              : "linear-gradient(135deg, rgb(var(--gc-steel)), rgb(var(--gc-mist)))",
                           }}
                         >
                           {initials(u.name)}

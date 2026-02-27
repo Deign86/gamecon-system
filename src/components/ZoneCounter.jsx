@@ -34,7 +34,7 @@ export default function ZoneCounter() {
     return (
       <div className="text-center py-12">
         <p className="text-gc-mist text-sm">No zones found. Run the seed script to populate zones.</p>
-        <p className="text-gc-mist/50 text-xs mt-1 font-mono">npm run seed</p>
+        <p className="text-gc-hint text-xs mt-1 font-mono">npm run seed</p>
       </div>
     );
   }

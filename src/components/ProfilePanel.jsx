@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, ChevronRight } from "lucide-react";
+import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, ChevronRight, Sun, Moon, Monitor } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
@@ -19,6 +19,7 @@ const SEED_BY_CANONICAL = Object.fromEntries(
 );
 import AdminResetPanel from "./AdminResetPanel";
 import { useTab } from "../App";
+import { useTheme } from "../hooks/useTheme";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -28,6 +29,7 @@ const fadeUp = {
 export default function ProfilePanel() {
   const { user, profile, setProfile } = useAuth();
   const { setTab } = useTab();
+  const { mode, setTheme } = useTheme();
   const { docs: myContribs } = useCollection("contributions");
 
   // Derive active canonical committee names (normalise slugs + legacy values)
@@ -169,7 +171,7 @@ export default function ProfilePanel() {
           onClick={() => setShowPicker((p) => !p)}
           className={cn(
             "w-full flex items-center justify-center gap-2 rounded-lg border px-3 py-2 transition-colors text-xs",
-            "border-gc-steel/30 bg-gc-iron/50 hover:border-gc-steel/60 text-gc-mist",
+            "border-gc-steel/60 bg-gc-iron hover:border-gc-steel text-gc-mist",
           )}
         >
           {saving ? (
@@ -206,8 +208,8 @@ export default function ProfilePanel() {
                         active
                           ? "border-gc-success/50 bg-gc-success/10 text-gc-success font-semibold"
                           : atMax
-                            ? "border-gc-steel/10 bg-gc-iron/20 text-gc-steel/40 cursor-not-allowed"
-                            : "border-gc-steel/20 bg-gc-iron/40 text-gc-cloud hover:border-gc-steel/50 hover:bg-gc-iron/70",
+                            ? "border-gc-steel/40 bg-gc-iron/40 text-gc-hint cursor-not-allowed"
+                            : "border-gc-steel/60 bg-gc-iron text-gc-cloud hover:border-gc-steel hover:bg-gc-iron/80",
                       )}
                     >
                       <span
@@ -236,7 +238,7 @@ export default function ProfilePanel() {
         </div>
 
         {mine.length === 0 ? (
-          <p className="text-sm text-gc-mist/60 text-center py-3">
+          <p className="text-sm text-gc-hint text-center py-3">
             No contributions logged yet.
           </p>
         ) : (
@@ -244,17 +246,17 @@ export default function ProfilePanel() {
             {mine.slice(0, 3).map((c) => (
               <div
                 key={c.id}
-                className="flex items-center gap-3 rounded-lg bg-gc-iron/50 border border-gc-steel/30 px-3 py-2"
+                className="flex items-center gap-3 rounded-lg bg-gc-iron border border-gc-steel/60 px-3 py-2"
               >
                 <div className="h-1.5 w-1.5 rounded-full bg-gc-success shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-gc-cloud truncate">{c.task}</p>
-                  <p className="text-[10px] text-gc-mist/60 font-mono">{fmtDate(c.timestamp)}</p>
+                  <p className="text-[10px] text-gc-hint font-mono">{fmtDate(c.timestamp)}</p>
                 </div>
               </div>
             ))}
             {mine.length > 3 && (
-              <p className="text-[11px] text-gc-mist/50 text-center">+{mine.length - 3} more</p>
+              <p className="text-[11px] text-gc-hint text-center">+{mine.length - 3} more</p>
             )}
           </div>
         )}
@@ -262,11 +264,46 @@ export default function ProfilePanel() {
         <button
           type="button"
           onClick={() => setTab("contributions")}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-gc-steel/30 bg-gc-iron/50 px-3 py-2 text-xs font-semibold text-gc-mist transition-colors hover:border-gc-steel/60 hover:text-gc-cloud"
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-gc-steel/60 bg-gc-iron px-3 py-2 text-xs font-semibold text-gc-mist transition-colors hover:border-gc-steel hover:text-gc-cloud"
         >
           Open Contributions Tracker
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
+      </motion.div>
+
+      {/* Appearance / theme toggle */}
+      <motion.div variants={fadeUp} className="gc-card p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Sun className="h-4 w-4 text-gc-crimson" />
+          <h3 className="font-display text-base font-bold tracking-wide text-gc-mist">
+            APPEARANCE
+          </h3>
+        </div>
+        <div className="flex rounded-lg border border-gc-steel/60 overflow-hidden">
+          {[
+            { key: "system", label: "System", icon: Monitor },
+            { key: "light",  label: "Light",  icon: Sun },
+            { key: "dark",   label: "Dark",   icon: Moon },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setTheme(key)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-all duration-200",
+                mode === key
+                  ? "bg-gc-crimson text-white"
+                  : "bg-gc-iron text-gc-mist hover:text-gc-cloud hover:bg-gc-iron/80"
+              )}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              {label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[10px] text-gc-hint mt-2 text-center">
+          {mode === "system" ? "Following your device setting" : `Locked to ${mode} mode`}
+        </p>
       </motion.div>
 
       {/* Change password */}
@@ -286,7 +323,7 @@ export default function ProfilePanel() {
           <p className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-gc-crimson shrink-0" /> COED Building — Assembly Hall (Main Campus)</p>
           <p className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-gc-crimson shrink-0" /> March 5–6, 2026 (Thursday & Friday)</p>
           <p className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-gc-crimson shrink-0" /> 9:00 AM — 5:00 PM</p>
-          <p className="text-gc-mist/50 mt-2 font-mono">#ITLYMPICS2026</p>
+          <p className="text-gc-faded mt-2 font-mono">#ITLYMPICS2026</p>
         </div>
       </motion.div>
 

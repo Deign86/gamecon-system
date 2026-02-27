@@ -127,19 +127,19 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
 
           {/* Sheet */}
           <motion.div
-            className="relative z-10 w-full max-w-md rounded-2xl border border-gc-steel/30 bg-gc-void shadow-2xl"
+            className="relative z-10 w-full max-w-md rounded-2xl border border-gc-steel/50 bg-gc-void shadow-2xl"
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gc-steel/20 px-5 py-4">
+            <div className="flex items-center justify-between border-b border-gc-steel/40 px-5 py-4">
               <div>
                 <p className="font-display text-sm font-bold tracking-widest text-gc-mist uppercase">
                   {existing ? "Edit Contribution" : "Log Contribution"}
                 </p>
-                <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-gc-mist/60">
+                <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-gc-hint">
                   For{" "}
                   <span className="font-semibold text-gc-cloud">
                     {targetUser?.name || "—"}
@@ -201,7 +201,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 rounded-lg border border-gc-steel/30 px-4 py-2.5 text-sm font-semibold text-gc-mist transition-colors hover:bg-gc-steel/10"
+                  className="flex-1 rounded-lg border border-gc-steel/50 px-4 py-2.5 text-sm font-semibold text-gc-mist transition-colors hover:bg-gc-steel/20"
                 >
                   Cancel
                 </button>

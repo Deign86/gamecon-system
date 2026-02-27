@@ -171,8 +171,8 @@ export default function AddAssigneeDialog({
             {/* Empty state */}
             {suggested.length === 0 && others.length === 0 && (
               <div className="py-8 text-center">
-                <Users className="mx-auto h-8 w-8 text-gc-mist/30 mb-2" />
-                <p className="text-sm text-gc-mist/60">
+                <Users className="mx-auto h-8 w-8 text-gc-hint mb-2" />
+                <p className="text-sm text-gc-hint">
                   {search
                     ? "No matching members found."
                     : "All members are already assigned."}
@@ -198,7 +198,7 @@ function MemberRow({ member, isSuggested = false, onSelect }) {
         "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all",
         isSuggested
           ? "bg-gc-warning/5 border border-gc-warning/15 hover:bg-gc-warning/10"
-          : "bg-gc-iron/30 border border-gc-steel/20 hover:bg-gc-iron/60 hover:border-gc-steel/40"
+          : "bg-gc-iron border border-gc-steel/50 hover:bg-gc-iron/80 hover:border-gc-steel"
       )}
     >
       {/* Avatar */}

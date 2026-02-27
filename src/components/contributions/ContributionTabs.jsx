@@ -38,7 +38,7 @@ export default function ContributionTabs() {
           <h1 className="font-display text-xl font-bold tracking-wider text-gc-white">
             CONTRIBUTIONS
           </h1>
-          <p className="text-[11px] font-mono text-gc-mist/50">
+          <p className="text-[11px] font-mono text-gc-hint">
             GameCon 2026 · Class Tracker
           </p>
         </div>
@@ -51,7 +51,7 @@ export default function ContributionTabs() {
             "ml-auto flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-all",
             myEntriesOnly
               ? "border-gc-crimson/50 bg-gc-crimson/15 text-gc-crimson"
-              : "border-gc-steel/30 bg-gc-iron/50 text-gc-mist hover:border-gc-steel/60"
+              : "border-gc-steel/50 bg-gc-iron text-gc-mist hover:border-gc-steel/60"
           )}
         >
           <span
@@ -65,7 +65,7 @@ export default function ContributionTabs() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 rounded-xl border border-gc-steel/20 bg-gc-iron/30 p-1">
+      <div className="flex gap-1 rounded-xl border border-gc-steel/50 bg-gc-iron/60 p-1">
         {TABS.map(({ key, label, Icon }) => {
           const active = activeTab === key;
           return (
@@ -76,7 +76,7 @@ export default function ContributionTabs() {
               className={cn(
                 "relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all",
                 active
-                  ? "bg-gc-void text-gc-white shadow-sm border border-gc-steel/20"
+                  ? "bg-gc-void text-gc-white shadow-sm border border-gc-steel/50"
                   : "text-gc-mist hover:text-gc-cloud"
               )}
             >

@@ -79,9 +79,9 @@ export default function AddPersonDialog({ open, onClose, userId }) {
         </div>
 
         {/* Optional initial assignment */}
-        <div className="rounded-xl border border-gc-steel/30 bg-gc-iron/30 p-3 space-y-3">
+        <div className="rounded-xl border border-gc-steel/50 bg-gc-iron p-3 space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-gc-mist">
-            Initial Assignment <span className="text-gc-mist/50">(optional)</span>
+            Initial Assignment <span className="text-gc-hint">(optional)</span>
           </p>
 
           {/* Committee */}
@@ -108,7 +108,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
                 "rounded-lg px-3 py-1.5 text-[10px] font-bold border transition-all duration-200",
                 !day
                   ? "bg-gc-steel/30 text-gc-cloud border-gc-steel/50"
-                  : "bg-gc-iron/40 text-gc-mist border-gc-steel/30 hover:text-gc-cloud"
+                  : "bg-gc-iron text-gc-mist border-gc-steel/50 hover:text-gc-cloud"
               )}
             >
               None
@@ -122,7 +122,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
                   "rounded-lg px-3 py-1.5 text-[10px] font-bold border transition-all duration-200",
                   day === d
                     ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
-                    : "bg-gc-iron/40 text-gc-mist border-gc-steel/30 hover:text-gc-cloud"
+                    : "bg-gc-iron text-gc-mist border-gc-steel/50 hover:text-gc-cloud"
                 )}
               >
                 {d}

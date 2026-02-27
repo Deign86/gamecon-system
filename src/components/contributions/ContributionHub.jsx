@@ -193,14 +193,14 @@ function MyLogView() {
         </h3>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
           {myContribs.length === 0 && (
-            <p className="text-sm text-gc-mist/60 text-center py-6">No contributions logged yet.</p>
+            <p className="text-sm text-gc-hint text-center py-6">No contributions logged yet.</p>
           )}
           {myContribs.map((c) => {
             const committee = COMMITTEES.find((cm) => cm.id === c.committee);
             return (
               <div
                 key={c.id}
-                className="flex items-start gap-3 rounded-lg bg-gc-iron/50 border border-gc-steel/30 px-3 py-2.5"
+                className="flex items-start gap-3 rounded-lg bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
               >
                 <div
                   className="mt-0.5 h-2 w-2 shrink-0 rounded-full"
@@ -211,7 +211,7 @@ function MyLogView() {
                   {c.description && (
                     <p className="text-xs text-gc-mist mt-0.5 line-clamp-2">{c.description}</p>
                   )}
-                  <p className="text-[10px] text-gc-mist/60 mt-1 font-mono">
+                  <p className="text-[10px] text-gc-hint mt-1 font-mono">
                     {committee?.name || "General"} · {fmtDate(c.timestamp)}
                   </p>
                 </div>
