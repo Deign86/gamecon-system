@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldAlert,
-  ShieldCheck,
   UserCog,
   Eye,
   ToggleLeft,
@@ -26,18 +25,16 @@ import { useAuth } from "../../hooks/useAuth";
 const ROLE_ICONS = {
   admin:   ShieldAlert,
   proctor: UserCog,
-  head:    ShieldCheck,
   viewer:  Eye,
 };
 
 const ROLE_COLORS = {
   admin:   { ring: "border-gc-crimson",  bg: "bg-gc-crimson/15", text: "text-gc-crimson",  shadow: "shadow-[0_0_14px_rgba(200,16,46,0.25)]" },
   proctor: { ring: "border-gc-success",  bg: "bg-gc-success/12", text: "text-gc-success",  shadow: "shadow-[0_0_14px_rgba(34,197,94,0.2)]" },
-  head:    { ring: "border-gc-warning",  bg: "bg-gc-warning/12", text: "text-gc-warning",  shadow: "shadow-[0_0_14px_rgba(234,179,8,0.2)]" },
   viewer:  { ring: "border-gc-cloud",    bg: "bg-gc-steel/30",   text: "text-gc-cloud",    shadow: "" },
 };
 
-const ROLE_RANK = { admin: 3, proctor: 2, head: 1, viewer: 0 };
+const ROLE_RANK = { admin: 3, proctor: 2, viewer: 0 };
 
 /**
  * User Detail side-drawer — view user info, edit role/committee/active.
@@ -239,17 +236,19 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                     const Icon = ROLE_ICONS[r.value] || UserCog;
                     const colors = ROLE_COLORS[r.value] || ROLE_COLORS.viewer;
                     const selected = role === r.value;
+                    const isSelf = user?.id === authUser?.uid;
                     const currentRoleRank = ROLE_RANK[user?.role || "proctor"] ?? 0;
                     const isDowngrade = (ROLE_RANK[r.value] ?? 0) < currentRoleRank;
+                    const blocked = isSelf && isDowngrade; // admins can't downgrade themselves
                     return (
                       <button
                         key={r.value}
-                        onClick={() => !isDowngrade && setRole(r.value)}
-                        disabled={isDowngrade}
-                        title={isDowngrade ? "Role downgrade is not allowed" : r.description}
+                        onClick={() => !blocked && setRole(r.value)}
+                        disabled={blocked}
+                        title={blocked ? "You cannot downgrade your own role" : r.description}
                         className={cn(
                           "flex items-center gap-2.5 rounded border py-3 px-3.5 text-left transition-all duration-200",
-                          isDowngrade
+                          blocked
                             ? "border-gc-steel/40 bg-gc-iron/30 text-gc-steel cursor-not-allowed opacity-40"
                             : selected
                               ? cn(colors.ring, colors.bg, colors.text, colors.shadow)

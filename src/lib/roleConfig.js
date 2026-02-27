@@ -12,7 +12,6 @@
 export const APP_ROLES = [
   { value: "admin",   label: "Admin",   description: "Full control — create users, edit roles, reset system" },
   { value: "proctor", label: "Proctor", description: "Regular operational user — headcounts, shifts, etc." },
-  { value: "head",    label: "Head",    description: "Committee head — read-heavy, limited writes" },
   { value: "viewer",  label: "Viewer",  description: "Read-only access" },
 ];
 

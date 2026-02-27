@@ -3,8 +3,8 @@
  * Committee IDs should match `COMMITTEES[].id` from seed data.
  */
 export const DEFAULT_SHIFT_LIMITS = {
-  // Exhibitors: 1 per booth — only one exhibitor needed per block
-  "exhibitors": { min: 1, max: 1 },
+  // Exhibitors: 2 per block (morning and afternoon)
+  "exhibitors": { min: 2, max: 2 },
 
   // Ticketing & Voting combined: 3–4 people per block
   // We'll use this key for combined checks; individual 'ticketing'/'voting'

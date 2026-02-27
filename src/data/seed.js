@@ -59,7 +59,7 @@ export const COMMITTEE_REQUIRED_STAFF = {
   "creatives":       2,
   "awards-prizes":   2,
   "documentation":   2,
-  "exhibitors":      1,
+  "exhibitors":      2,
   "crowd-control":   12,
   "venue-design":    2,
   "ticketing":       3,

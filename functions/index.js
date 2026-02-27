@@ -22,8 +22,8 @@ const { getShiftLimits } = require("./shiftLimitsConfig");
 
 initializeApp();
 
-const VALID_ROLES = ["admin", "proctor", "head", "committee-head", "viewer"];
-const ROLE_RANK = { admin: 3, proctor: 2, head: 1, "committee-head": 1, viewer: 0 };
+const VALID_ROLES = ["admin", "proctor", "viewer"];
+const ROLE_RANK = { admin: 3, proctor: 2, viewer: 0 };
 
 /* ── Committee name normalisation ──
  * Maps every known variant (slug IDs, short names, header variants)
@@ -218,12 +218,15 @@ exports.updateUserRoleAndCommittee = onCall(callOpts, async (request) => {
     throw new HttpsError("invalid-argument", `Invalid role: ${role}. Must be one of: ${VALID_ROLES.join(", ")}`);
   }
 
-  // Prevent role downgrade
-  const targetDoc = await getFirestore().doc(`users/${uid}`).get();
-  if (targetDoc.exists) {
-    const currentRole = targetDoc.data().role || "proctor";
-    if ((ROLE_RANK[role] ?? 0) < (ROLE_RANK[currentRole] ?? 0)) {
-      throw new HttpsError("permission-denied", `Cannot downgrade user from ${currentRole} to ${role}.`);
+  // Prevent self-downgrade — admins can downgrade others but not themselves
+  const callerUid = request.auth.uid;
+  if (uid === callerUid) {
+    const targetDoc = await getFirestore().doc(`users/${uid}`).get();
+    if (targetDoc.exists) {
+      const currentRole = targetDoc.data().role || "proctor";
+      if ((ROLE_RANK[role] ?? 0) < (ROLE_RANK[currentRole] ?? 0)) {
+        throw new HttpsError("permission-denied", "You cannot downgrade your own role.");
+      }
     }
   }
 
@@ -267,12 +270,15 @@ exports.setUserRole = onCall(callOpts, async (request) => {
     throw new HttpsError("invalid-argument", `Invalid role: ${role}`);
   }
 
-  // Prevent role downgrade
-  const targetDoc = await getFirestore().doc(`users/${uid}`).get();
-  if (targetDoc.exists) {
-    const currentRole = targetDoc.data().role || "proctor";
-    if ((ROLE_RANK[role] ?? 0) < (ROLE_RANK[currentRole] ?? 0)) {
-      throw new HttpsError("permission-denied", `Cannot downgrade user from ${currentRole} to ${role}.`);
+  // Prevent self-downgrade — admins can downgrade others but not themselves
+  const callerUid = request.auth.uid;
+  if (uid === callerUid) {
+    const targetDoc = await getFirestore().doc(`users/${uid}`).get();
+    if (targetDoc.exists) {
+      const currentRole = targetDoc.data().role || "proctor";
+      if ((ROLE_RANK[role] ?? 0) < (ROLE_RANK[currentRole] ?? 0)) {
+        throw new HttpsError("permission-denied", "You cannot downgrade your own role.");
+      }
     }
   }
 
