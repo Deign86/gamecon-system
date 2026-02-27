@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ToastProvider } from "./components/Toast";
+import ErrorBoundary from "./components/ErrorBoundary";
 import AuthGate from "./components/AuthGate";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
@@ -14,7 +15,7 @@ const ProfilePanel = lazy(() => import("./components/ProfilePanel"));
 const LogsPanel    = lazy(() => import("./components/LogsPanel"));
 const RoleTasking  = lazy(() => import("./components/RoleTasking"));
 const AdminUsersPage = lazy(() => import("./components/admin/AdminUsersPage"));
-const ContributionTabs = lazy(() => import("./components/contributions/ContributionTabs"));
+/* ContributionTabs removed — consolidated into Dashboard ContributionHub */
 const FullScreenHeadcountView = lazy(() =>
   import("./components/headcount/FullScreenHeadcountView")
 );
@@ -53,24 +54,25 @@ function AppShell() {
       <div className="flex min-h-screen flex-col gc-diag-bg gc-noise">
         <TopNav />
         <main className="flex-1 overflow-y-auto px-3 pb-24 pt-4 sm:px-6">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={tab}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Suspense fallback={<RouteFallback />}>
-                {tab === "dashboard"     && <Dashboard />}
-                {tab === "roles"        && <RoleTasking />}
-                {tab === "users"        && <AdminUsersPage />}
-                {tab === "contributions" && <ContributionTabs />}
-                {tab === "me"           && <ProfilePanel />}
-                {tab === "logs"         && <LogsPanel />}
-              </Suspense>
-            </motion.div>
-          </AnimatePresence>
+          <Suspense fallback={<RouteFallback />}>
+            <ErrorBoundary key={tab}>
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={tab}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {tab === "dashboard"     && <Dashboard />}
+                  {tab === "roles"        && <RoleTasking />}
+                  {tab === "users"        && <AdminUsersPage />}
+                  {tab === "me"           && <ProfilePanel />}
+                  {tab === "logs"         && <LogsPanel />}
+                </motion.div>
+              </AnimatePresence>
+            </ErrorBoundary>
+          </Suspense>
         </main>
         <BottomNav />
       </div>

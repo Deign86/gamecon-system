@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import ZoneCounter from "./ZoneCounter";
 import ShiftBoard from "./ShiftBoard";
-import ContributionForm from "./ContributionForm";
+import ContributionHub from "./contributions/ContributionHub";
 import ExpenseTracker from "./ExpenseTracker";
 import IncidentLog from "./IncidentLog";
 import CommitteeCard from "./CommitteeCard";
@@ -139,7 +139,7 @@ export default function Dashboard() {
         title="CONTRIBUTIONS"
         wide
       >
-        <ContributionForm />
+        <ContributionHub />
       </Modal>
 
       <Modal
