@@ -127,8 +127,8 @@ export const VENUE_ZONES = [
     tracked: true,
     isOutside: false,
     layoutPositions: {
-      day1: { x: 63, y: 3, width: 20, height: 13 },
-      day2: { x: 63, y: 3, width: 20, height: 13 },
+      day1: { x: 63, y: 3, width: 34, height: 13 },
+      day2: { x: 63, y: 3, width: 34, height: 13 },
     },
   },
 

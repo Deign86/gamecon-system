@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Map, Loader2, AlertTriangle, Shield, ArrowLeft } from "lucide-react";
+import { Map, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
 import { useVenueStatus } from "../../hooks/useVenueStatus";
 import { VENUE_ZONES, HALL_BOUNDS, BOOTH_GRID, getZonesForDay, getZoneTypeLegend } from "../../lib/venueZones";
 import ZoneOverlay from "./ZoneOverlay";
@@ -34,7 +34,6 @@ export default function VenueMapWithStatus({ onNavigate }) {
 
   /* ── Aggregate stats for the top bar ── */
   const totalIncidents = Object.values(statuses).reduce((s, z) => s + (z.incidentsOpen || 0), 0);
-  const staffSum = Object.values(statuses).reduce((s, z) => s + (z.staffOnDuty || 0), 0);
 
   if (loading) {
     return (
@@ -89,10 +88,7 @@ export default function VenueMapWithStatus({ onNavigate }) {
               <span className="font-bold text-gc-danger">{totalIncidents}</span> open
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 rounded bg-gc-iron border border-gc-steel/30 px-2 py-1 text-gc-cloud">
-            <Shield className="h-3 w-3 text-gc-mist" />
-            <span className="font-bold text-gc-white">{staffSum}</span> staff
-          </span>
+          {/* People/staff totals removed from map header */}
         </div>
       </div>
 

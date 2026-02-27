@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { Users, AlertTriangle, Shield } from "lucide-react";
 import { getZoneTypeColor } from "../../lib/venueZones";
 
 const overlayVariant = {
@@ -22,10 +21,10 @@ const overlayVariant = {
  */
 export default function ZoneOverlay({ zone, position, status, isSelected, onClick }) {
   const color = getZoneTypeColor(zone.type);
-  const { currentCount, incidentsOpen, staffOnDuty, hasData } = status;
+  const { incidentsOpen, hasData } = status;
 
-  /* Occupancy heat: 0→25+ people maps to opacity 0.08→0.35 */
-  const heatOpacity = Math.min(0.08 + (currentCount / 30) * 0.27, 0.35);
+  /* People-tracking removed: use a fixed low opacity for zone fills */
+  const heatOpacity = 0.08;
   const hasIncidents = incidentsOpen > 0;
 
   return (
@@ -93,24 +92,7 @@ export default function ZoneOverlay({ zone, position, status, isSelected, onClic
           )}
         </div>
 
-        {/* Status badges (bottom row) */}
-        {(zone.tracked || hasData) && (
-          <div className="flex items-end gap-1 mt-auto">
-            {/* Headcount */}
-            <span className="inline-flex items-center gap-0.5 rounded bg-black/30 px-1 py-0.5 text-[6px] sm:text-[8px] font-mono text-gc-cloud/80">
-              <Users className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-gc-crimson/70" />
-              {currentCount}
-            </span>
-
-            {/* Staff on duty */}
-            {staffOnDuty > 0 && (
-              <span className="inline-flex items-center gap-0.5 rounded bg-black/30 px-1 py-0.5 text-[6px] sm:text-[8px] font-mono text-gc-cloud/80">
-                <Shield className="h-2 w-2 sm:h-2.5 sm:w-2.5 text-gc-success/70" />
-                {staffOnDuty}
-              </span>
-            )}
-          </div>
-        )}
+        {/* People-tracking removed: no headcount or staff badges shown on the map */}
 
         {/* Untracked label */}
         {!zone.tracked && !hasData && (
