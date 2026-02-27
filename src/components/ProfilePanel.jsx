@@ -9,6 +9,7 @@ import { ROLE_COMMITTEES as COMMITTEES } from "../data/seed";
 import { normalizeCommitteeName } from "../lib/roleConfig";
 import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";
+import IncidentNotificationToggle from "./profile/IncidentNotificationToggle";
 
 /**
  * Build a lookup: canonical committee name → seed COMMITTEES entry.
@@ -304,6 +305,11 @@ export default function ProfilePanel() {
         <p className="text-[10px] text-gc-hint mt-2 text-center">
           {mode === "system" ? "Following your device setting" : `Locked to ${mode} mode`}
         </p>
+      </motion.div>
+
+      {/* Incident notification toggle */}
+      <motion.div variants={fadeUp}>
+        <IncidentNotificationToggle />
       </motion.div>
 
       {/* Change password */}

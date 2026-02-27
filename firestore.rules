@@ -226,6 +226,20 @@ service cloud.firestore {
     }
 
     /* ───────────────────────────────────
+     *  FCM Tokens  (Push notification registration)
+     *  Read:   any auth'd user (Cloud Function also reads via Admin SDK)
+     *  Create/Update: owner only (userId must match caller)
+     *  Delete: owner only
+     * ─────────────────────────────────── */
+    match /fcmTokens/{tokenId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn()
+                            && request.resource.data.userId == request.auth.uid;
+      allow delete:         if isSignedIn()
+                            && resource.data.userId == request.auth.uid;
+    }
+
+    /* ───────────────────────────────────
      *  DEFAULT — deny everything not matched above.
      *  Defence-in-depth: any new collection is locked
      *  until an explicit rule is added.

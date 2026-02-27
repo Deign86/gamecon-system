@@ -108,7 +108,7 @@ export default function LogsPanel() {
           ACTIVITY <span className="text-gc-crimson">LOG</span>
         </h2>
         <p className="text-xs text-gc-mist mt-0.5 font-mono">
-          Complete audit trail of all system events — admin only.
+          Complete audit trail of all system events — admin only. Logs auto-purge after 7 days.
         </p>
       </motion.div>
 

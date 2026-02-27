@@ -13,10 +13,12 @@
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onDocumentWritten } = require("firebase-functions/v2/firestore");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
+const { onDocumentWritten, onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getMessaging } = require("firebase-admin/messaging");
 const crypto = require("crypto");
 const { getShiftLimits } = require("./shiftLimitsConfig");
 
@@ -390,6 +392,41 @@ exports.deleteUser = onCall(callOpts, async (request) => {
 });
 
 /* ─────────────────────────────────────────────────────
+ *  cleanupOldLogs (Scheduled)
+ *
+ *  Runs daily at 02:00 UTC via Cloud Scheduler.
+ *  Deletes all documents in the `logs` collection
+ *  whose `timestamp` is older than 7 days.
+ * ───────────────────────────────────────────────────── */
+exports.scheduledCleanupOldLogs = onSchedule(
+  { schedule: "every day 02:00", timeZone: "Asia/Manila" },
+  async () => {
+    const db = getFirestore();
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const snap = await db
+      .collection("logs")
+      .where("timestamp", "<", cutoff)
+      .get();
+
+    if (snap.empty) {
+      console.log("[cleanupOldLogs] No logs older than 7 days.");
+      return;
+    }
+
+    // Batch-delete in chunks of 500
+    const refs = snap.docs.map((d) => d.ref);
+    for (let i = 0; i < refs.length; i += 500) {
+      const batch = db.batch();
+      refs.slice(i, i + 500).forEach((ref) => batch.delete(ref));
+      await batch.commit();
+    }
+
+    console.log(`[cleanupOldLogs] Deleted ${refs.length} log(s) older than 7 days.`);
+  }
+);
+
+/* ─────────────────────────────────────────────────────
  *  validateCommitteeShiftLimits
  *  Firestore trigger: committeeShifts/{docId}
  *
@@ -448,6 +485,124 @@ exports.validateCommitteeShiftLimits = onDocumentWritten(
     if (data.maxAllowed == null) updates.maxAllowed = limits.max;
     if (Object.keys(updates).length > 0) {
       await after.ref.update(updates);
+    }
+  }
+);
+
+/* ─────────────────────────────────────────────────────
+ *  onNewIncident
+ *  Firestore trigger: incidents/{docId} — on CREATE
+ *
+ *  When a new incident document is created, sends push
+ *  notifications via FCM to all registered devices.
+ *  Invalid / expired tokens are automatically cleaned up.
+ * ───────────────────────────────────────────────────── */
+exports.onNewIncident = onDocumentCreated(
+  "incidents/{docId}",
+  async (event) => {
+    const data = event.data?.data();
+    if (!data) return;
+
+    const db = getFirestore();
+    const messaging = getMessaging();
+
+    // 1. Fetch all FCM tokens
+    const tokensSnap = await db.collection("fcmTokens").get();
+    if (tokensSnap.empty) {
+      console.log("[onNewIncident] No FCM tokens registered — skipping.");
+      return;
+    }
+
+    // Collect valid tokens (skip desktop markers which aren't real FCM tokens)
+    const tokens = [];
+    const tokenDocs = [];
+
+    tokensSnap.forEach((tokenDoc) => {
+      const d = tokenDoc.data();
+      if (d.token && d.platform !== "desktop") {
+        tokens.push(d.token);
+        tokenDocs.push(tokenDoc);
+      }
+    });
+
+    if (tokens.length === 0) {
+      console.log("[onNewIncident] No FCM-eligible tokens found — skipping.");
+      return;
+    }
+
+    // 2. Build notification payload
+    const severity = (data.severity || "unknown").toUpperCase();
+    const title = `Incident: ${data.title || "New Incident"}`;
+    const body = `${severity} — Reported by ${data.reporterName || "Unknown"}${
+      data.zoneId ? ` in ${data.zoneId}` : ""
+    }`;
+
+    // 3. Send in batches of 500 (FCM multicast limit)
+    const invalidTokens = [];
+
+    for (let i = 0; i < tokens.length; i += 500) {
+      const batch = tokens.slice(i, i + 500);
+
+      try {
+        const response = await messaging.sendEachForMulticast({
+          tokens: batch,
+          notification: { title, body },
+          data: {
+            type: "incident",
+            incidentId: event.params.docId,
+            severity: data.severity || "unknown",
+            incidentTitle: data.title || "",
+          },
+          webpush: {
+            fcmOptions: { link: "/" },
+            notification: {
+              icon: "/logo.png",
+              badge: "/logo.png",
+              vibrate: [200, 100, 200],
+            },
+          },
+          android: {
+            priority: "high",
+            notification: {
+              channelId: "incidents",
+              priority: "high",
+              sound: "default",
+            },
+          },
+        });
+
+        // Track invalid tokens for cleanup
+        response.responses.forEach((resp, idx) => {
+          if (!resp.success) {
+            const errCode = resp.error?.code;
+            if (
+              errCode === "messaging/invalid-registration-token" ||
+              errCode === "messaging/registration-token-not-registered"
+            ) {
+              invalidTokens.push(tokenDocs[i + idx]);
+            }
+          }
+        });
+
+        const successCount = response.responses.filter((r) => r.success).length;
+        console.log(
+          `[onNewIncident] Sent ${successCount}/${batch.length} notifications (batch ${
+            Math.floor(i / 500) + 1
+          }).`
+        );
+      } catch (err) {
+        console.error("[onNewIncident] FCM send error:", err);
+      }
+    }
+
+    // 4. Clean up invalid / expired tokens
+    if (invalidTokens.length > 0) {
+      const dbBatch = db.batch();
+      invalidTokens.forEach((tokenDoc) => dbBatch.delete(tokenDoc.ref));
+      await dbBatch.commit();
+      console.log(
+        `[onNewIncident] Cleaned up ${invalidTokens.length} invalid token(s).`
+      );
     }
   }
 );

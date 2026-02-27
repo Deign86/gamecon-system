@@ -8,6 +8,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import AuthGate from "./components/AuthGate";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
+import ForegroundNotificationHandler from "./components/ForegroundNotificationHandler";
 
 /* Lazy‑load heavy tab views */
 const Dashboard    = lazy(() => import("./components/Dashboard"));
@@ -64,6 +65,7 @@ function AppShell() {
     <TabCtx.Provider value={{ tab, setTab }}>
       <div className="flex min-h-screen flex-col gc-diag-bg gc-noise">
         <TopNav />
+        <ForegroundNotificationHandler />
         <main className="flex-1 overflow-y-auto px-3 pb-24 pt-4 sm:px-6">
           <Suspense fallback={<RouteFallback />}>
             <ErrorBoundary key={tab}>
