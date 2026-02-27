@@ -13,12 +13,11 @@ This application is an internal tool used by event staff during Gamecon 2026. It
 - **Live Headcount** - Zone-by-zone real-time headcount tracking with a full-screen board view for operations displays
 - **Shift Board** - Visual shift scheduling and assignment management with committee groupings
 - **Role Tasking** - Assign and track staff roles across committees; supports importing role sheets from spreadsheets
-- **Incident Log** - Structured incident reporting with push notification support for relevant staff
+- **Incident Log** - Structured incident reporting for event operations
 - **Contributions Tracker** - Log and review volunteer contributions
 - **Budget Monitor** - Expense tracking and budget visibility for committee heads
 - **Committee Cards** - Per-committee status and headcount summaries
 - **Admin Panel** - User creation, role management, password resets, and bulk operations exclusively for admins
-- **Push Notifications** - Firebase Cloud Messaging support for incident alerts; opt-in per user profile
 
 ---
 
@@ -34,7 +33,6 @@ This application is an internal tool used by event staff during Gamecon 2026. It
 | Backend / Database | Firebase Firestore |
 | Authentication | Firebase Auth |
 | Cloud Functions | Firebase Cloud Functions v2 (Node.js) |
-| Push Notifications | Firebase Cloud Messaging |
 | Spreadsheet Parsing | xlsx (SheetJS) |
 | Deployment | Vercel |
 
@@ -49,7 +47,7 @@ This application is an internal tool used by event staff during Gamecon 2026. It
 │   ├── components/              # All UI components
 │   │   ├── admin/               # Admin-only user management UI
 │   │   ├── headcount/           # Zone counter and full-screen board
-│   │   ├── profile/             # User profile and notification toggle
+│   │   ├── profile/             # User profile components
 │   │   ├── roles/               # Role tasking dialogs and editors
 │   │   └── shifts/              # Shift assignment dialogs and rows
 │   ├── hooks/                   # Custom React hooks (auth, Firestore, headcount)
@@ -57,9 +55,6 @@ This application is an internal tool used by event staff during Gamecon 2026. It
 │   └── data/                    # Seed scripts for Firestore data population
 ├── functions/                   # Firebase Cloud Functions source
 │   ├── index.js                 # Admin callable functions (user CRUD, auth claims)
-│   └── incidentNotifications.js # Incident push notification trigger
-├── public/
-│   └── firebase-messaging-sw.js # Service worker for background push notifications
 ├── firebase.json                # Firebase project configuration
 ├── firestore.rules              # Firestore security rules
 ├── firestore.indexes.json       # Firestore composite index definitions
@@ -85,7 +80,7 @@ Role enforcement is applied both at the Firestore security rules level and in th
 ## Prerequisites
 
 - Node.js 18 or later
-- A Firebase project with Firestore, Authentication, Cloud Functions, and Cloud Messaging enabled
+- A Firebase project with Firestore, Authentication, and Cloud Functions enabled
 - Firebase CLI installed globally (`npm install -g firebase-tools`)
 
 ---
@@ -122,7 +117,6 @@ Role enforcement is applied both at the Firestore security rules level and in th
    VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
    VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
    VITE_FIREBASE_APP_ID=your_app_id
-   VITE_FIREBASE_VAPID_KEY=your_vapid_key
    ```
 
    These values are available in your Firebase project console under Project Settings.

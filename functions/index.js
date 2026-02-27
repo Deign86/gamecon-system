@@ -13,12 +13,10 @@
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const crypto = require("crypto");
-const { sendIncidentNotifications } = require("./incidentNotifications");
 
 initializeApp();
 
@@ -315,31 +313,3 @@ exports.deleteUser = onCall(callOpts, async (request) => {
   return { success: true };
 });
 
-/* ═══════════════════════════════════════════════════════════════
- *  Incident Push Notifications — Firestore onCreate Trigger
- * ═══════════════════════════════════════════════════════════════
- *  Automatically fires when a new document is created in the
- *  `incidents` collection. Queries all users who opted in to
- *  incident push notifications and sends them an FCM message.
- * ─────────────────────────────────────────────────────────────── */
-exports.onIncidentCreated = onDocumentCreated("incidents/{incidentId}", async (event) => {
-  const snap = event.data;
-  if (!snap) {
-    console.log("[onIncidentCreated] No data in event. Skipping.");
-    return null;
-  }
-
-  const incident = snap.data();
-  const incidentId = event.params.incidentId;
-
-  console.log(`[onIncidentCreated] New incident: ${incidentId} — "${incident.title}" (${incident.severity})`);
-
-  try {
-    const result = await sendIncidentNotifications(incident, incidentId);
-    console.log(`[onIncidentCreated] Notification result:`, JSON.stringify(result));
-    return result;
-  } catch (err) {
-    console.error("[onIncidentCreated] Failed to send notifications:", err);
-    return null;
-  }
-});

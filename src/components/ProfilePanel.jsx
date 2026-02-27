@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, Bell, ChevronRight } from "lucide-react";
+import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, ChevronRight } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
@@ -9,7 +9,6 @@ import { COMMITTEES } from "../data/seed";
 import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";
 import AdminResetPanel from "./AdminResetPanel";
-import IncidentNotificationToggle from "./profile/IncidentNotificationToggle";
 import { useTab } from "../App";
 
 const fadeUp = {
@@ -100,7 +99,7 @@ export default function ProfilePanel() {
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <span className="gc-chip-green">
             <Shield className="h-3 w-3" />
-            {profile?.role || "member"}
+            {(profile?.role || "member").charAt(0).toUpperCase() + (profile?.role || "member").slice(1)}
           </span>
           {myCommittees.map((c) => (
             <span
@@ -215,17 +214,6 @@ export default function ProfilePanel() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
-
-      {/* Incident Push Notifications */}
-      <motion.div variants={fadeUp} className="gc-card p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Bell className="h-4 w-4 text-gc-crimson" />
-          <h3 className="font-display text-base font-bold tracking-wide text-gc-mist">
-            PUSH NOTIFICATIONS
-          </h3>
-        </div>
-        <IncidentNotificationToggle />
       </motion.div>
 
       {/* My contributions — compact summary, links to full Contributions tab */}
