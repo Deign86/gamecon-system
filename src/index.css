@@ -38,22 +38,22 @@
     --gc-faded: 62 62 62;      /* quaternary — decorative, footnotes */
 
     /* Component surface tokens */
-    --gc-card-bg:          #1a1a1a;
-    --gc-card-border:      #2a2a2a;
-    --gc-input-bg:         #111;
-    --gc-input-border:     #333;
+    --gc-card-bg:          #111114;
+    --gc-card-border:      #1c1c22;
+    --gc-input-bg:         #0c0c0f;
+    --gc-input-border:     #27272e;
     --gc-input-text:       #E5E7EB;
-    --gc-input-placeholder:#666;
-    --gc-scrollbar-track:  #111;
-    --gc-scrollbar-thumb:  #333;
-    --gc-ghost-bg:         rgba(255,255,255,0.04);
-    --gc-ghost-bg-hover:   rgba(255,255,255,0.08);
-    --gc-ghost-border:     rgba(255,255,255,0.08);
+    --gc-input-placeholder:#555;
+    --gc-scrollbar-track:  #0c0c0f;
+    --gc-scrollbar-thumb:  #27272e;
+    --gc-ghost-bg:         rgba(255,255,255,0.025);
+    --gc-ghost-bg-hover:   rgba(255,255,255,0.06);
+    --gc-ghost-border:     rgba(255,255,255,0.05);
     --gc-ghost-border-hover: rgba(200,16,46,0.3);
     --gc-diag-base:        #080808;
-    --gc-noise-opacity:    0.025;
-    --gc-overlay-bg:       rgba(0,0,0,0.60);
-    --gc-inset-highlight:  rgba(255,255,255,0.03);
+    --gc-noise-opacity:    0.02;
+    --gc-overlay-bg:       rgba(0,0,0,0.70);
+    --gc-inset-highlight:  rgba(255,255,255,0.02);
     color-scheme: dark;
   }
 
@@ -86,21 +86,21 @@
     --gc-faded: 155 150 145;   /* quaternary — decorative, footnotes */
 
     /* Component surface tokens */
-    --gc-card-bg:          #E8E5E2;
-    --gc-card-border:      #CCC9C5;
-    --gc-input-bg:         #F5F3F1;
-    --gc-input-border:     #B8B5B1;
+    --gc-card-bg:          #E4E1DE;
+    --gc-card-border:      #C5C2BE;
+    --gc-input-bg:         #F0EEEC;
+    --gc-input-border:     #B2AFAB;
     --gc-input-text:       #2C2A28;
     --gc-input-placeholder:#8A8784;
-    --gc-scrollbar-track:  #F0EDEB;
-    --gc-scrollbar-thumb:  #B8B5B1;
-    --gc-ghost-bg:         rgba(0,0,0,0.04);
-    --gc-ghost-bg-hover:   rgba(0,0,0,0.08);
-    --gc-ghost-border:     rgba(0,0,0,0.08);
+    --gc-scrollbar-track:  #EDEBE9;
+    --gc-scrollbar-thumb:  #B2AFAB;
+    --gc-ghost-bg:         rgba(0,0,0,0.03);
+    --gc-ghost-bg-hover:   rgba(0,0,0,0.06);
+    --gc-ghost-border:     rgba(0,0,0,0.05);
     --gc-ghost-border-hover: rgba(190,14,42,0.25);
     --gc-diag-base:        #F9F7F5;
-    --gc-noise-opacity:    0.018;
-    --gc-overlay-bg:       rgba(0,0,0,0.35);
+    --gc-noise-opacity:    0.015;
+    --gc-overlay-bg:       rgba(0,0,0,0.40);
     --gc-inset-highlight:  rgba(0,0,0,0.02);
     color-scheme: light;
   }
@@ -124,6 +124,9 @@
     background: var(--gc-scrollbar-thumb);
     border-radius: 999px;
   }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--gc-crimson) / 0.5);
+  }
 
   ::selection {
     background: rgba(200, 16, 46, 0.35);
@@ -141,7 +144,7 @@
 
 @layer components {
 
-  /* ── Noise overlay ── */
+  /* ── Noise + scan-line overlay ── */
   .gc-noise::before {
     content: "";
     position: fixed;
@@ -153,8 +156,22 @@
     background-size: 256px 256px;
     animation: grain 0.5s steps(1) infinite;
   }
+  .gc-noise::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(0, 0, 0, 0.012) 3px,
+      rgba(0, 0, 0, 0.012) 4px
+    );
+  }
 
-  /* ── Diagonal slash accent (poster motif) ── */
+  /* ── Corner triangle accent (cyber-industrial motif) ── */
   .gc-slash {
     position: relative;
     overflow: hidden;
@@ -163,34 +180,39 @@
     content: "";
     position: absolute;
     top: 0;
-    right: -20%;
-    width: 60%;
-    height: 100%;
-    background: linear-gradient(
-      135deg,
-      transparent 40%,
-      rgb(var(--gc-crimson) / 0.06) 40%,
-      rgb(var(--gc-crimson) / 0.06) 42%,
-      transparent 42%
-    );
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 56px 56px 0;
+    border-color: transparent rgb(var(--gc-crimson) / 0.05) transparent transparent;
     pointer-events: none;
+    transition: border-color 0.3s;
+  }
+  .gc-slash:hover::after {
+    border-color: transparent rgb(var(--gc-crimson) / 0.1) transparent transparent;
   }
 
-  /* ── Card glow hover ── */
+  /* ── Card — angular command-center style ── */
   .gc-card {
-    @apply relative rounded-xl border transition-all duration-300;
+    @apply relative rounded-md border transition-all duration-300;
     background: var(--gc-card-bg);
     border-color: var(--gc-card-border);
-  }
-  .gc-card:hover {
-    border-color: rgb(var(--gc-crimson) / 0.5);
     box-shadow:
-      0 0 20px rgb(var(--gc-crimson) / 0.12),
-      0 0 60px rgb(var(--gc-crimson) / 0.06),
+      0 1px 3px rgba(0,0,0,0.15),
       inset 0 1px 0 var(--gc-inset-highlight);
   }
+  .gc-card:hover {
+    border-color: rgb(var(--gc-crimson) / 0.4);
+    box-shadow:
+      0 0 0 1px rgb(var(--gc-crimson) / 0.08),
+      0 0 24px rgb(var(--gc-crimson) / 0.08),
+      0 8px 32px rgba(0,0,0,0.25),
+      inset 0 1px 0 var(--gc-inset-highlight);
+    transform: translateY(-1px);
+  }
 
-  /* ── Red accent bar on cards ── */
+  /* ── Accent bar card — animated shimmer ── */
   .gc-card-accent {
     @apply gc-card;
   }
@@ -201,62 +223,81 @@
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(90deg, transparent, rgb(var(--gc-crimson)), transparent);
-    border-radius: 12px 12px 0 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(var(--gc-crimson) / 0.5) 20%,
+      rgb(var(--gc-crimson)) 50%,
+      rgb(var(--gc-crimson) / 0.5) 80%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 4s ease-in-out infinite;
+    border-radius: 6px 6px 0 0;
   }
 
-  /* ── Counter badge ── */
+  /* ── Counter badge — angular ── */
   .gc-counter {
-    @apply inline-flex items-center justify-center rounded-full font-mono font-bold;
+    @apply inline-flex items-center justify-center font-mono font-bold;
     min-width: 2.5rem;
     height: 2.5rem;
-    background: radial-gradient(circle at 30% 30%, rgb(var(--gc-scarlet)), rgb(var(--gc-crimson)));
+    border-radius: 4px;
+    background: linear-gradient(135deg, rgb(var(--gc-crimson)), rgb(var(--gc-blood)));
     color: #fff;
     box-shadow:
-      0 2px 8px rgb(var(--gc-crimson) / 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      0 2px 12px rgb(var(--gc-crimson) / 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgb(var(--gc-crimson) / 0.6);
   }
 
-  /* ── Status chips ── */
+  /* ── Status chips — angular ── */
   .gc-chip {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 text-xs font-semibold tracking-wide;
+    border-radius: 3px;
   }
   .gc-chip-green {
     @apply gc-chip;
-    background: rgb(var(--gc-success) / 0.12);
+    background: rgb(var(--gc-success) / 0.1);
     color: rgb(var(--gc-success));
     border: 1px solid rgb(var(--gc-success) / 0.2);
   }
   .gc-chip-yellow {
     @apply gc-chip;
-    background: rgb(var(--gc-warning) / 0.12);
+    background: rgb(var(--gc-warning) / 0.1);
     color: rgb(var(--gc-warning));
     border: 1px solid rgb(var(--gc-warning) / 0.2);
   }
   .gc-chip-red {
     @apply gc-chip;
-    background: rgb(var(--gc-danger) / 0.12);
+    background: rgb(var(--gc-danger) / 0.1);
     color: rgb(var(--gc-danger));
     border: 1px solid rgb(var(--gc-danger) / 0.2);
   }
 
-  /* ── Button styles ── */
+  /* ── Button styles — angular, command-center ── */
   .gc-btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 font-body font-semibold text-sm transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 font-display font-semibold text-sm uppercase tracking-wider transition-all duration-200;
+    border-radius: 4px;
   }
   .gc-btn-primary {
     @apply gc-btn text-white;
     background: linear-gradient(135deg, rgb(var(--gc-crimson)), rgb(var(--gc-scarlet)));
-    box-shadow: 0 2px 12px rgb(var(--gc-crimson) / 0.35);
-    /* Always white text on crimson bg */
+    box-shadow:
+      0 2px 16px rgb(var(--gc-crimson) / 0.4),
+      inset 0 1px 0 rgba(255,255,255,0.1);
     color: #fff;
+    border: 1px solid rgb(var(--gc-crimson) / 0.5);
   }
   .gc-btn-primary:hover {
-    box-shadow: 0 4px 24px rgb(var(--gc-crimson) / 0.5);
+    box-shadow:
+      0 4px 32px rgb(var(--gc-crimson) / 0.5),
+      0 0 0 1px rgb(var(--gc-crimson)),
+      inset 0 1px 0 rgba(255,255,255,0.15);
     transform: translateY(-1px);
   }
   .gc-btn-primary:active {
     transform: translateY(0);
+    box-shadow: 0 1px 8px rgb(var(--gc-crimson) / 0.3);
   }
   .gc-btn-ghost {
     @apply gc-btn;
@@ -267,18 +308,22 @@
   .gc-btn-ghost:hover {
     background: var(--gc-ghost-bg-hover);
     border-color: var(--gc-ghost-border-hover);
+    box-shadow: 0 0 12px rgb(var(--gc-crimson) / 0.06);
   }
 
-  /* ── Input styles ── */
+  /* ── Input styles — angular ── */
   .gc-input {
-    @apply w-full rounded-lg border px-3 py-2.5 text-sm font-body transition-all duration-200 outline-none;
+    @apply w-full border px-3 py-2.5 text-sm font-body transition-all duration-200 outline-none;
+    border-radius: 4px;
     background: var(--gc-input-bg);
     border-color: var(--gc-input-border);
     color: var(--gc-input-text);
   }
   .gc-input:focus {
     border-color: rgb(var(--gc-crimson));
-    box-shadow: 0 0 0 3px rgb(var(--gc-crimson) / 0.15);
+    box-shadow:
+      0 0 0 2px rgb(var(--gc-crimson) / 0.12),
+      0 0 16px rgb(var(--gc-crimson) / 0.06);
   }
   .gc-input::placeholder {
     color: var(--gc-input-placeholder);
@@ -289,30 +334,29 @@
     opacity: 0;
     animation: fadeUp 0.5s ease-out forwards;
   }
-  .gc-stagger > *:nth-child(1)  { animation-delay: 0.05s; }
-  .gc-stagger > *:nth-child(2)  { animation-delay: 0.1s; }
-  .gc-stagger > *:nth-child(3)  { animation-delay: 0.15s; }
-  .gc-stagger > *:nth-child(4)  { animation-delay: 0.2s; }
-  .gc-stagger > *:nth-child(5)  { animation-delay: 0.25s; }
-  .gc-stagger > *:nth-child(6)  { animation-delay: 0.3s; }
-  .gc-stagger > *:nth-child(7)  { animation-delay: 0.35s; }
-  .gc-stagger > *:nth-child(8)  { animation-delay: 0.4s; }
-  .gc-stagger > *:nth-child(9)  { animation-delay: 0.45s; }
-  .gc-stagger > *:nth-child(10) { animation-delay: 0.5s; }
-  .gc-stagger > *:nth-child(11) { animation-delay: 0.55s; }
-  .gc-stagger > *:nth-child(12) { animation-delay: 0.6s; }
+  .gc-stagger > *:nth-child(1)  { animation-delay: 0.04s; }
+  .gc-stagger > *:nth-child(2)  { animation-delay: 0.08s; }
+  .gc-stagger > *:nth-child(3)  { animation-delay: 0.12s; }
+  .gc-stagger > *:nth-child(4)  { animation-delay: 0.16s; }
+  .gc-stagger > *:nth-child(5)  { animation-delay: 0.20s; }
+  .gc-stagger > *:nth-child(6)  { animation-delay: 0.24s; }
+  .gc-stagger > *:nth-child(7)  { animation-delay: 0.28s; }
+  .gc-stagger > *:nth-child(8)  { animation-delay: 0.32s; }
+  .gc-stagger > *:nth-child(9)  { animation-delay: 0.36s; }
+  .gc-stagger > *:nth-child(10) { animation-delay: 0.40s; }
+  .gc-stagger > *:nth-child(11) { animation-delay: 0.44s; }
+  .gc-stagger > *:nth-child(12) { animation-delay: 0.48s; }
 
-  /* ── Diagonal background pattern ── */
+  /* ── Dot-grid background (command-center matrix) ── */
   .gc-diag-bg {
     background:
-      repeating-linear-gradient(
-        135deg,
-        transparent,
-        transparent 60px,
-        rgb(var(--gc-crimson) / 0.02) 60px,
-        rgb(var(--gc-crimson) / 0.02) 61px
+      radial-gradient(
+        circle,
+        rgb(var(--gc-crimson) / 0.06) 1px,
+        transparent 1px
       ),
       var(--gc-diag-base);
+    background-size: 32px 32px;
   }
 }
 
@@ -322,10 +366,172 @@
 
 @layer utilities {
   .text-shadow-red {
-    text-shadow: 0 0 40px rgb(var(--gc-crimson) / 0.3);
+    text-shadow:
+      0 0 30px rgb(var(--gc-crimson) / 0.4),
+      0 0 60px rgb(var(--gc-crimson) / 0.15);
   }
 
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+
+  .gc-border-glow {
+    box-shadow:
+      0 0 0 1px rgb(var(--gc-crimson) / 0.3),
+      0 0 12px rgb(var(--gc-crimson) / 0.1);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIGHT-MODE OVERRIDES
+   Tailwind compiles rgb(var(--gc-*)) into hardcoded dark-mode
+   values at build time, so light-mode CSS variables never apply
+   to utility classes. This block re-maps every gc-* utility
+   actually in use, pulling the correct light-mode value.
+   ══════════════════════════════════════════════════════════ */
+
+/* ─── Backgrounds: void (249 247 245) ─── */
+html.light .bg-gc-void   { background-color: rgb(249 247 245) !important; }
+html.light .bg-gc-void\/50 { background-color: rgb(249 247 245 / 0.5) !important; }
+html.light .bg-gc-void\/90 { background-color: rgb(249 247 245 / 0.9) !important; }
+
+/* ─── Backgrounds: night (240 237 235) ─── */
+html.light .bg-gc-night  { background-color: rgb(240 237 235) !important; }
+html.light .bg-gc-night\/80 { background-color: rgb(240 237 235 / 0.8) !important; }
+html.light .bg-gc-night\/95 { background-color: rgb(240 237 235 / 0.95) !important; }
+
+/* ─── Backgrounds: slate (228 225 222) ─── */
+html.light .bg-gc-slate  { background-color: rgb(228 225 222) !important; }
+html.light .bg-gc-slate\/50 { background-color: rgb(228 225 222 / 0.5) !important; }
+html.light .bg-gc-slate\/60 { background-color: rgb(228 225 222 / 0.6) !important; }
+html.light .bg-gc-slate\/80 { background-color: rgb(228 225 222 / 0.8) !important; }
+
+/* ─── Backgrounds: iron (215 212 209) ─── */
+html.light .bg-gc-iron   { background-color: rgb(215 212 209) !important; }
+html.light .bg-gc-iron\/30 { background-color: rgb(215 212 209 / 0.3) !important; }
+html.light .bg-gc-iron\/40 { background-color: rgb(215 212 209 / 0.4) !important; }
+html.light .bg-gc-iron\/50 { background-color: rgb(215 212 209 / 0.5) !important; }
+html.light .bg-gc-iron\/60 { background-color: rgb(215 212 209 / 0.6) !important; }
+html.light .bg-gc-iron\/80 { background-color: rgb(215 212 209 / 0.8) !important; }
+
+/* ─── Backgrounds: steel (185 181 177) ─── */
+html.light .bg-gc-steel  { background-color: rgb(185 181 177) !important; }
+html.light .bg-gc-steel\/20 { background-color: rgb(185 181 177 / 0.2) !important; }
+html.light .bg-gc-steel\/30 { background-color: rgb(185 181 177 / 0.3) !important; }
+html.light .bg-gc-steel\/40 { background-color: rgb(185 181 177 / 0.4) !important; }
+html.light .bg-gc-steel\/60 { background-color: rgb(185 181 177 / 0.6) !important; }
+
+/* ─── Backgrounds: mist (105 100 95) ─── */
+html.light .bg-gc-mist\/40 { background-color: rgb(105 100 95 / 0.4) !important; }
+
+/* ─── Backgrounds: crimson (190 14 42) ─── */
+html.light .bg-gc-crimson { background-color: rgb(190 14 42) !important; }
+html.light .bg-gc-crimson\/5  { background-color: rgb(190 14 42 / 0.05) !important; }
+html.light .bg-gc-crimson\/10 { background-color: rgb(190 14 42 / 0.1) !important; }
+html.light .bg-gc-crimson\/15 { background-color: rgb(190 14 42 / 0.15) !important; }
+html.light .bg-gc-crimson\/20 { background-color: rgb(190 14 42 / 0.2) !important; }
+html.light .bg-gc-crimson\/25 { background-color: rgb(190 14 42 / 0.25) !important; }
+
+/* ─── Backgrounds: semantic ─── */
+html.light .bg-gc-success { background-color: rgb(22 163 74) !important; }
+html.light .bg-gc-success\/10 { background-color: rgb(22 163 74 / 0.1) !important; }
+html.light .bg-gc-success\/15 { background-color: rgb(22 163 74 / 0.15) !important; }
+html.light .bg-gc-success\/80 { background-color: rgb(22 163 74 / 0.8) !important; }
+html.light .bg-gc-danger  { background-color: rgb(220 38 38) !important; }
+html.light .bg-gc-danger\/5  { background-color: rgb(220 38 38 / 0.05) !important; }
+html.light .bg-gc-danger\/10 { background-color: rgb(220 38 38 / 0.1) !important; }
+html.light .bg-gc-danger\/15 { background-color: rgb(220 38 38 / 0.15) !important; }
+html.light .bg-gc-warning\/5  { background-color: rgb(180 120 4 / 0.05) !important; }
+html.light .bg-gc-warning\/10 { background-color: rgb(180 120 4 / 0.1) !important; }
+html.light .bg-gc-warning\/15 { background-color: rgb(180 120 4 / 0.15) !important; }
+
+/* ─── Text: primary ─── */
+html.light .text-gc-white { color: rgb(28 23 20) !important; }
+html.light .text-gc-bone  { color: rgb(52 47 42) !important; }
+html.light .text-gc-cloud { color: rgb(72 67 62) !important; }
+html.light .text-gc-mist  { color: rgb(105 100 95) !important; }
+html.light .text-gc-steel { color: rgb(185 181 177) !important; }
+
+/* ─── Text: accent ─── */
+html.light .text-gc-crimson { color: rgb(190 14 42) !important; }
+html.light .text-gc-crimson\/70 { color: rgb(190 14 42 / 0.7) !important; }
+html.light .text-gc-crimson\/80 { color: rgb(190 14 42 / 0.8) !important; }
+html.light .text-gc-scarlet { color: rgb(210 20 48) !important; }
+
+/* ─── Text: semantic ─── */
+html.light .text-gc-success { color: rgb(22 163 74) !important; }
+html.light .text-gc-success\/30 { color: rgb(22 163 74 / 0.3) !important; }
+html.light .text-gc-warning { color: rgb(180 120 4) !important; }
+html.light .text-gc-warning\/60 { color: rgb(180 120 4 / 0.6) !important; }
+html.light .text-gc-warning\/70 { color: rgb(180 120 4 / 0.7) !important; }
+html.light .text-gc-danger  { color: rgb(220 38 38) !important; }
+
+/* ─── Borders: neutrals ─── */
+html.light .border-gc-cloud { border-color: rgb(72 67 62) !important; }
+html.light .border-gc-steel { border-color: rgb(185 181 177) !important; }
+html.light .border-gc-steel\/10 { border-color: rgb(185 181 177 / 0.1) !important; }
+html.light .border-gc-steel\/15 { border-color: rgb(185 181 177 / 0.15) !important; }
+html.light .border-gc-steel\/20 { border-color: rgb(185 181 177 / 0.2) !important; }
+html.light .border-gc-steel\/30 { border-color: rgb(185 181 177 / 0.3) !important; }
+html.light .border-gc-steel\/40 { border-color: rgb(185 181 177 / 0.4) !important; }
+html.light .border-gc-steel\/50 { border-color: rgb(185 181 177 / 0.5) !important; }
+html.light .border-gc-steel\/60 { border-color: rgb(185 181 177 / 0.6) !important; }
+
+/* ─── Borders: accent ─── */
+html.light .border-gc-crimson { border-color: rgb(190 14 42) !important; }
+html.light .border-gc-crimson\/15 { border-color: rgb(190 14 42 / 0.15) !important; }
+html.light .border-gc-crimson\/20 { border-color: rgb(190 14 42 / 0.2) !important; }
+html.light .border-gc-crimson\/25 { border-color: rgb(190 14 42 / 0.25) !important; }
+html.light .border-gc-crimson\/30 { border-color: rgb(190 14 42 / 0.3) !important; }
+html.light .border-gc-crimson\/40 { border-color: rgb(190 14 42 / 0.4) !important; }
+html.light .border-gc-crimson\/50 { border-color: rgb(190 14 42 / 0.5) !important; }
+
+/* ─── Borders: semantic ─── */
+html.light .border-gc-danger { border-color: rgb(220 38 38) !important; }
+html.light .border-gc-danger\/15 { border-color: rgb(220 38 38 / 0.15) !important; }
+html.light .border-gc-danger\/20 { border-color: rgb(220 38 38 / 0.2) !important; }
+html.light .border-gc-danger\/25 { border-color: rgb(220 38 38 / 0.25) !important; }
+html.light .border-gc-danger\/30 { border-color: rgb(220 38 38 / 0.3) !important; }
+html.light .border-gc-success { border-color: rgb(22 163 74) !important; }
+html.light .border-gc-success\/20 { border-color: rgb(22 163 74 / 0.2) !important; }
+html.light .border-gc-success\/25 { border-color: rgb(22 163 74 / 0.25) !important; }
+html.light .border-gc-success\/30 { border-color: rgb(22 163 74 / 0.3) !important; }
+html.light .border-gc-success\/50 { border-color: rgb(22 163 74 / 0.5) !important; }
+html.light .border-gc-warning { border-color: rgb(180 120 4) !important; }
+html.light .border-gc-warning\/15 { border-color: rgb(180 120 4 / 0.15) !important; }
+html.light .border-gc-warning\/20 { border-color: rgb(180 120 4 / 0.2) !important; }
+html.light .border-gc-warning\/25 { border-color: rgb(180 120 4 / 0.25) !important; }
+html.light .border-gc-warning\/30 { border-color: rgb(180 120 4 / 0.3) !important; }
+html.light .border-gc-warning\/40 { border-color: rgb(180 120 4 / 0.4) !important; }
+
+/* ─── Gradients ─── */
+html.light .via-gc-crimson\/40 { --tw-gradient-to: rgb(190 14 42 / 0); --tw-gradient-stops: var(--tw-gradient-from), rgb(190 14 42 / 0.4), var(--tw-gradient-to); }
+html.light .via-gc-crimson\/50 { --tw-gradient-to: rgb(190 14 42 / 0); --tw-gradient-stops: var(--tw-gradient-from), rgb(190 14 42 / 0.5), var(--tw-gradient-to); }
+html.light .via-gc-crimson\/60 { --tw-gradient-to: rgb(190 14 42 / 0); --tw-gradient-stops: var(--tw-gradient-from), rgb(190 14 42 / 0.6), var(--tw-gradient-to); }
+
+/* ─── Dividers ─── */
+html.light .divide-gc-steel\/30 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(185 181 177 / 0.3) !important; }
+html.light .divide-gc-steel\/40 > :not([hidden]) ~ :not([hidden]) { border-color: rgb(185 181 177 / 0.4) !important; }
+
+/* ─── Shadow ─── */
+html.light .shadow-gc-danger\/30 { --tw-shadow-color: rgb(220 38 38 / 0.3) !important; }
+
+/* ─── Light-mode adjustments for component classes ─── */
+html.light .gc-card:hover {
+  box-shadow:
+    0 0 0 1px rgb(190 14 42 / 0.1),
+    0 0 16px rgb(190 14 42 / 0.06),
+    0 4px 16px rgba(0,0,0,0.08),
+    inset 0 1px 0 var(--gc-inset-highlight) !important;
+}
+
+html.light .text-shadow-red {
+  text-shadow:
+    0 0 20px rgb(190 14 42 / 0.3),
+    0 0 40px rgb(190 14 42 / 0.1) !important;
+}
+
+html.light ::selection {
+  background: rgba(190, 14, 42, 0.25);
+  color: #fff;
 }
