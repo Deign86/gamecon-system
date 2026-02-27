@@ -18,6 +18,9 @@ firebase-debug.log
 firestore-debug.log
 ui-debug.log
 
+# Service worker with embedded Firebase config â€" generated at build time
+public/firebase-messaging-sw.js
+
 # Service account keys — NEVER commit
 *-service-account*.json
 serviceAccountKey*.json
