@@ -215,13 +215,14 @@ service cloud.firestore {
     }
 
     /* ───────────────────────────────────
-     *  Audit / Activity Logs
+     *  Audit / Activity Logs  (collection: "logs")
      *  Read: admin only
-     *  Write: system only (deny all client writes)
+     *  Write: any auth'd user (fire-and-forget from client)
      * ─────────────────────────────────── */
-    match /auditLogs/{id} {
+    match /logs/{id} {
       allow read:  if isAdmin();
-      allow write: if false;
+      allow create: if isSignedIn();
+      allow update, delete: if false;
     }
 
     /* ───────────────────────────────────

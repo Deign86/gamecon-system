@@ -29,10 +29,17 @@ export function useCollection(path, sortField = "timestamp", maxItems = 100) {
       orderBy(sortField, "desc"),
       limit(maxItems)
     );
-    const unsub = onSnapshot(q, (snap) => {
-      setDocs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoading(false);
-    });
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setDocs(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        setLoading(false);
+      },
+      (err) => {
+        console.error(`[useCollection] ${path}:`, err);
+        setLoading(false);
+      }
+    );
     return unsub;
   }, [path, sortField, maxItems]);
 
