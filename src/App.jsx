@@ -14,6 +14,7 @@ const ProfilePanel = lazy(() => import("./components/ProfilePanel"));
 const LogsPanel    = lazy(() => import("./components/LogsPanel"));
 const RoleTasking  = lazy(() => import("./components/RoleTasking"));
 const AdminUsersPage = lazy(() => import("./components/admin/AdminUsersPage"));
+const ContributionTabs = lazy(() => import("./components/contributions/ContributionTabs"));
 const FullScreenHeadcountView = lazy(() =>
   import("./components/headcount/FullScreenHeadcountView")
 );
@@ -62,11 +63,12 @@ function AppShell() {
               transition={{ duration: 0.15 }}
             >
               <Suspense fallback={<RouteFallback />}>
-                {tab === "dashboard" && <Dashboard />}
-                {tab === "roles"     && <RoleTasking />}
-                {tab === "users"     && <AdminUsersPage />}
-                {tab === "me"        && <ProfilePanel />}
-                {tab === "logs"      && <LogsPanel />}
+                {tab === "dashboard"     && <Dashboard />}
+                {tab === "roles"        && <RoleTasking />}
+                {tab === "users"        && <AdminUsersPage />}
+                {tab === "contributions" && <ContributionTabs />}
+                {tab === "me"           && <ProfilePanel />}
+                {tab === "logs"         && <LogsPanel />}
               </Suspense>
             </motion.div>
           </AnimatePresence>

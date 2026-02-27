@@ -88,16 +88,22 @@ export default function ChangePasswordForm() {
             onSubmit={handleSubmit}
             className="space-y-3"
           >
-            {/* Current password */}
-            <div className="relative">
-              <input
-                type={showCur ? "text" : "password"}
-                value={current}
-                onChange={(e) => { setCurrent(e.target.value); setStatus("idle"); }}
-                placeholder="Current password"
-                className="gc-input pr-10"
-                autoComplete="current-password"
-              />
+          {/* Hidden username field — tells password managers which account this is for */}
+          <input type="text" name="username" autoComplete="username" className="sr-only" aria-hidden="true" tabIndex={-1} readOnly />
+
+          {/* Current password */}
+          <div className="relative">
+            <label htmlFor="cp-current" className="sr-only">Current password</label>
+            <input
+              id="cp-current"
+              name="current-password"
+              type={showCur ? "text" : "password"}
+              value={current}
+              onChange={(e) => { setCurrent(e.target.value); setStatus("idle"); }}
+              placeholder="Current password"
+              className="gc-input pr-10"
+              autoComplete="current-password"
+            />
               <button
                 type="button"
                 onClick={() => setShowCur(!showCur)}
@@ -110,7 +116,10 @@ export default function ChangePasswordForm() {
 
             {/* New password */}
             <div className="relative">
+              <label htmlFor="cp-new" className="sr-only">New password</label>
               <input
+                id="cp-new"
+                name="new-password"
                 type={showNew ? "text" : "password"}
                 value={next}
                 onChange={(e) => { setNext(e.target.value); setStatus("idle"); }}
@@ -133,7 +142,10 @@ export default function ChangePasswordForm() {
 
             {/* Confirm */}
             <div>
+              <label htmlFor="cp-confirm" className="sr-only">Confirm new password</label>
               <input
+                id="cp-confirm"
+                name="confirm-password"
                 type="password"
                 value={confirm}
                 onChange={(e) => { setConfirm(e.target.value); setStatus("idle"); }}

@@ -36,11 +36,12 @@ export default function AdminResetPanel() {
   const handleReset = async () => {
     if (!confirmed) return;
     setStatus("loading");
-    setProgress("");
+    setProgress("Contacting server…");
     setError("");
 
     try {
-      const res = await resetSystemData((msg) => setProgress(msg));
+      const res = await resetSystemData();
+      setProgress(`Reset complete — ${res.total ?? 0} documents cleared.`);
       setResult(res);
       setStatus("done");
     } catch (err) {

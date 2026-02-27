@@ -109,15 +109,19 @@ service cloud.firestore {
 
     /* ───────────────────────────────────
      *  Contributions
-     *  Read: any auth'd user
-     *  Create: any auth'd user
-     *  Update/Delete: doc owner OR admin (admin needed for system reset)
+     *  Read:   any authenticated user
+     *  Create: admin OR proctor/head/committee-head (any classmate's userId)
+     *  Update/Delete: the proctor who logged it (loggedBy) OR admin
      * ─────────────────────────────────── */
+    function isProctorOrAbove() {
+      return isSignedIn() && callerRole() in ['admin', 'proctor', 'head', 'committee-head'];
+    }
+
     match /contributions/{id} {
       allow read:   if isSignedIn();
-      allow create: if isSignedIn();
+      allow create: if isProctorOrAbove();
       allow update, delete: if isSignedIn()
-        && (resource.data.userId == request.auth.uid || isAdmin());
+        && (resource.data.loggedBy == request.auth.uid || isAdmin());
     }
 
     /* ───────────────────────────────────

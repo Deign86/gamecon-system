@@ -49,3 +49,10 @@ export async function sendPasswordReset(email) {
   if (!email) throw new Error("email is required");
   await fbSendPasswordResetEmail(auth, email);
 }
+
+/* ── Reset all event data (admin only, server-side Cloud Function) ── */
+export async function callResetSystemData() {
+  const fn = httpsCallable(functions, "resetSystemData");
+  const result = await fn({});
+  return result.data; // { total: number }
+}

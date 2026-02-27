@@ -22,8 +22,8 @@ const { sendIncidentNotifications } = require("./incidentNotifications");
 
 initializeApp();
 
-const VALID_ROLES = ["admin", "proctor", "head", "viewer"];
-const ROLE_RANK = { admin: 3, proctor: 2, head: 1, viewer: 0 };
+const VALID_ROLES = ["admin", "proctor", "head", "committee-head", "viewer"];
+const ROLE_RANK = { admin: 3, proctor: 2, head: 1, "committee-head": 1, viewer: 0 };
 
 /* ── Input validation helpers ── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,7 +47,12 @@ async function assertAdmin(request) {
 }
 
 /* ── Shared options for all callable functions ── */
-const callOpts = { cors: true };
+const ALLOWED_ORIGINS = [
+  "https://playverse-ops.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:4173",
+];
+const callOpts = { cors: ALLOWED_ORIGINS };
 
 /* ─── Helper: generate a password that meets Firebase requirements ─── */
 function generatePassword(length = 16) {
@@ -224,10 +229,71 @@ exports.setUserActiveStatus = onCall(callOpts, async (request) => {
     throw new HttpsError("invalid-argument", "uid and active (bool) are required.");
   }
 
-  await getFirestore().doc(`users/${uid}`).update({ active });
+  await getFirestore().doc(`users/${uid}`).update({
+    active,
+    updatedAt: FieldValue.serverTimestamp(),
+  });
   await getAuth().updateUser(uid, { disabled: !active });
 
   return { success: true };
+});
+
+/* ─── resetSystemData ─── */
+exports.resetSystemData = onCall(callOpts, async (request) => {
+  await assertAdmin(request);
+
+  const db = getFirestore();
+  const COLLECTIONS_TO_CLEAR = [
+    "headcounts",
+    "contributions",
+    "expenses",
+    "shifts",
+    "committeeShifts",
+    "incidents",
+    "roleAssignments",
+    "committeeSchedules",
+  ];
+
+  let total = 0;
+
+  // 1. Delete event-data collections
+  for (const colName of COLLECTIONS_TO_CLEAR) {
+    const snap = await db.collection(colName).get();
+    const refs = snap.docs.map((d) => d.ref);
+    for (let i = 0; i < refs.length; i += 500) {
+      const batch = db.batch();
+      refs.slice(i, i + 500).forEach((ref) => batch.delete(ref));
+      await batch.commit();
+    }
+    total += refs.length;
+  }
+
+  // 2. Reset per-zone live headcounts to 0
+  const zonesSnap = await db.collection("zones").get();
+  for (let i = 0; i < zonesSnap.docs.length; i += 500) {
+    const batch = db.batch();
+    zonesSnap.docs.slice(i, i + 500).forEach((d) => {
+      batch.update(d.ref, { currentCount: 0, lastUpdated: FieldValue.serverTimestamp() });
+    });
+    await batch.commit();
+  }
+  total += zonesSnap.docs.length;
+
+  // 3. Reset standalone headcount counter
+  await db.doc("counters/headcount").set(
+    { count: 0, lastUpdated: FieldValue.serverTimestamp() },
+    { merge: true }
+  );
+
+  // 4. Write audit log
+  await db.collection("auditLogs").add({
+    action: "system_reset",
+    performedBy: request.auth.uid,
+    totalDocsDeleted: total,
+    timestamp: FieldValue.serverTimestamp(),
+  });
+
+  return { total };
 });
 
 /* ─── deleteUser ─── */

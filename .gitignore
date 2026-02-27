@@ -35,3 +35,10 @@ Thumbs.db
 .vscode/settings.json
 *.log
 .vercel
+.env*.local
+
+# AI assistant config
+.claude/
+
+# Raw data / reference sheets — not part of the app source
+*.xlsx

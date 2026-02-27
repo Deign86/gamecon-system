@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, User, ScrollText, UsersRound } from "lucide-react";
+import { LayoutDashboard, ClipboardList, User, ScrollText, UsersRound, BookUser } from "lucide-react";
 import { useTab } from "../App";
 import { useAuth } from "../hooks/useAuth";
 import { cn } from "../lib/utils";
@@ -9,19 +9,30 @@ const BASE_TABS = [
   { key: "logs",      label: "Logs",      Icon: ScrollText },
 ];
 
+const PROCTOR_TABS = [
+  { key: "dashboard",     label: "Dashboard",  Icon: LayoutDashboard },
+  { key: "contributions", label: "Contribs",   Icon: BookUser },
+  { key: "me",            label: "Me",         Icon: User },
+  { key: "logs",          label: "Logs",       Icon: ScrollText },
+];
+
 const ADMIN_TABS = [
-  { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
-  { key: "roles",     label: "Roles",     Icon: ClipboardList, adminOnly: true },
-  { key: "users",     label: "Users",     Icon: UsersRound, adminOnly: true },
-  { key: "me",        label: "Me",        Icon: User },
-  { key: "logs",      label: "Logs",      Icon: ScrollText },
+  { key: "dashboard",     label: "Dashboard", Icon: LayoutDashboard },
+  { key: "roles",         label: "Roles",     Icon: ClipboardList },
+  { key: "contributions", label: "Contribs",  Icon: BookUser },
+  { key: "users",         label: "Users",     Icon: UsersRound },
+  { key: "me",            label: "Me",        Icon: User },
 ];
 
 export default function BottomNav() {
   const { tab, setTab } = useTab();
   const { profile } = useAuth();
-  const isAdmin = profile?.role === "admin";
-  const tabs = isAdmin ? ADMIN_TABS : BASE_TABS;
+  const role  = profile?.role;
+  const tabs  = role === "admin"
+    ? ADMIN_TABS
+    : ["proctor", "head", "committee-head"].includes(role)
+      ? PROCTOR_TABS
+      : BASE_TABS;
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-gc-steel/40 backdrop-blur-xl bg-gc-void/85 safe-bottom">

@@ -72,29 +72,41 @@ export default function AuthGate() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
+              <label
+                htmlFor="login-email"
+                className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gc-mist"
+              >
                 Email
               </label>
               <input
+                id="login-email"
+                name="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="gc-input"
                 placeholder="you@plv.edu.ph"
+                autoComplete="email"
                 required
               />
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
+              <label
+                htmlFor="login-password"
+                className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gc-mist"
+              >
                 Password
               </label>
               <input
+                id="login-password"
+                name="password"
                 type="password"
                 value={pass}
                 onChange={(e) => setPass(e.target.value)}
                 className="gc-input"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 required
                 minLength={6}
               />

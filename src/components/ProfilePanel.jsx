@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, Bell } from "lucide-react";
+import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, Bell, ChevronRight } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
@@ -10,6 +10,7 @@ import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";
 import AdminResetPanel from "./AdminResetPanel";
 import IncidentNotificationToggle from "./profile/IncidentNotificationToggle";
+import { useTab } from "../App";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -18,6 +19,7 @@ const fadeUp = {
 
 export default function ProfilePanel() {
   const { user, profile, setProfile } = useAuth();
+  const { setTab } = useTab();
   const { docs: myContribs } = useCollection("contributions");
 
   // Derive active committee IDs (support both new `committees` array and legacy `committee` string)
@@ -70,8 +72,11 @@ export default function ProfilePanel() {
     }
   }
 
-  // Filter to only my contributions
-  const mine = myContribs.filter((c) => c.userId === user?.uid);
+  // Filter to entries logged BY me (loggedBy) – covers the new proctor-for-classmate model.
+  // Falls back to userId match for legacy entries that pre-date loggedBy.
+  const mine = myContribs.filter(
+    (c) => c.loggedBy === user?.uid || (!c.loggedBy && c.userId === user?.uid)
+  );
 
   return (
     <motion.div
@@ -223,7 +228,7 @@ export default function ProfilePanel() {
         <IncidentNotificationToggle />
       </motion.div>
 
-      {/* My contributions */}
+      {/* My contributions — compact summary, links to full Contributions tab */}
       <motion.div variants={fadeUp} className="gc-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <ClipboardCheck className="h-4 w-4 text-gc-success" />
@@ -233,25 +238,38 @@ export default function ProfilePanel() {
           <span className="ml-auto font-mono text-xs text-gc-mist">{mine.length}</span>
         </div>
 
-        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-          {mine.length === 0 && (
-            <p className="text-sm text-gc-mist/60 text-center py-4">
-              No contributions yet. Start logging!
-            </p>
-          )}
-          {mine.map((c) => (
-            <div
-              key={c.id}
-              className="flex items-center gap-3 rounded-lg bg-gc-iron/50 border border-gc-steel/30 px-3 py-2"
-            >
-              <div className="h-1.5 w-1.5 rounded-full bg-gc-success shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gc-cloud truncate">{c.task}</p>
-                <p className="text-[10px] text-gc-mist/60 font-mono">{fmtDate(c.timestamp)}</p>
+        {mine.length === 0 ? (
+          <p className="text-sm text-gc-mist/60 text-center py-3">
+            No contributions logged yet.
+          </p>
+        ) : (
+          <div className="space-y-1.5 mb-3">
+            {mine.slice(0, 3).map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center gap-3 rounded-lg bg-gc-iron/50 border border-gc-steel/30 px-3 py-2"
+              >
+                <div className="h-1.5 w-1.5 rounded-full bg-gc-success shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gc-cloud truncate">{c.task}</p>
+                  <p className="text-[10px] text-gc-mist/60 font-mono">{fmtDate(c.timestamp)}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+            {mine.length > 3 && (
+              <p className="text-[11px] text-gc-mist/50 text-center">+{mine.length - 3} more</p>
+            )}
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setTab("contributions")}
+          className="w-full flex items-center justify-center gap-2 rounded-lg border border-gc-steel/30 bg-gc-iron/50 px-3 py-2 text-xs font-semibold text-gc-mist transition-colors hover:border-gc-steel/60 hover:text-gc-cloud"
+        >
+          Open Contributions Tracker
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
       </motion.div>
 
       {/* Change password */}
