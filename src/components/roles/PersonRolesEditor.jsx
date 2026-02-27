@@ -7,6 +7,7 @@ import {
   addAssignmentToPerson,
   removeAssignmentFromPerson,
 } from "../../lib/rolesEditor";
+import { logActivity } from "../../lib/auditLog";
 
 /* ── Day pill colours ── */
 const DAY_COLORS = {
@@ -61,6 +62,14 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
     setAddError(null);
     try {
       await addAssignmentToPerson(person.id, { committee: newComm, day: newDay }, userId);
+      logActivity({
+        action: "role.add_assignment",
+        category: "role",
+        details: `Assigned ${person.name} to ${newComm} (${newDay})`,
+        meta: { personId: person.id, committee: newComm, day: newDay },
+        userId,
+        userName: person.name,
+      });
       setAdding(false);
       setAddError(null);
     } catch (err) {
@@ -76,6 +85,14 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
     setBusy(`remove-${idx}`);
     try {
       await removeAssignmentFromPerson(person.id, assignment, userId);
+      logActivity({
+        action: "role.remove_assignment",
+        category: "role",
+        details: `Removed ${person.name} from ${assignment.committee} (${assignment.day})`,
+        meta: { personId: person.id, committee: assignment.committee, day: assignment.day },
+        userId,
+        userName: person.name,
+      });
     } catch (err) {
       // error handled silently — UI stays consistent
     } finally {

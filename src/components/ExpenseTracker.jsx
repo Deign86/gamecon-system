@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Plus, Receipt, TrendingDown } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
+import { logActivity } from "../lib/auditLog";
 import { COMMITTEES, EXPENSE_CATEGORIES } from "../data/seed";
 import { peso, fmtDate, cn } from "../lib/utils";
 
@@ -28,6 +29,14 @@ export default function ExpenseTracker() {
         category,
         committee: comm,
         status: "pending",
+        userId: user.uid,
+        userName: profile?.name || "Unknown",
+      });
+      logActivity({
+        action: "expense.create",
+        category: "expense",
+        details: `Added expense: ${item.trim()} — ₱${parseFloat(amount).toLocaleString()}`,
+        meta: { item: item.trim(), amount: parseFloat(amount), category, committee: comm },
         userId: user.uid,
         userName: profile?.name || "Unknown",
       });

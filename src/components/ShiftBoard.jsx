@@ -26,6 +26,7 @@ import {
 } from "../lib/roleFirestore";
 import ShiftCommitteeRow from "./shifts/ShiftCommitteeRow";
 import AddAssigneeDialog from "./shifts/AddAssigneeDialog";
+import { logActivity } from "../lib/auditLog";
 import { useToast } from "./Toast";
 
 /* ── Map shift-block IDs to role-schedule DAY labels ── */
@@ -199,6 +200,14 @@ export default function ShiftBoard() {
     setInitialising(true);
     try {
       await initialiseBlockShifts(displayBlock, COMMITTEES, user.uid);
+      logActivity({
+        action: "shift.initialise",
+        category: "shift",
+        details: `Initialised shift rows for block ${displayBlock}`,
+        meta: { dayBlock: displayBlock },
+        userId: user.uid,
+        userName: profile?.name || "Admin",
+      });
       toast("Shift rows created for all committees.", "success");
     } catch (err) {
       toast("Failed to initialise shifts.", "error");
@@ -232,6 +241,14 @@ export default function ShiftBoard() {
           member,
           user.uid
         );
+        logActivity({
+          action: "shift.add_assignee",
+          category: "shift",
+          details: `Added ${member.name} to ${comm.name} (${displayBlock})`,
+          meta: { dayBlock: displayBlock, committeeId: cId, assignee: member.name },
+          userId: user.uid,
+          userName: profile?.name || "Admin",
+        });
         toast(`${member.name} added to ${comm.name}.`, "success");
       } catch (err) {
         toast("Failed to add assignee.", "error");
@@ -245,6 +262,14 @@ export default function ShiftBoard() {
       if (!user) return;
       try {
         await removeAssigneeFromShift(shiftId, userId, user.uid);
+        logActivity({
+          action: "shift.remove_assignee",
+          category: "shift",
+          details: `Removed ${userName} from shift ${shiftId}`,
+          meta: { shiftId, removedUserId: userId, removedUserName: userName },
+          userId: user.uid,
+          userName: profile?.name || "Admin",
+        });
         toast(`${userName} removed.`, "warning");
       } catch (err) {
         toast("Failed to remove assignee.", "error");

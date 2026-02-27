@@ -2,6 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
+import { logActivity } from "../lib/auditLog";
 import { ZONES } from "../data/seed";
 import { fmtDate, cn } from "../lib/utils";
 
@@ -35,6 +36,15 @@ export default function IncidentLog() {
           resolvedByName: profile?.name || "Unknown",
         }),
       });
+      const inc = incidents.find((i) => i.id === incId);
+      logActivity({
+        action: newStatus === "resolved" ? "incident.resolve" : "incident.reopen",
+        category: "incident",
+        details: `${newStatus === "resolved" ? "Resolved" : "Reopened"} incident: ${inc?.title || incId}`,
+        meta: { incidentId: incId, newStatus },
+        userId: user.uid,
+        userName: profile?.name || "Unknown",
+      });
     } finally {
       setResolving(null);
     }
@@ -53,6 +63,14 @@ export default function IncidentLog() {
         status: "open",
         reportedBy: user.uid,
         reporterName: profile?.name || "Unknown",
+      });
+      logActivity({
+        action: "incident.create",
+        category: "incident",
+        details: `Reported incident: ${title.trim()} (${severity})`,
+        meta: { title: title.trim(), zoneId: zone, severity },
+        userId: user.uid,
+        userName: profile?.name || "Unknown",
       });
       setTitle("");
       setZone("");

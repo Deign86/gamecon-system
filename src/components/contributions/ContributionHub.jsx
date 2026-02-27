@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck } from "lucide-react";
 import { useCollection } from "../../hooks/useFirestore";
 import { useAuth } from "../../hooks/useAuth";
+import { logActivity } from "../../lib/auditLog";
 import { COMMITTEES } from "../../data/seed";
 import { fmtDate, cn } from "../../lib/utils";
 import PersonContributionView from "./PersonContributionView";
@@ -111,6 +112,14 @@ function MyLogView() {
         committee: comm,
         task: task.trim(),
         description: desc.trim(),
+      });
+      logActivity({
+        action: "contribution.create",
+        category: "contribution",
+        details: `Self-logged contribution: ${task.trim()}`,
+        meta: { committee: comm, task: task.trim() },
+        userId: user.uid,
+        userName: profile?.name || "Unknown",
       });
       setTask("");
       setDesc("");

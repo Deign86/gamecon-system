@@ -17,6 +17,8 @@ import {
 import { cn } from "../../lib/utils";
 import { COMMITTEE_NAMES } from "../../lib/roleConfig";
 import { createUserAccount } from "../../lib/adminApi";
+import { logActivity } from "../../lib/auditLog";
+import { useAuth } from "../../hooks/useAuth";
 
 /* ── Password policy (mirrors Firebase Auth settings) ── */
 const PASSWORD_RULES = [
@@ -64,6 +66,7 @@ function generateStrongPassword(length = 16) {
  * New users always start as "proctor". Admin sets or randomizes the password.
  */
 export default function CreateUserForm({ onCreated }) {
+  const { user: authUser, profile: authProfile } = useAuth();
   const [name, setName]           = useState("");
   const [email, setEmail]         = useState("");
   const [committee, setCommittee] = useState("");
@@ -106,6 +109,14 @@ export default function CreateUserForm({ onCreated }) {
         committee || undefined,
         password
       );
+      logActivity({
+        action: "user.create",
+        category: "admin",
+        details: `Created user ${name.trim()} (${email.trim().toLowerCase()})${committee ? ` in ${committee}` : ""}`,
+        meta: { uid: result.uid, email: email.trim().toLowerCase(), committee: committee || null },
+        userId: authUser?.uid || "admin",
+        userName: authProfile?.name || "Admin",
+      });
       setCreatedName(name.trim());
       setGeneratedPass(result.password);
       setShowModal(true);

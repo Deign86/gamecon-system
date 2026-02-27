@@ -8,6 +8,7 @@ import {
   removeMemberFromCommitteeSchedule,
   slugify,
 } from "../../lib/rolesEditor";
+import { logActivity } from "../../lib/auditLog";
 
 /* ── Committee accent palette (matches RoleTasking) ── */
 const PALETTE = [
@@ -54,6 +55,14 @@ export default function CommitteeScheduleEditor({
     setBusy(`remove-${name}`);
     try {
       await removeMemberFromCommitteeSchedule(committee, day, name, userId);
+      logActivity({
+        action: "role.remove_member",
+        category: "role",
+        details: `Removed ${name} from ${committee} (${day})`,
+        meta: { committee, day, memberName: name },
+        userId,
+        userName: name,
+      });
     } catch (err) {
       // error handled silently
     } finally {
@@ -67,6 +76,14 @@ export default function CommitteeScheduleEditor({
     setBusy("add");
     try {
       await addMemberToCommitteeSchedule(committee, day, person, userId);
+      logActivity({
+        action: "role.add_member",
+        category: "role",
+        details: `Added ${person.name} to ${committee} (${day})`,
+        meta: { committee, day, memberName: person.name },
+        userId,
+        userName: person.name,
+      });
       setSearch("");
     } catch (err) {
       // error handled silently
@@ -83,6 +100,14 @@ export default function CommitteeScheduleEditor({
     try {
       const id = slugify(trimmed);
       await addMemberToCommitteeSchedule(committee, day, { id, name: trimmed }, userId);
+      logActivity({
+        action: "role.add_new_member",
+        category: "role",
+        details: `Added new person ${trimmed} to ${committee} (${day})`,
+        meta: { committee, day, memberName: trimmed, newPersonId: id },
+        userId,
+        userName: trimmed,
+      });
       setNewName("");
       setShowAdd(false);
     } catch (err) {

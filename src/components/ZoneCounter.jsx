@@ -3,22 +3,41 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, TrendingUp, Maximize2 } from "lucide-react";
 import { useHeadcount } from "../hooks/useHeadcount";
 import { useAuth } from "../hooks/useAuth";
+import { logActivity } from "../lib/auditLog";
 import { getZoneIcon, cn } from "../lib/utils";
 
 export default function ZoneCounter() {
   const { zones, incrementZone, decrementZone, loading } = useHeadcount();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [pulsing, setPulsing] = useState(null);
 
   async function handleIncrement(zoneId) {
     setPulsing(zoneId);
     await incrementZone(zoneId, user?.uid);
+    const zoneName = zones.find(z => z.id === zoneId)?.name || zoneId;
+    logActivity({
+      action: "headcount.increment",
+      category: "headcount",
+      details: `+1 at ${zoneName}`,
+      meta: { zoneId },
+      userId: user?.uid || "unknown",
+      userName: profile?.name || "Unknown",
+    });
     setTimeout(() => setPulsing(null), 400);
   }
 
   async function handleDecrement(zoneId) {
     setPulsing(zoneId);
     await decrementZone(zoneId, user?.uid);
+    const zoneName = zones.find(z => z.id === zoneId)?.name || zoneId;
+    logActivity({
+      action: "headcount.decrement",
+      category: "headcount",
+      details: `-1 at ${zoneName}`,
+      meta: { zoneId },
+      userId: user?.uid || "unknown",
+      userName: profile?.name || "Unknown",
+    });
     setTimeout(() => setPulsing(null), 400);
   }
 

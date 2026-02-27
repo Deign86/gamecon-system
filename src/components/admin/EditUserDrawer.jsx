@@ -20,6 +20,8 @@ import {
 import { cn, fmtDate } from "../../lib/utils";
 import { COMMITTEE_NAMES, DAY_SLOTS, APP_ROLES, normalizeCommitteeName, normalizeCommittees } from "../../lib/roleConfig";
 import { updateUserRoleAndCommittee } from "../../lib/adminApi";
+import { logActivity } from "../../lib/auditLog";
+import { useAuth } from "../../hooks/useAuth";
 
 const ROLE_ICONS = {
   admin:   ShieldAlert,
@@ -42,6 +44,7 @@ const ROLE_RANK = { admin: 3, proctor: 2, head: 1, viewer: 0 };
  * Uses the updateUserRoleAndCommittee Cloud Function for all changes.
  */
 export default function EditUserDrawer({ user, open, onClose, onSaved }) {
+  const { user: authUser, profile: authProfile } = useAuth();
   const overlayRef = useRef(null);
   const [role, setRole]               = useState("");
   const [committees, setCommittees]   = useState([]); // [{ committee, day }]
@@ -93,6 +96,14 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
         role,
         committees,
         active,
+      });
+      logActivity({
+        action: "user.update",
+        category: "admin",
+        details: `Updated ${user.name}: role=${role}, active=${active}, committees=${committees.map(c => c.committee).join(", ") || "none"}`,
+        meta: { targetUid: user.id, role, committees, active },
+        userId: authUser?.uid || "admin",
+        userName: authProfile?.name || "Admin",
       });
       setToast({ type: "success", msg: "User updated successfully." });
       onSaved?.({ ...user, role, committees, active });

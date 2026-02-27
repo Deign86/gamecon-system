@@ -10,6 +10,7 @@ import {
   updateTask,
   deleteTask,
 } from "../../lib/tasksFirestore";
+import { logActivity } from "../../lib/auditLog";
 import { COMMITTEE_NAMES } from "../../lib/roleConfig";
 import TaskColumn from "./TaskColumn";
 import TaskFormDrawer from "./TaskFormDrawer";
@@ -63,11 +64,19 @@ export default function TaskBoard() {
     async (taskId, newStatus) => {
       try {
         await updateTask(taskId, { status: newStatus });
+        logActivity({
+          action: "task.status_change",
+          category: "task",
+          details: `Moved task ${taskId} to ${newStatus}`,
+          meta: { taskId, newStatus },
+          userId: user?.uid || "unknown",
+          userName: profile?.name || "Unknown",
+        });
       } catch (err) {
         toast("Failed to update status", "error");
       }
     },
-    [toast]
+    [user, profile, toast]
   );
 
   const handleCardClick = useCallback((task) => {
@@ -85,25 +94,49 @@ export default function TaskBoard() {
     async (data) => {
       if (editingTask) {
         await updateTask(editingTask.id, data);
+        logActivity({
+          action: "task.update",
+          category: "task",
+          details: `Updated task: ${data.title || editingTask.id}`,
+          meta: { taskId: editingTask.id, ...data },
+          userId: user?.uid || "unknown",
+          userName: profile?.name || "Unknown",
+        });
         toast("Task updated", "success");
       } else {
         await createTask(data, user.uid);
+        logActivity({
+          action: "task.create",
+          category: "task",
+          details: `Created task: ${data.title || "Untitled"}`,
+          meta: { ...data },
+          userId: user.uid,
+          userName: profile?.name || "Unknown",
+        });
         toast("Task created", "success");
       }
     },
-    [editingTask, user, toast]
+    [editingTask, user, profile, toast]
   );
 
   const handleDelete = useCallback(async () => {
     if (!editingTask) return;
     try {
       await deleteTask(editingTask.id);
+      logActivity({
+        action: "task.delete",
+        category: "task",
+        details: `Deleted task: ${editingTask.title || editingTask.id}`,
+        meta: { taskId: editingTask.id },
+        userId: user?.uid || "unknown",
+        userName: profile?.name || "Unknown",
+      });
       toast("Task deleted", "info");
       setDrawerOpen(false);
     } catch {
       toast("Failed to delete task", "error");
     }
-  }, [editingTask, toast]);
+  }, [editingTask, user, profile, toast]);
 
   /* ─── render ─── */
   return (

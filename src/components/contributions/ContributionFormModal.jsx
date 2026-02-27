@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, CheckCircle } from "lucide-react";
 import { COMMITTEES } from "../../data/seed";
 import { createContribution, updateContribution } from "../../lib/contributionsFirestore";
+import { logActivity } from "../../lib/auditLog";
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "../../lib/utils";
 
@@ -88,6 +89,14 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
           task: task.trim(),
           details: details.trim(),
         });
+        logActivity({
+          action: "contribution.update",
+          category: "contribution",
+          details: `Updated contribution for ${targetUser?.name || "unknown"}: ${task.trim()}`,
+          meta: { contributionId: existing.id, task: task.trim(), targetUserId: targetUser?.id },
+          userId: user.uid,
+          userName: user.displayName || "Unknown",
+        });
       } else {
         await createContribution({
           userId:    targetUser.id,
@@ -96,6 +105,14 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
           task,
           details,
           loggedBy:  user.uid,
+        });
+        logActivity({
+          action: "contribution.create",
+          category: "contribution",
+          details: `Logged contribution for ${targetUser.name}: ${task.trim()}`,
+          meta: { targetUserId: targetUser.id, committee: committeeId, task: task.trim() },
+          userId: user.uid,
+          userName: user.displayName || "Unknown",
         });
       }
       setDone(true);

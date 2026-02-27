@@ -6,13 +6,11 @@ import { cn } from "../lib/utils";
 const BASE_TABS = [
   { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { key: "me",        label: "Me",        Icon: User },
-  { key: "logs",      label: "Logs",      Icon: ScrollText },
 ];
 
 const PROCTOR_TABS = [
   { key: "dashboard",  label: "Dashboard",  Icon: LayoutDashboard },
   { key: "me",         label: "Me",         Icon: User },
-  { key: "logs",       label: "Logs",       Icon: ScrollText },
 ];
 
 const ADMIN_TABS = [

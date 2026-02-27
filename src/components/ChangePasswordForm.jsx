@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { changePassword } from "../lib/changePassword";
+import { logActivity } from "../lib/auditLog";
+import { useAuth } from "../hooks/useAuth";
 import { cn } from "../lib/utils";
 
 /**
@@ -9,6 +11,7 @@ import { cn } from "../lib/utils";
  * Uses Firebase re-auth + updatePassword under the hood.
  */
 export default function ChangePasswordForm() {
+  const { user, profile } = useAuth();
   const [current, setCurrent]   = useState("");
   const [next, setNext]         = useState("");
   const [confirm, setConfirm]   = useState("");
@@ -32,6 +35,13 @@ export default function ChangePasswordForm() {
 
     try {
       await changePassword(current, next);
+      logActivity({
+        action: "auth.password_change",
+        category: "auth",
+        details: `User changed their own password`,
+        userId: user?.uid || "unknown",
+        userName: profile?.name || "Unknown",
+      });
       setStatus("success");
       setCurrent("");
       setNext("");

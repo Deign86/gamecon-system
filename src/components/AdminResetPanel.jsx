@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { resetSystemData } from "../lib/resetSystemData";
+import { logActivity } from "../lib/auditLog";
 import { cn } from "../lib/utils";
 
 const CONFIRMATION_PHRASE = "RESET GAMECON";
@@ -41,6 +42,14 @@ export default function AdminResetPanel() {
 
     try {
       const res = await resetSystemData();
+      logActivity({
+        action: "system.reset",
+        category: "system",
+        details: `System reset — ${res.total ?? 0} documents cleared`,
+        meta: { total: res.total },
+        userId: profile?.uid || "admin",
+        userName: profile?.name || "Admin",
+      });
       setProgress(`Reset complete — ${res.total ?? 0} documents cleared.`);
       setResult(res);
       setStatus("done");

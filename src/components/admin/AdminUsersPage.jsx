@@ -16,6 +16,7 @@ import {
 import { db } from "../../firebase";
 import { useAuth } from "../../hooks/useAuth";
 import { setUserActiveStatus, sendPasswordReset, deleteUser } from "../../lib/adminApi";
+import { logActivity } from "../../lib/auditLog";
 import { cn } from "../../lib/utils";
 import UserManagementTable from "./UserManagementTable";
 import EditUserDrawer from "./EditUserDrawer";
@@ -27,7 +28,7 @@ import Modal from "../Modal";
  * Rendered as a tab inside the AppShell (tab === "users") or as a standalone route.
  */
 export default function AdminUsersPage({ standalone = false, onBack }) {
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const isAdmin = profile?.role === "admin";
 
   const [users, setUsers]             = useState([]);
@@ -75,6 +76,15 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
     setTogglingUid(uid);
     try {
       await setUserActiveStatus(uid, active);
+      const target = users.find((u) => u.id === uid);
+      logActivity({
+        action: active ? "user.enable" : "user.disable",
+        category: "admin",
+        details: `${active ? "Enabled" : "Disabled"} user ${target?.name || uid} (${target?.email || ""})`,
+        meta: { targetUid: uid, active },
+        userId: profile?.uid || user?.uid,
+        userName: profile?.name || "Admin",
+      });
       setToast({
         type: "success",
         msg: active ? "Account enabled." : "Account disabled.",
@@ -91,6 +101,14 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
     setResetingUid(u.id);
     try {
       await sendPasswordReset(u.email);
+      logActivity({
+        action: "user.password_reset",
+        category: "admin",
+        details: `Sent password reset to ${u.name} (${u.email})`,
+        meta: { targetUid: u.id, email: u.email },
+        userId: profile?.uid || "admin",
+        userName: profile?.name || "Admin",
+      });
       setToast({
         type: "success",
         msg: `Password reset sent to ${u.email}`,
@@ -107,7 +125,16 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
   const doDelete = async (uid) => {
     setDeletingUid(uid);
     try {
+      const target = deleteTarget || users.find((u) => u.id === uid);
       await deleteUser(uid);
+      logActivity({
+        action: "user.delete",
+        category: "admin",
+        details: `Deleted user ${target?.name || uid} (${target?.email || ""})`,
+        meta: { targetUid: uid, name: target?.name, email: target?.email },
+        userId: profile?.uid || "admin",
+        userName: profile?.name || "Admin",
+      });
       setToast({ type: "success", msg: "Account deleted." });
     } catch (err) {
       setToast({ type: "error", msg: err.message || "Delete failed." });

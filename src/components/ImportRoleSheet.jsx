@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { parseRoleSheet } from "../lib/parseRoleSheet";
 import { importRoleData } from "../lib/roleFirestore";
+import { logActivity } from "../lib/auditLog";
+import { useAuth } from "../hooks/useAuth";
 import { cn } from "../lib/utils";
 
 /**
@@ -10,6 +12,7 @@ import { cn } from "../lib/utils";
  * Accepts an .xlsx, parses it, previews counts, then writes to Firestore.
  */
 export default function ImportRoleSheet({ onDone }) {
+  const { user, profile } = useAuth();
   const [stage, setStage]     = useState("idle"); // idle | parsing | preview | writing | done | error
   const [file, setFile]       = useState(null);
   const [parsed, setParsed]   = useState(null);
@@ -56,6 +59,14 @@ export default function ImportRoleSheet({ onDone }) {
     setStage("writing");
     try {
       const res = await importRoleData(parsed);
+      logActivity({
+        action: "role.import",
+        category: "role",
+        details: `Imported role sheet: ${parsed.personRoles?.length ?? 0} persons, ${committeeCount} committees`,
+        meta: { persons: parsed.personRoles?.length, committees: committeeCount, fileName: file?.name },
+        userId: user?.uid || "admin",
+        userName: profile?.name || "Admin",
+      });
       setResult(res);
       setStage("done");
       onDone?.();

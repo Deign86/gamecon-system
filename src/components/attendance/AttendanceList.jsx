@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, ShieldCheck, X, Search, Filter } from "lucide-react";
 import { markAttendance } from "../../lib/attendanceFirestore";
+import { logActivity } from "../../lib/auditLog";
 import { STATUS_META } from "../../lib/attendanceConfig";
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "../../lib/utils";
@@ -54,6 +55,14 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
     setBusy(person.id);
     try {
       await markAttendance(blockId, person, status, user.uid);
+      logActivity({
+        action: "attendance.mark",
+        category: "attendance",
+        details: `Marked ${person.name} as ${status} (${blockId})`,
+        meta: { blockId, personId: person.id, personName: person.name, status },
+        userId: user.uid,
+        userName: user.displayName || "Unknown",
+      });
     } catch (err) {
       console.error("Failed to mark attendance", err);
     } finally {

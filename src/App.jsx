@@ -79,7 +79,7 @@ function AppShell() {
                   {tab === "roles"        && <RoleTasking />}
                   {tab === "users"        && <AdminUsersPage />}
                   {tab === "me"           && <ProfilePanel />}
-                  {tab === "logs"         && <LogsPanel />}
+                  {tab === "logs" && profile?.role === "admin" && <LogsPanel />}
                 </motion.div>
               </AnimatePresence>
             </ErrorBoundary>

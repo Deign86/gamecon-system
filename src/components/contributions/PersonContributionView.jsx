@@ -9,6 +9,7 @@ import {
   subscribeContributionsByUser,
   deleteContribution,
 } from "../../lib/contributionsFirestore";
+import { logActivity } from "../../lib/auditLog";
 import ContributionFormModal from "./ContributionFormModal";
 
 const CAN_WRITE_ROLES = ["admin", "proctor", "head", "committee-head"];
@@ -99,6 +100,14 @@ export default function PersonContributionView({ myEntriesOnly }) {
   async function handleDelete(c) {
     if (!window.confirm(`Delete "${c.task}"? This cannot be undone.`)) return;
     await deleteContribution(c.id);
+    logActivity({
+      action: "contribution.delete",
+      category: "contribution",
+      details: `Deleted contribution: ${c.task} (for ${c.userName || "unknown"})`,
+      meta: { contributionId: c.id, task: c.task, targetUserId: c.userId },
+      userId: user?.uid || "unknown",
+      userName: profile?.name || "Unknown",
+    });
   }
 
   /* ── Helpers ────────────────────────────────────────── */

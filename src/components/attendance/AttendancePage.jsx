@@ -7,6 +7,7 @@ import {
   subscribeAttendanceForBlock,
   markRemainingAbsent,
 } from "../../lib/attendanceFirestore";
+import { logActivity } from "../../lib/auditLog";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../Toast";
 import { cn } from "../../lib/utils";
@@ -63,6 +64,14 @@ export default function AttendancePage() {
     setMarkingAbsent(true);
     try {
       await markRemainingAbsent(blockId, volunteers, records, user.uid);
+      logActivity({
+        action: "attendance.bulk_absent",
+        category: "attendance",
+        details: `Marked ${unmarkedCount} unmarked volunteers as absent (${blockId})`,
+        meta: { blockId, unmarkedCount },
+        userId: user.uid,
+        userName: profile?.name || "Unknown",
+      });
       toast("Unmarked volunteers set to absent", "success");
     } catch (err) {
       console.error(err);
