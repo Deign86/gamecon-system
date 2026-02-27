@@ -51,7 +51,7 @@ export default function TopNav() {
               title="Sign out"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span className="translate-y-[1px]">SIGN OUT</span>
+              <span className="translate-y-[2px]">SIGN OUT</span>
             </button>
           )}
         </div>
