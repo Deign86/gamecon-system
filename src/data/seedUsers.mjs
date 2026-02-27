@@ -49,22 +49,22 @@ const TEST_USERS = [
     committee: "technical",
     contact: "+63 912 345 6789",
   },
-  {
-    email: "head@gamecon2026.com",
-    password: "Head@GC2026",
-    name: "Esports Head",
-    role: "committee-head",
-    committee: "esports",
-    contact: "+63 917 654 3210",
-  },
-  {
-    email: "member@gamecon2026.com",
-    password: "Member@GC2026",
-    name: "Juan Dela Cruz",
-    role: "member",
-    committee: "proctors",
-    contact: "+63 920 111 2222",
-  },
+  // {
+  //   email: "head@gamecon2026.com",
+  //   password: "Head@GC2026",
+  //   name: "Esports Head",
+  //   role: "committee-head",
+  //   committee: "esports",
+  //   contact: "+63 917 654 3210",
+  // },
+  // {
+  //   email: "member@gamecon2026.com",
+  //   password: "Member@GC2026",
+  //   name: "Juan Dela Cruz",
+  //   role: "member",
+  //   committee: "proctors",
+  //   contact: "+63 920 111 2222",
+  // },
 ];
 
 async function createUser({ email, password, name, role, committee, contact }) {
