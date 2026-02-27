@@ -188,20 +188,20 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
               {/* Title */}
               <div>
-                <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                   Title *
                 </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Restock water at RCY"
-                  className="w-full rounded border border-gc-steel/40 bg-gc-slate px-3 py-2 text-sm font-body text-gc-white placeholder:text-gc-mist/40 focus:border-gc-crimson/60 focus:outline-none transition-colors"
+                  className="gc-input"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                   Description
                 </label>
                 <textarea
@@ -209,7 +209,7 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Optional details…"
-                  className="w-full rounded border border-gc-steel/40 bg-gc-slate px-3 py-2 text-sm font-body text-gc-white placeholder:text-gc-mist/40 focus:border-gc-crimson/60 focus:outline-none transition-colors resize-none"
+                  className="gc-input resize-none"
                 />
               </div>
 
@@ -217,19 +217,20 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
               <div className="grid grid-cols-2 gap-3">
                 {/* Day */}
                 <div>
-                  <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                     Day
                   </label>
                   <div className="flex gap-1.5">
                     {DAYS.map((d) => (
                       <button
+                        type="button"
                         key={d}
                         onClick={() => setDay(d)}
                         className={cn(
                           "flex-1 rounded border px-2 py-1.5 text-xs font-display tracking-wider transition-colors",
                           day === d
                             ? "border-gc-crimson/60 bg-gc-crimson/15 text-gc-crimson"
-                            : "border-gc-steel/40 bg-gc-slate text-gc-mist hover:text-gc-cloud"
+                            : "border-gc-steel/40 bg-gc-iron text-gc-mist hover:text-gc-cloud"
                         )}
                       >
                         {d}
@@ -240,14 +241,14 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
                 {/* Status */}
                 <div>
-                  <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                  <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                     Status
                   </label>
                   <div className="relative">
                     <select
                       value={status}
                       onChange={(e) => setStatus(e.target.value)}
-                      className="w-full appearance-none rounded border border-gc-steel/40 bg-gc-slate px-3 py-1.5 pr-8 text-xs font-display tracking-wider text-gc-cloud focus:border-gc-crimson/60 focus:outline-none transition-colors"
+                      className="gc-input appearance-none !py-1.5 pr-8 !text-xs"
                     >
                       {STATUSES.map((s) => (
                         <option key={s.value} value={s.value}>{s.label}</option>
@@ -260,18 +261,19 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
               {/* Priority */}
               <div>
-                <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                   <Flag className="inline h-3 w-3 mr-1 -translate-y-px" />
                   Priority
                 </label>
                 <div className="flex gap-1.5">
                   {PRIORITIES.map((p) => (
                     <button
+                      type="button"
                       key={p.value}
                       onClick={() => setPriority(p.value)}
                       className={cn(
                         "flex-1 rounded border px-2 py-1.5 text-xs font-display tracking-wider transition-colors",
-                        priority === p.value ? p.color : "border-gc-steel/40 bg-gc-slate text-gc-mist hover:text-gc-cloud"
+                        priority === p.value ? p.color : "border-gc-steel/40 bg-gc-iron text-gc-mist hover:text-gc-cloud"
                       )}
                     >
                       {p.label}
@@ -282,14 +284,14 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
               {/* Committee */}
               <div>
-                <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                   Committee
                 </label>
                 <div className="relative">
                   <select
                     value={committee}
                     onChange={(e) => setCommittee(e.target.value)}
-                    className="w-full appearance-none rounded border border-gc-steel/40 bg-gc-slate px-3 py-2 pr-8 text-sm font-body text-gc-cloud focus:border-gc-crimson/60 focus:outline-none transition-colors"
+                    className="gc-input appearance-none pr-8"
                   >
                     <option value="">None</option>
                     {COMMITTEE_NAMES.map((c) => (
@@ -302,7 +304,7 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
               {/* Zone ID */}
               <div>
-                <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                   <MapPin className="inline h-3 w-3 mr-1 -translate-y-px" />
                   Zone (optional)
                 </label>
@@ -310,14 +312,13 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
                   value={zoneId}
                   onChange={(e) => setZoneId(e.target.value)}
                   placeholder="e.g. ES-1, RCY, Booth-3"
-                  className="w-full rounded border border-gc-steel/40 bg-gc-slate px-3 py-2 text-sm font-body text-gc-white placeholder:text-gc-mist/40 focus:border-gc-crimson/60 focus:outline-none transition-colors"
+                  className="gc-input"
                 />
               </div>
 
               {/* ─── Assignees ─── */}
               <div>
-                <label className="block text-[10px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
-                  <UserPlus className="inline h-3 w-3 mr-1 -translate-y-px" />
+                <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
                   Assignees
                 </label>
 
@@ -346,14 +347,11 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
                 {/* Toggle picker button */}
                 <button
+                  type="button"
                   onClick={() => setShowPicker((v) => !v)}
-                  className={cn(
-                    "w-full rounded border border-dashed px-3 py-2 text-xs font-display tracking-wider transition-colors",
-                    showPicker
-                      ? "border-gc-crimson/40 text-gc-crimson bg-gc-crimson/5"
-                      : "border-gc-steel/40 text-gc-mist hover:text-gc-cloud hover:border-gc-mist/40"
-                  )}
+                  className="gc-btn-ghost w-full"
                 >
+                  <UserPlus className="h-3.5 w-3.5" />
                   {showPicker ? "HIDE PEOPLE" : "ADD PEOPLE FROM ROLES"}
                 </button>
 
@@ -376,14 +374,14 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
                               value={search}
                               onChange={(e) => setSearch(e.target.value)}
                               placeholder="Search names…"
-                              className="w-full rounded border border-gc-steel/30 bg-gc-iron pl-8 pr-3 py-1.5 text-xs font-body text-gc-white placeholder:text-gc-mist/40 focus:border-gc-crimson/60 focus:outline-none transition-colors"
+                              className="gc-input !py-1.5 !text-xs !pl-8"
                             />
                           </div>
                           <div className="relative">
                             <select
                               value={filterCommittee}
                               onChange={(e) => setFilterCommittee(e.target.value)}
-                              className="appearance-none rounded border border-gc-steel/30 bg-gc-iron px-2 pr-7 py-1.5 text-[10px] font-display tracking-wider text-gc-cloud focus:border-gc-crimson/60 focus:outline-none transition-colors"
+                              className="gc-input appearance-none !py-1.5 !text-xs !w-auto pr-7"
                             >
                               <option value="">All</option>
                               {COMMITTEE_NAMES.map((c) => (
@@ -398,7 +396,7 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
                         <div className="max-h-40 overflow-y-auto space-y-0.5 scrollbar-thin scrollbar-thumb-gc-steel scrollbar-track-transparent">
                           {loadingPeople && (
                             <div className="flex h-16 items-center justify-center">
-                              <span className="text-[10px] font-display tracking-widest text-gc-mist animate-pulse">LOADING…</span>
+                              <span className="text-xs text-gc-mist animate-pulse font-body">Loading…</span>
                             </div>
                           )}
                           {!loadingPeople && filteredPeople.length === 0 && (
@@ -452,28 +450,29 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
               <div className="flex items-center gap-2 pt-2 border-t border-gc-steel/20">
                 {isEdit && onDelete && (
                   <button
+                    type="button"
                     onClick={onDelete}
-                    className="flex items-center gap-1.5 rounded border border-gc-danger/30 bg-gc-danger/10 px-3 py-2 text-xs font-display tracking-wider text-gc-danger hover:bg-gc-danger/20 transition-colors"
+                    className="inline-flex items-center gap-1 rounded-md border border-gc-danger/30 bg-gc-danger/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-gc-danger hover:bg-gc-danger/20 transition-colors"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3 w-3" />
                     DELETE
                   </button>
                 )}
                 <div className="flex-1" />
                 <button
+                  type="button"
                   onClick={onClose}
-                  className="rounded border border-gc-steel/40 bg-gc-slate px-4 py-2 text-xs font-display tracking-wider text-gc-mist hover:text-gc-cloud transition-colors"
+                  className="gc-btn-ghost"
                 >
                   CANCEL
                 </button>
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={!title.trim() || saving}
                   className={cn(
-                    "rounded border px-5 py-2 text-xs font-display tracking-wider transition-colors",
-                    title.trim() && !saving
-                      ? "border-gc-crimson/60 bg-gc-crimson/20 text-gc-crimson hover:bg-gc-crimson/30"
-                      : "border-gc-steel/30 bg-gc-iron text-gc-mist cursor-not-allowed"
+                    "gc-btn-primary",
+                    (!title.trim() || saving) && "opacity-40 pointer-events-none"
                   )}
                 >
                   {saving ? "SAVING…" : isEdit ? "UPDATE" : "CREATE"}

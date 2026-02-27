@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Plus, Filter, KanbanSquare } from "lucide-react";
+import { Plus, Filter, Calendar, Loader2, KanbanSquare } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../Toast";
@@ -107,122 +107,110 @@ export default function TaskBoard() {
 
   /* ─── render ─── */
   return (
-    <div className="mx-auto max-w-5xl">
-      {/* ── Header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", damping: 24, stiffness: 280 }}
-        className="mb-5"
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded border border-gc-crimson/30 bg-gc-crimson/10">
-            <KanbanSquare className="h-4.5 w-4.5 text-gc-crimson" />
-          </div>
-          <div>
-            <h1 className="font-display text-2xl font-bold tracking-[0.08em] text-gc-white leading-none">
-              TASK BOARD
-            </h1>
-            <p className="text-[10px] font-mono text-gc-mist tracking-wider mt-0.5">
-              KANBAN &bull; {filteredTasks.length} TASKS
-            </p>
-          </div>
+    <div className="space-y-5">
+      {/* ── Day tabs ── */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {DAYS.map((d) => (
+          <button
+            key={d}
+            onClick={() => setDay(d)}
+            className={cn(
+              "shrink-0 rounded px-3 py-2 text-xs font-semibold transition-all border",
+              day === d
+                ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
+                : "bg-gc-iron border-gc-steel/60 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"
+            )}
+          >
+            {d}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Summary bar ── */}
+      <div className="flex items-center justify-between rounded border border-gc-steel/60 bg-gc-iron px-4 py-2.5">
+        <div className="flex items-center gap-4 text-xs font-body">
+          <span className="flex items-center gap-1.5 text-gc-cloud">
+            <Calendar className="h-3.5 w-3.5 text-gc-crimson" />
+            {day}
+          </span>
+          <span className="text-gc-mist">
+            {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
+          </span>
         </div>
 
-        {/* Controls row */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Day switcher */}
-          <div className="flex rounded border border-gc-steel/40 overflow-hidden">
-            {DAYS.map((d) => (
-              <button
-                key={d}
-                onClick={() => setDay(d)}
-                className={cn(
-                  "px-3.5 py-1.5 text-xs font-display tracking-wider transition-colors",
-                  day === d
-                    ? "bg-gc-crimson/20 text-gc-crimson border-r border-gc-crimson/30"
-                    : "bg-gc-slate text-gc-mist hover:text-gc-cloud border-r border-gc-steel/30 last:border-r-0"
-                )}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-
+        <div className="flex items-center gap-2">
           {/* Filter toggle */}
           <button
             onClick={() => setShowFilters((v) => !v)}
             className={cn(
-              "flex items-center gap-1.5 rounded border px-3 py-1.5 text-xs font-display tracking-wider transition-colors",
+              "inline-flex items-center gap-1 rounded-md px-2 py-0.5",
+              "text-[10px] font-bold uppercase tracking-wider transition-colors",
               showFilters || filterCommittee
-                ? "border-gc-crimson/40 text-gc-crimson bg-gc-crimson/10"
-                : "border-gc-steel/40 text-gc-mist hover:text-gc-cloud bg-gc-slate"
+                ? "bg-gc-crimson/10 text-gc-crimson border border-gc-crimson/20"
+                : "bg-gc-iron text-gc-mist border border-gc-steel/40 hover:text-gc-cloud"
             )}
           >
-            <Filter className="h-3.5 w-3.5" />
-            FILTER
+            <Filter className="h-3 w-3" />
+            Filter
             {filterCommittee && (
-              <span className="ml-1 rounded bg-gc-crimson/20 px-1.5 py-0.5 text-[9px]">
-                1
-              </span>
+              <span className="ml-0.5 rounded bg-gc-crimson/20 px-1 py-px text-[8px]">1</span>
             )}
           </button>
 
-          <div className="flex-1" />
-
           {/* New task button */}
           {canCreate && (
-            <button
-              onClick={handleAddClick}
-              className="flex items-center gap-1.5 rounded border border-gc-crimson/50 bg-gc-crimson/15 px-4 py-1.5 text-xs font-display tracking-wider text-gc-crimson hover:bg-gc-crimson/25 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              NEW TASK
+            <button onClick={handleAddClick} className="gc-btn-primary !py-1 !px-3 !text-[10px] !gap-1">
+              <Plus className="h-3 w-3" /> New Task
             </button>
           )}
         </div>
+      </div>
 
-        {/* Filter panel */}
-        {showFilters && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="mt-2 overflow-hidden"
-          >
-            <div className="rounded border border-gc-steel/30 bg-gc-slate p-3">
-              <label className="block text-[9px] font-display tracking-[0.2em] text-gc-mist uppercase mb-1.5">
-                Committee
-              </label>
-              <select
-                value={filterCommittee}
-                onChange={(e) => setFilterCommittee(e.target.value)}
-                className="w-full sm:w-64 appearance-none rounded border border-gc-steel/40 bg-gc-iron px-3 py-1.5 text-xs font-body text-gc-cloud focus:border-gc-crimson/60 focus:outline-none transition-colors"
-              >
-                <option value="">All Committees</option>
-                {COMMITTEE_NAMES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-          </motion.div>
-        )}
-      </motion.div>
-
-      {/* ── Loading state ── */}
-      {loading && (
-        <div className="flex h-48 items-center justify-center">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-8 w-8 rounded border-2 border-gc-crimson border-t-transparent animate-spin" />
-            <span className="text-[10px] font-display tracking-[0.2em] text-gc-crimson animate-pulse">
-              LOADING TASKS…
-            </span>
+      {/* Filter panel */}
+      {showFilters && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="overflow-hidden"
+        >
+          <div className="rounded bg-gc-iron border border-gc-steel/50 p-3">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
+              Committee
+            </label>
+            <select
+              value={filterCommittee}
+              onChange={(e) => setFilterCommittee(e.target.value)}
+              className="gc-input !py-1.5 !text-xs w-full sm:w-64"
+            >
+              <option value="">All Committees</option>
+              {COMMITTEE_NAMES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
-        </div>
+        </motion.div>
       )}
 
-      {/* ── Kanban columns ── */}
-      {!loading && (
+      {/* ── Loading state ── */}
+      {loading ? (
+        <div className="flex flex-col items-center py-12 gap-3">
+          <Loader2 className="h-8 w-8 text-gc-crimson animate-spin" />
+          <p className="text-sm text-gc-mist font-body">Loading tasks…</p>
+        </div>
+      ) : filteredTasks.length === 0 && !filterCommittee ? (
+        /* ── Empty state ── */
+        <div className="text-center py-10">
+          <KanbanSquare className="mx-auto h-10 w-10 text-gc-faded mb-3" />
+          <p className="text-sm text-gc-hint">No tasks for {day} yet.</p>
+          {canCreate && (
+            <p className="text-xs text-gc-faded mt-1">
+              Tap "New Task" to get started.
+            </p>
+          )}
+        </div>
+      ) : (
+        /* ── Kanban columns ── */
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {STATUSES.map((status, i) => (
             <motion.div
@@ -244,7 +232,6 @@ export default function TaskBoard() {
         </div>
       )}
 
-      {/* ── Task Form Drawer ── */}
       <TaskFormDrawer
         open={drawerOpen}
         onClose={() => { setDrawerOpen(false); setEditingTask(null); }}

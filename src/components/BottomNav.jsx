@@ -1,4 +1,4 @@
-import { LayoutDashboard, ClipboardList, User, ScrollText, UsersRound, KanbanSquare } from "lucide-react";
+import { LayoutDashboard, ClipboardList, User, ScrollText, UsersRound } from "lucide-react";
 import { useTab } from "../App";
 import { useAuth } from "../hooks/useAuth";
 import { cn } from "../lib/utils";
@@ -11,17 +11,16 @@ const BASE_TABS = [
 
 const PROCTOR_TABS = [
   { key: "dashboard",  label: "Dashboard",  Icon: LayoutDashboard },
-  { key: "tasks",      label: "Tasks",      Icon: KanbanSquare },
   { key: "me",         label: "Me",         Icon: User },
   { key: "logs",       label: "Logs",       Icon: ScrollText },
 ];
 
 const ADMIN_TABS = [
   { key: "dashboard",  label: "Dashboard", Icon: LayoutDashboard },
-  { key: "tasks",      label: "Tasks",     Icon: KanbanSquare },
   { key: "roles",      label: "Roles",     Icon: ClipboardList },
   { key: "users",      label: "Users",     Icon: UsersRound },
   { key: "me",         label: "Me",        Icon: User },
+  { key: "logs",       label: "Logs",      Icon: ScrollText },
 ];
 
 export default function BottomNav() {

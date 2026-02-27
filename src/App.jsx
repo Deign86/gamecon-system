@@ -15,7 +15,6 @@ const ProfilePanel = lazy(() => import("./components/ProfilePanel"));
 const LogsPanel    = lazy(() => import("./components/LogsPanel"));
 const RoleTasking  = lazy(() => import("./components/RoleTasking"));
 const AdminUsersPage = lazy(() => import("./components/admin/AdminUsersPage"));
-const TaskBoard = lazy(() => import("./components/tasks/TaskBoard"));
 /* ContributionTabs removed — consolidated into Dashboard ContributionHub */
 const FullScreenHeadcountView = lazy(() =>
   import("./components/headcount/FullScreenHeadcountView")
@@ -79,7 +78,6 @@ function AppShell() {
                   {tab === "dashboard"     && <Dashboard />}
                   {tab === "roles"        && <RoleTasking />}
                   {tab === "users"        && <AdminUsersPage />}
-                  {tab === "tasks"       && <TaskBoard />}
                   {tab === "me"           && <ProfilePanel />}
                   {tab === "logs"         && <LogsPanel />}
                 </motion.div>

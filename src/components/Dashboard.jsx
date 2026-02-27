@@ -10,6 +10,7 @@ import {
   Laptop2,
   MapPin,
   Clock,
+  KanbanSquare,
 } from "lucide-react";
 import ZoneCounter from "./ZoneCounter";
 import ShiftBoard from "./ShiftBoard";
@@ -19,6 +20,7 @@ import IncidentLog from "./IncidentLog";
 import CommitteeCard from "./CommitteeCard";
 import VenueMapWithStatus from "./venue/VenueMapWithStatus";
 import AttendancePage from "./attendance/AttendancePage";
+import TaskBoard from "./tasks/TaskBoard";
 import Modal from "./Modal";
 
 const CARDS = [
@@ -30,6 +32,7 @@ const CARDS = [
   { key: "incidents",     label: "Incidents",         Icon: AlertTriangle,  accent: "#EF4444", id: "M-06" },
   { key: "committees",    label: "Committees",        Icon: Laptop2,        accent: "#A855F7", id: "M-07" },
   { key: "venuemap",      label: "Venue Map",         Icon: MapPin,         accent: "#14B8A6", id: "M-08" },
+  { key: "tasks",         label: "Task Board",        Icon: KanbanSquare,   accent: "#F97316", id: "M-09" },
 ];
 
 const stagger = {
@@ -216,6 +219,15 @@ export default function Dashboard() {
         wide
       >
         <VenueMapWithStatus onNavigate={(key) => { closeModal(); setTimeout(() => openModal(key), 150); }} />
+      </Modal>
+
+      <Modal
+        open={activeModal === "tasks"}
+        onClose={closeModal}
+        title="TASK BOARD"
+        wide
+      >
+        <TaskBoard />
       </Modal>
     </motion.div>
   );
