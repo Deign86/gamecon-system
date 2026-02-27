@@ -1,0 +1,181 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { changePassword } from "../lib/changePassword";
+import { cn } from "../lib/utils";
+
+/**
+ * Password change form — renders inside the Profile view.
+ * Uses Firebase re-auth + updatePassword under the hood.
+ */
+export default function ChangePasswordForm() {
+  const [current, setCurrent]   = useState("");
+  const [next, setNext]         = useState("");
+  const [confirm, setConfirm]   = useState("");
+  const [showCur, setShowCur]   = useState(false);
+  const [showNew, setShowNew]   = useState(false);
+  const [status, setStatus]     = useState("idle"); // idle | loading | success | error
+  const [error, setError]       = useState("");
+
+  /* ── validation ── */
+  const tooShort  = next.length > 0 && next.length < 8;
+  const mismatch  = confirm.length > 0 && next !== confirm;
+  const canSubmit = current.length > 0 && next.length >= 8 && next === confirm && status !== "loading";
+
+  /* ── submit ── */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+
+    setStatus("loading");
+    setError("");
+
+    try {
+      await changePassword(current, next);
+      setStatus("success");
+      setCurrent("");
+      setNext("");
+      setConfirm("");
+    } catch (err) {
+      setError(err.message);
+      setStatus("error");
+    }
+  };
+
+  /* ── reset after success ── */
+  const reset = () => {
+    setStatus("idle");
+    setError("");
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <Lock className="h-4 w-4 text-gc-crimson" />
+        <h3 className="font-display text-base font-bold tracking-wide text-gc-mist">
+          CHANGE PASSWORD
+        </h3>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {/* ── Success state ── */}
+        {status === "success" && (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center gap-3 py-6"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gc-success/15">
+              <CheckCircle2 className="h-6 w-6 text-gc-success" />
+            </div>
+            <p className="text-sm font-semibold text-gc-success">Password updated successfully</p>
+            <button onClick={reset} className="gc-btn-ghost text-xs mt-1">
+              Done
+            </button>
+          </motion.div>
+        )}
+
+        {/* ── Form ── */}
+        {status !== "success" && (
+          <motion.form
+            key="form"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            onSubmit={handleSubmit}
+            className="space-y-3"
+          >
+            {/* Current password */}
+            <div className="relative">
+              <input
+                type={showCur ? "text" : "password"}
+                value={current}
+                onChange={(e) => { setCurrent(e.target.value); setStatus("idle"); }}
+                placeholder="Current password"
+                className="gc-input pr-10"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCur(!showCur)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gc-mist hover:text-gc-cloud transition-colors"
+                tabIndex={-1}
+              >
+                {showCur ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </button>
+            </div>
+
+            {/* New password */}
+            <div className="relative">
+              <input
+                type={showNew ? "text" : "password"}
+                value={next}
+                onChange={(e) => { setNext(e.target.value); setStatus("idle"); }}
+                placeholder="New password (min 8 characters)"
+                className={cn("gc-input pr-10", tooShort && "border-gc-warning focus:border-gc-warning")}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gc-mist hover:text-gc-cloud transition-colors"
+                tabIndex={-1}
+              >
+                {showNew ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              </button>
+              {tooShort && (
+                <p className="mt-1 text-[11px] text-gc-warning">Must be at least 8 characters</p>
+              )}
+            </div>
+
+            {/* Confirm */}
+            <div>
+              <input
+                type="password"
+                value={confirm}
+                onChange={(e) => { setConfirm(e.target.value); setStatus("idle"); }}
+                placeholder="Confirm new password"
+                className={cn("gc-input", mismatch && "border-gc-danger focus:border-gc-danger")}
+                autoComplete="new-password"
+              />
+              {mismatch && (
+                <p className="mt-1 text-[11px] text-gc-danger">Passwords don't match</p>
+              )}
+            </div>
+
+            {/* Error banner */}
+            {status === "error" && error && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-start gap-2 rounded-lg border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className={cn(
+                "gc-btn-primary w-full",
+                !canSubmit && "opacity-40 cursor-not-allowed hover:transform-none hover:shadow-none"
+              )}
+            >
+              {status === "loading" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Update Password"
+              )}
+            </button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

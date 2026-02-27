@@ -1,0 +1,206 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ───────────────────────────────────
+     *  Helper functions
+     * ─────────────────────────────────── */
+
+    /// Caller is signed-in via Firebase Auth
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /// Fetch the caller's user profile doc (only call after isSignedIn())
+    function userRef() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    /// Caller's Firestore role field — guarded by exists() so get() never
+    /// fires on a missing doc (avoids the "document does not exist" crash).
+    function callerRole() {
+      return exists(userRef()) ? get(userRef()).data.role : null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && callerRole() == 'admin';
+    }
+
+    function isAdminOrHead() {
+      return isSignedIn() && callerRole() in ['admin', 'head', 'committee-head'];
+    }
+
+    /* ───────────────────────────────────
+     *  Counters (global headcount counter)
+     *  Read: any auth'd user
+     *  Create/Update: any auth'd user
+     *  Delete: admin only
+     * ─────────────────────────────────── */
+    match /counters/{id} {
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete:         if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Zones  (Live Headcount counters)
+     *  Read: any auth'd user
+     *  Create/Update: any auth'd user (increment/decrement)
+     *  Delete: admin only
+     * ─────────────────────────────────── */
+    match /zones/{zoneId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete:         if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Headcount log entries
+     *  Read: any auth'd user
+     *  Create/Update: any auth'd user
+     *  Delete: admin only (system reset)
+     * ─────────────────────────────────── */
+    match /headcounts/{docId} {
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn();
+      allow delete:         if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  User profiles
+     *  Read: any auth'd user
+     *  Create: only the owner (during registration)
+     *  Update:
+     *    - Owner can update only non-privileged fields (name, contact, etc.)
+     *    - Admin can update any field (role, committee, active, etc.)
+     *  Delete: admin only
+     * ─────────────────────────────────── */
+    match /users/{uid} {
+      allow read:   if isSignedIn();
+
+      // Admin can create user docs (via Cloud Function createUserAccount)
+      allow create: if isAdmin();
+
+      // Self-registration create (owner only)
+      allow create: if isSignedIn() && request.auth.uid == uid;
+
+      // Admin: unrestricted updates
+      allow update: if isAdmin();
+
+      // Owner: can update ONLY non-privileged fields
+      // (notifications is explicitly allowed for push notification opt-in/out)
+      allow update: if isSignedIn()
+                    && request.auth.uid == uid
+                    && !request.resource.data.diff(resource.data).affectedKeys()
+                        .hasAny(['role', 'committee', 'active']);
+
+      allow delete: if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Committees (seed / config data)
+     *  Read: any auth'd user
+     *  Write: admin only
+     * ─────────────────────────────────── */
+    match /committees/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Contributions
+     *  Read: any auth'd user
+     *  Create: any auth'd user
+     *  Update/Delete: doc owner OR admin (admin needed for system reset)
+     * ─────────────────────────────────── */
+    match /contributions/{id} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn()
+        && (resource.data.userId == request.auth.uid || isAdmin());
+    }
+
+    /* ───────────────────────────────────
+     *  Expenses
+     *  Read: any auth'd user
+     *  Create: any auth'd user
+     *  Update/Delete: admin or committee-head (also system reset)
+     * ─────────────────────────────────── */
+    match /expenses/{id} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdminOrHead();
+    }
+
+    /* ───────────────────────────────────
+     *  Shift Board (legacy)
+     *  Read: any auth'd user
+     *  Write: admin or committee-head
+     * ─────────────────────────────────── */
+    match /shifts/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdminOrHead();
+    }
+
+    /* ───────────────────────────────────
+     *  Committee Shifts (new shift-handling system)
+     *  Read: any auth'd user
+     *  Write: admin only
+     * ─────────────────────────────────── */
+    match /committeeShifts/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Incident Log
+     *  Read: any auth'd user
+     *  Create: any auth'd user
+     *  Update/Delete: admin or committee-head
+     * ─────────────────────────────────── */
+    match /incidents/{id} {
+      allow read:   if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdminOrHead();
+    }
+
+    /* ───────────────────────────────────
+     *  Role Assignments (imported from Excel)
+     *  Read: any auth'd user
+     *  Write (create/update/delete): admin only
+     * ─────────────────────────────────── */
+    match /roleAssignments/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Committee Schedules (imported from Excel)
+     *  Read: any auth'd user
+     *  Write (create/update/delete): admin only
+     * ─────────────────────────────────── */
+    match /committeeSchedules/{id} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Audit / Activity Logs
+     *  Read: admin only
+     *  Write: system only (deny all client writes)
+     * ─────────────────────────────────── */
+    match /auditLogs/{id} {
+      allow read:  if isAdmin();
+      allow write: if false;
+    }
+
+    /* ───────────────────────────────────
+     *  DEFAULT — deny everything not matched above.
+     *  Defence-in-depth: any new collection is locked
+     *  until an explicit rule is added.
+     * ─────────────────────────────────── */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

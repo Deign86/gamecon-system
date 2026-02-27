@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="64" height="64">
+  <!-- Outer diamond -->
+  <polygon points="100,4 196,100 100,196 4,100" fill="#B91C1C"/>
+  <!-- Border cutout -->
+  <polygon points="100,24 176,100 100,176 24,100" fill="white"/>
+  <!-- Inner diamond body -->
+  <polygon points="100,32 168,100 100,168 32,100" fill="#B91C1C"/>
+  <!-- G letter cutouts -->
+  <g fill="white">
+    <polygon points="56,72 68,60 68,120 56,132"/>
+    <polygon points="56,72 68,60 98,60 98,72"/>
+    <polygon points="56,132 68,120 98,120 86,132"/>
+    <polygon points="76,92 98,92 98,120 88,120 88,102 76,102"/>
+    <polygon points="80,80 88,72 96,80 88,88"/>
+    <!-- C letter cutouts -->
+    <polygon points="106,68 118,56 118,140 106,152"/>
+    <polygon points="106,68 118,56 148,68 144,78"/>
+    <polygon points="106,152 118,140 148,140 144,152"/>
+    <polygon points="136,64 148,64 148,80 140,80"/>
+    <polygon points="134,130 148,130 148,146 140,146"/>
+  </g>
+</svg>
