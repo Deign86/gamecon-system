@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Users,
@@ -32,6 +32,8 @@ export default function ShiftCommitteeRow({
   dayBlock,
   onAdd,
   onRemove,
+  highlighted = false,
+  rowRef,
 }) {
   const [expanded, setExpanded] = useState(true);
   const assignees = shift?.assignees || [];
@@ -44,12 +46,38 @@ export default function ShiftCommitteeRow({
   const isFull = assignees.length >= maxAllowed;
   const accentColor = committee.color || "#C8102E";
 
+  /* ── Auto-expand when highlighted ── */
+  useEffect(() => {
+    if (highlighted && !expanded) setExpanded(true);
+  }, [highlighted]);
+
   return (
     <motion.div
+      ref={rowRef}
       layout
       initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded border border-gc-steel/50 bg-gc-slate/80 overflow-hidden"
+      animate={{
+        opacity: 1,
+        y: 0,
+        boxShadow: highlighted
+          ? [
+              `0 0 0px ${accentColor}00`,
+              `0 0 20px ${accentColor}50, 0 0 40px ${accentColor}25, inset 0 0 20px ${accentColor}08`,
+              `0 0 0px ${accentColor}00`,
+            ]
+          : `0 0 0px ${accentColor}00`,
+      }}
+      transition={{
+        boxShadow: highlighted
+          ? { duration: 2.4, times: [0, 0.3, 1], ease: "easeInOut" }
+          : { duration: 0.3 },
+      }}
+      className={cn(
+        "rounded border overflow-hidden transition-colors duration-500",
+        highlighted
+          ? "border-gc-crimson/60 bg-gc-crimson/[0.06]"
+          : "border-gc-steel/50 bg-gc-slate/80"
+      )}
     >
       {/* ── Header ── */}
       <button

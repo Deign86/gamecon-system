@@ -257,7 +257,7 @@ export default function ZoneDetailDrawer({ zone, status, day, onClose, onNavigat
                       description={`See staff assignments for ${zone.committee || "this zone"}`}
                       onClick={() => {
                         onClose();
-                        onNavigate?.("shifts");
+                        onNavigate?.("shifts", { committeeId: zone.committee });
                       }}
                     />
                   </div>

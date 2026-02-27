@@ -46,10 +46,12 @@ const cardVariant = {
 
 export default function Dashboard() {
   const [activeModal, setActiveModal] = useState(null);
-  const closeModal = useCallback(() => setActiveModal(null), []);
+  const [modalData, setModalData] = useState(null);
+  const closeModal = useCallback(() => { setActiveModal(null); setModalData(null); }, []);
 
-  function openModal(key) {
+  function openModal(key, data = null) {
     setActiveModal(key);
+    setModalData(data);
   }
 
   return (
@@ -164,7 +166,7 @@ export default function Dashboard() {
         title="SHIFT BOARD"
         wide
       >
-        <ShiftBoard />
+        <ShiftBoard highlightCommittee={modalData?.committeeId} />
       </Modal>
 
       <Modal
@@ -218,7 +220,7 @@ export default function Dashboard() {
         title="VENUE MAP"
         wide
       >
-        <VenueMapWithStatus onNavigate={(key) => { closeModal(); setTimeout(() => openModal(key), 150); }} />
+        <VenueMapWithStatus onNavigate={(key, data) => { closeModal(); setTimeout(() => openModal(key, data), 150); }} />
       </Modal>
 
       <Modal

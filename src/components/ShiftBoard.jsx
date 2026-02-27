@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -59,7 +59,7 @@ const stagger = {
   show: { transition: { staggerChildren: 0.04 } },
 };
 
-export default function ShiftBoard() {
+export default function ShiftBoard({ highlightCommittee }) {
   const toast = useToast();
   const { user, profile } = useAuth();
   const isAdmin = profile?.role === "admin";
@@ -224,6 +224,26 @@ export default function ShiftBoard() {
     }
   }, [isAdmin, user, displayBlock, toast]);
 
+  /* ── Committee row refs for scroll-to-highlight ── */
+  const committeeRefs = useRef({});
+  const [highlightedId, setHighlightedId] = useState(null);
+
+  useEffect(() => {
+    if (!highlightCommittee || loadingShifts) return;
+    // Small delay to let the DOM render the rows
+    const timer = setTimeout(() => {
+      const el = committeeRefs.current[highlightCommittee];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        setHighlightedId(highlightCommittee);
+        // Remove highlight after animation completes
+        const clearTimer = setTimeout(() => setHighlightedId(null), 2800);
+        return () => clearTimeout(clearTimer);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [highlightCommittee, loadingShifts]);
+
   /* ── Add assignee dialog state ── */
   const [addDialog, setAddDialog] = useState({ open: false, committeeId: null });
 
@@ -338,7 +358,7 @@ export default function ShiftBoard() {
       </div>
       {/* Legend */}
       <div className="text-xs text-gc-mist px-1">
-        Exhibitors: 1 per booth · Ticketing/Voting: 3–4 · Crowd Control: 12–24 · Documentation: 2–4 · Guest Relations: 4–6 · Marketing: 2 · Awards: up to 4
+        Exhibitors: 2 per block · Ticketing/Voting: 3–4 · Crowd Control: 12–24 · Documentation: 2–4 · Guest Relations: 4–6 · Marketing: 2 · Awards: up to 4
       </div>
 
       {/* ── Summary bar ── */}
@@ -429,6 +449,8 @@ export default function ShiftBoard() {
                 dayBlock={displayBlock}
                 onAdd={openAddDialog}
                 onRemove={handleRemoveAssignee}
+                highlighted={highlightedId === committee.id}
+                rowRef={(el) => { committeeRefs.current[committee.id] = el; }}
               />
             );
           })}
