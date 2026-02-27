@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ToastProvider } from "./components/Toast";
 import AuthGate from "./components/AuthGate";
@@ -93,40 +94,43 @@ function RouteFallback() {
 
 export default function App() {
   return (
-    <Routes>
-      {/* ── Full‑screen headcount (standalone, own AuthProvider) ── */}
-      <Route
-        path="/headcount/fullscreen"
-        element={
-          <Suspense fallback={<RouteFallback />}>
-            <FullScreenHeadcountView />
-          </Suspense>
-        }
-      />
+    <>
+      <Routes>
+        {/* ── Full‑screen headcount (standalone, own AuthProvider) ── */}
+        <Route
+          path="/headcount/fullscreen"
+          element={
+            <Suspense fallback={<RouteFallback />}>
+              <FullScreenHeadcountView />
+            </Suspense>
+          }
+        />
 
-      {/* ── Standalone admin users route ── */}
-      <Route
-        path="/admin/users"
-        element={
-          <AuthProvider>
-            <div className="min-h-screen gc-diag-bg gc-noise">
-              <AdminUsersPage standalone />
-            </div>
-          </AuthProvider>
-        }
-      />
+        {/* ── Standalone admin users route ── */}
+        <Route
+          path="/admin/users"
+          element={
+            <AuthProvider>
+              <div className="min-h-screen gc-diag-bg gc-noise">
+                <AdminUsersPage standalone />
+              </div>
+            </AuthProvider>
+          }
+        />
 
-      {/* ── Main app shell (default) ── */}
-      <Route
-        path="*"
-        element={
-          <AuthProvider>
-            <ToastProvider>
-              <AppShell />
-            </ToastProvider>
-          </AuthProvider>
-        }
-      />
-    </Routes>
+        {/* ── Main app shell (default) ── */}
+        <Route
+          path="*"
+          element={
+            <AuthProvider>
+              <ToastProvider>
+                <AppShell />
+              </ToastProvider>
+            </AuthProvider>
+          }
+        />
+      </Routes>
+      <Analytics />
+    </>
   );
 }
