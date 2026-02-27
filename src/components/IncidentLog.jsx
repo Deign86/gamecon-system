@@ -66,7 +66,7 @@ export default function IncidentLog() {
   return (
     <div className="space-y-5">
       {/* Quick report form */}
-      <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-gc-danger/5 border border-gc-danger/15 p-4">
+      <form onSubmit={handleSubmit} className="space-y-3 rounded bg-gc-danger/5 border border-gc-danger/15 p-4">
         <div className="flex items-center gap-2 mb-1">
           <AlertTriangle className="h-4 w-4 text-gc-danger" />
           <span className="text-xs font-bold uppercase tracking-wider text-gc-danger">Quick Report</span>
@@ -122,7 +122,7 @@ export default function IncidentLog() {
 
       {/* Incident list */}
       <div>
-        <h3 className="mb-3 font-display text-base font-bold tracking-wide text-gc-mist">
+        <h3 className="mb-3 font-display text-base font-bold tracking-wider text-gc-mist">
           RECENT INCIDENTS
         </h3>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">

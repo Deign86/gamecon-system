@@ -106,7 +106,7 @@ export default function ContributionForm() {
 
       {/* Recent contributions */}
       <div>
-        <h3 className="mb-3 font-display text-base font-bold tracking-wide text-gc-mist">
+        <h3 className="mb-3 font-display text-base font-bold tracking-wider text-gc-mist">
           RECENT
         </h3>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
@@ -118,7 +118,7 @@ export default function ContributionForm() {
             return (
               <div
                 key={c.id}
-                className="flex items-start gap-3 rounded-lg bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
+                className="flex items-start gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
               >
                 <div
                   className="mt-0.5 h-2 w-2 shrink-0 rounded-full"

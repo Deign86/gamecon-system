@@ -47,16 +47,23 @@ export default function AuthGate() {
 
   return (
     <div className="flex min-h-screen items-center justify-center gc-diag-bg gc-noise px-4">
-      {/* Decorative diagonal slash */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div
-          className="absolute -top-1/4 -right-1/4 w-[140%] h-[140%] opacity-[0.03]"
-          style={{
-            background:
-              "linear-gradient(135deg, transparent 45%, rgb(var(--gc-crimson) / 0.12) 45%, rgb(var(--gc-crimson) / 0.12) 47%, transparent 47%)",
-          }}
-        />
-      </div>
+      {/* Corner brackets */}
+      <div className="fixed top-4 left-4 w-14 h-14 border-t-2 border-l-2 border-gc-crimson/15 pointer-events-none" />
+      <div className="fixed bottom-4 right-4 w-14 h-14 border-b-2 border-r-2 border-gc-crimson/15 pointer-events-none" />
+      <div className="fixed top-4 right-4 w-14 h-14 border-t-2 border-r-2 border-gc-steel/10 pointer-events-none" />
+      <div className="fixed bottom-4 left-4 w-14 h-14 border-b-2 border-l-2 border-gc-steel/10 pointer-events-none" />
+
+      {/* Grid overlay */}
+      <div
+        className="fixed inset-0 pointer-events-none opacity-[0.025]"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgb(var(--gc-crimson)) 1px, transparent 1px),
+            linear-gradient(90deg, rgb(var(--gc-crimson)) 1px, transparent 1px)
+          `,
+          backgroundSize: '80px 80px',
+        }}
+      />
 
       <motion.div
         className="relative w-full max-w-sm"
@@ -64,27 +71,40 @@ export default function AuthGate() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
+        {/* System status line */}
+        <div className="mb-6 flex items-center justify-center gap-2 text-[10px] font-mono text-gc-hint uppercase tracking-[0.2em]">
+          <span className="h-1.5 w-1.5 rounded-full bg-gc-success animate-pulse" />
+          SYS.ONLINE — AUTH GATEWAY
+        </div>
+
         {/* Logo block */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex justify-center">
+          <div className="mx-auto mb-4 flex justify-center relative">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-24 w-24 rounded-full bg-gc-crimson/5 animate-pulse" />
+            </div>
             <GCLogo size={72} />
           </div>
           <h1 className="font-display text-4xl font-bold tracking-wider">
             <span className="text-gc-white">PLAY</span>{" "}
             <span className="text-gc-crimson text-shadow-red">VERSE</span>
           </h1>
-          <p className="mt-1 font-display text-lg tracking-widest text-gc-mist">
+          <p className="mt-1 font-display text-base tracking-[0.2em] text-gc-mist">
             IT GAMECON 2026
           </p>
-          <p className="mt-0.5 text-xs text-gc-hint font-body tracking-wide">
-            INTERNAL OPS DASHBOARD
+          <p className="mt-1 text-[10px] text-gc-hint font-mono tracking-[0.15em]">
+            [ INTERNAL OPS DASHBOARD ]
           </p>
         </div>
 
         {/* Form card */}
-        <div className="gc-card-accent p-6">
+        <div className="gc-card-accent p-6 relative">
+          {/* Corner accents */}
+          <div className="absolute top-2 left-2 w-3 h-3 border-t border-l border-gc-crimson/25 pointer-events-none" />
+          <div className="absolute bottom-2 right-2 w-3 h-3 border-b border-r border-gc-crimson/25 pointer-events-none" />
+
           {/* Admin-only account notice */}
-          <div className="flex items-center justify-center gap-2.5 rounded-lg border border-gc-steel/60 bg-gc-iron px-3.5 py-3 mb-5">
+          <div className="flex items-center justify-center gap-2.5 rounded border border-gc-steel/50 bg-gc-iron/50 px-3.5 py-3 mb-5">
             <Info className="h-4 w-4 text-gc-mist shrink-0" />
             <p className="text-[11px] text-gc-mist font-body leading-relaxed text-justify">
               Accounts are created by the GameCon admin. If you're a proctor
@@ -96,7 +116,7 @@ export default function AuthGate() {
             <div>
               <label
                 htmlFor="login-email"
-                className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gc-mist"
+                className="mb-1.5 block text-[10px] font-display font-semibold uppercase tracking-[0.2em] text-gc-mist"
               >
                 Email
               </label>
@@ -116,7 +136,7 @@ export default function AuthGate() {
             <div>
               <label
                 htmlFor="login-password"
-                className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gc-mist"
+                className="mb-1.5 block text-[10px] font-display font-semibold uppercase tracking-[0.2em] text-gc-mist"
               >
                 Password
               </label>
@@ -135,7 +155,7 @@ export default function AuthGate() {
             </div>
 
             {error && (
-              <div className="flex items-center gap-2 rounded-lg bg-gc-danger/10 border border-gc-danger/20 px-3 py-2 text-xs text-gc-danger">
+              <div className="flex items-center gap-2 rounded bg-gc-danger/10 border border-gc-danger/20 px-3 py-2 text-xs text-gc-danger">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {error}
               </div>
@@ -147,10 +167,10 @@ export default function AuthGate() {
               className="gc-btn-primary w-full disabled:opacity-50"
             >
               {busy ? (
-                <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                <span className="h-4 w-4 rounded-sm border-2 border-white border-t-transparent animate-spin" />
               ) : (
                 <>
-                  <LogIn className="h-4 w-4" /> Sign In
+                  <LogIn className="h-4 w-4" /> Access System
                 </>
               )}
             </button>
@@ -158,8 +178,11 @@ export default function AuthGate() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-[10px] uppercase tracking-widest text-gc-faded font-body">
-          Pamantasan ng Lungsod ng Valenzuela · CEIT · VITS
+        <p className="mt-6 text-center text-[10px] uppercase tracking-[0.2em] text-gc-faded font-mono">
+          PLV · CEIT · VITS
+        </p>
+        <p className="mt-1 text-center text-[9px] text-gc-faded/50 font-mono tracking-wider">
+          v2.0 — PLAYVERSE OPS
         </p>
       </motion.div>
     </div>

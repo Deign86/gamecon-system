@@ -163,7 +163,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
             {/* ── Header ── */}
             <div className="flex items-center justify-between border-b border-gc-steel/40 px-5 py-4">
               <div>
-                <h2 className="font-display text-xl font-bold tracking-wide text-gc-white">
+                <h2 className="font-display text-xl font-bold tracking-wider text-gc-white">
                   USER DETAILS
                 </h2>
                 {user && (
@@ -174,7 +174,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
               </div>
               <button
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
               >
                 <X className="h-4.5 w-4.5" />
               </button>
@@ -187,7 +187,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                 <h3 className="text-[11px] font-semibold uppercase tracking-wider text-gc-mist font-body">
                   Account Information
                 </h3>
-                <div className="rounded-xl border border-gc-steel/60 bg-gc-slate/50 divide-y divide-gc-steel/40">
+                <div className="rounded border border-gc-steel/60 bg-gc-slate/50 divide-y divide-gc-steel/40">
                   <div className="flex items-center gap-3 px-4 py-3">
                     <User className="h-4 w-4 text-gc-mist shrink-0" />
                     <div className="min-w-0">
@@ -237,7 +237,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                         disabled={isDowngrade}
                         title={isDowngrade ? "Role downgrade is not allowed" : r.description}
                         className={cn(
-                          "flex items-center gap-2.5 rounded-xl border py-3 px-3.5 text-left transition-all duration-200",
+                          "flex items-center gap-2.5 rounded border py-3 px-3.5 text-left transition-all duration-200",
                           isDowngrade
                             ? "border-gc-steel/40 bg-gc-iron/30 text-gc-steel cursor-not-allowed opacity-40"
                             : selected
@@ -276,13 +276,13 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                   {committees.map((c, i) => (
                     <div
                       key={`${c.committee}-${c.day}-${i}`}
-                      className="flex items-center gap-2 rounded-lg border border-gc-steel/60 bg-gc-iron px-3 py-2 group"
+                      className="flex items-center gap-2 rounded border border-gc-steel/60 bg-gc-iron px-3 py-2 group"
                     >
                       <span className="text-xs text-gc-cloud flex-1 truncate">
                         {c.committee}
                       </span>
                       <span className={cn(
-                        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0",
+                        "inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider shrink-0",
                         c.day === "DAY 1"  ? "bg-red-500/15 text-red-400 border-red-500/25" :
                         c.day === "DAY 2"  ? "bg-blue-500/15 text-blue-400 border-blue-500/25" :
                                              "bg-amber-500/15 text-amber-400 border-amber-500/25"
@@ -355,7 +355,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                 <button
                   onClick={() => setActive(!active)}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-xl border px-4 py-3 transition-all duration-200",
+                    "flex w-full items-center justify-between rounded border px-4 py-3 transition-all duration-200",
                     active
                       ? "border-gc-success/30 bg-gc-success/8 text-gc-success"
                       : "border-gc-danger/30 bg-gc-danger/8 text-gc-danger"
@@ -393,7 +393,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     className={cn(
-                      "flex items-center gap-2 rounded-lg px-4 py-3 text-xs font-body font-medium",
+                      "flex items-center gap-2 rounded px-4 py-3 text-xs font-body font-medium",
                       toast.type === "success"
                         ? "bg-gc-success/10 text-gc-success border border-gc-success/20"
                         : "bg-gc-danger/10 text-gc-danger border border-gc-danger/20"

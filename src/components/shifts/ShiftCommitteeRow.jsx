@@ -41,7 +41,7 @@ export default function ShiftCommitteeRow({
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border border-gc-steel/50 bg-gc-slate/80 overflow-hidden"
+      className="rounded border border-gc-steel/50 bg-gc-slate/80 overflow-hidden"
     >
       {/* ── Header ── */}
       <button
@@ -56,7 +56,7 @@ export default function ShiftCommitteeRow({
 
         {/* Name + count */}
         <div className="flex-1 min-w-0">
-          <span className="font-display text-base font-bold tracking-wide text-gc-cloud">
+          <span className="font-display text-base font-bold tracking-wider text-gc-cloud">
             {committee.name}
           </span>
           <span className="ml-2 text-xs text-gc-mist font-body">
@@ -66,12 +66,12 @@ export default function ShiftCommitteeRow({
 
         {/* Status chip */}
         {underStaffed ? (
-          <span className="flex items-center gap-1 rounded-full bg-gc-danger/12 border border-gc-danger/25 px-2 py-0.5 text-[10px] font-bold text-gc-danger">
+          <span className="flex items-center gap-1 rounded bg-gc-danger/12 border border-gc-danger/25 px-2 py-0.5 text-[10px] font-bold text-gc-danger">
             <AlertCircle className="h-3 w-3" />
             NEEDS {required - assignees.length}
           </span>
         ) : (
-          <span className="flex items-center gap-1 rounded-full bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
+          <span className="flex items-center gap-1 rounded bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
             <CheckCircle2 className="h-3 w-3" />
             FILLED
           </span>
@@ -110,7 +110,7 @@ export default function ShiftCommitteeRow({
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.8, opacity: 0 }}
                         className={cn(
-                          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-body font-medium transition-all",
+                          "inline-flex items-center gap-1.5 rounded border px-2.5 py-1 text-xs font-body font-medium transition-all",
                           isMe
                             ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
                             : "bg-gc-iron/80 border-gc-steel/40 text-gc-cloud"
@@ -141,7 +141,7 @@ export default function ShiftCommitteeRow({
                               e.stopPropagation();
                               onRemove(shift?.id, a.userId, a.name);
                             }}
-                            className="ml-0.5 rounded-full p-0.5 text-gc-mist hover:text-gc-danger hover:bg-gc-danger/15 transition-colors"
+                            className="ml-0.5 rounded p-0.5 text-gc-mist hover:text-gc-danger hover:bg-gc-danger/15 transition-colors"
                             title={`Remove ${a.name}`}
                           >
                             <X className="h-3 w-3" />
@@ -161,7 +161,7 @@ export default function ShiftCommitteeRow({
               {isAdmin && (
                 <button
                   onClick={() => onAdd(committee.id)}
-                  className="mt-1 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gc-steel bg-gc-iron px-3 py-1.5 text-xs font-body font-semibold text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5 transition-all"
+                  className="mt-1 inline-flex items-center gap-1.5 rounded border border-dashed border-gc-steel bg-gc-iron px-3 py-1.5 text-xs font-body font-semibold text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5 transition-all"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
                   Add Member

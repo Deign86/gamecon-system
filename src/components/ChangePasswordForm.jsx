@@ -53,7 +53,7 @@ export default function ChangePasswordForm() {
       {/* Header */}
       <div className="flex items-center gap-2">
         <Lock className="h-4 w-4 text-gc-crimson" />
-        <h3 className="font-display text-base font-bold tracking-wide text-gc-mist">
+        <h3 className="font-display text-base font-bold tracking-wider text-gc-mist">
           CHANGE PASSWORD
         </h3>
       </div>
@@ -68,7 +68,7 @@ export default function ChangePasswordForm() {
             exit={{ opacity: 0 }}
             className="flex flex-col items-center gap-3 py-6"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gc-success/15">
+            <div className="flex h-12 w-12 items-center justify-center rounded bg-gc-success/15">
               <CheckCircle2 className="h-6 w-6 text-gc-success" />
             </div>
             <p className="text-sm font-semibold text-gc-success">Password updated successfully</p>
@@ -163,7 +163,7 @@ export default function ChangePasswordForm() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex items-start gap-2 rounded-lg border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
+                className="flex items-start gap-2 rounded border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>

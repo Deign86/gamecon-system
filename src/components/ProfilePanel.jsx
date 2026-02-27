@@ -97,12 +97,12 @@ export default function ProfilePanel() {
       {/* Profile card */}
       <motion.div variants={fadeUp} className="gc-card-accent p-6 text-center">
         <div
-          className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl text-xl font-bold text-white"
+          className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-md text-xl font-bold text-white"
           style={{ background: `linear-gradient(135deg, ${primaryCommittee?.color || "#C8102E"}, ${primaryCommittee?.color || "#E31837"}dd)` }}
         >
           {initials(profile?.name)}
         </div>
-        <h2 className="font-display text-2xl font-bold tracking-wide text-gc-white">
+        <h2 className="font-display text-2xl font-bold tracking-wider text-gc-white">
           {profile?.name || "Unknown"}
         </h2>
 
@@ -139,7 +139,7 @@ export default function ProfilePanel() {
       <motion.div variants={fadeUp} className="gc-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <Users className="h-4 w-4 text-gc-crimson" />
-          <h3 className="font-display text-base font-bold tracking-wide text-gc-mist">
+          <h3 className="font-display text-base font-bold tracking-wider text-gc-mist">
             MY COMMITTEES
           </h3>
           <span className="ml-auto font-mono text-xs text-gc-mist">{myCommitteeNames.length}/{MAX_COMMITTEES}</span>
@@ -166,11 +166,11 @@ export default function ProfilePanel() {
         )}
 
         {/* Toggle picker */}
-        <button
+            <button
           type="button"
           onClick={() => setShowPicker((p) => !p)}
           className={cn(
-            "w-full flex items-center justify-center gap-2 rounded-lg border px-3 py-2 transition-colors text-xs",
+            "w-full flex items-center justify-center gap-2 rounded border px-3 py-2 transition-colors text-xs",
             "border-gc-steel/60 bg-gc-iron hover:border-gc-steel text-gc-mist",
           )}
         >
@@ -204,7 +204,7 @@ export default function ProfilePanel() {
                       disabled={saving || atMax}
                       onClick={() => handleCommitteeToggle(canonical)}
                       className={cn(
-                        "flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-all",
+                        "flex items-center gap-2 rounded border px-2.5 py-2 text-left text-xs transition-all",
                         active
                           ? "border-gc-success/50 bg-gc-success/10 text-gc-success font-semibold"
                           : atMax
@@ -246,7 +246,7 @@ export default function ProfilePanel() {
             {mine.slice(0, 3).map((c) => (
               <div
                 key={c.id}
-                className="flex items-center gap-3 rounded-lg bg-gc-iron border border-gc-steel/60 px-3 py-2"
+                className="flex items-center gap-3 rounded bg-gc-iron border border-gc-steel/60 px-3 py-2"
               >
                 <div className="h-1.5 w-1.5 rounded-full bg-gc-success shrink-0" />
                 <div className="flex-1 min-w-0">
@@ -264,7 +264,7 @@ export default function ProfilePanel() {
         <button
           type="button"
           onClick={() => setTab("contributions")}
-          className="w-full flex items-center justify-center gap-2 rounded-lg border border-gc-steel/60 bg-gc-iron px-3 py-2 text-xs font-semibold text-gc-mist transition-colors hover:border-gc-steel hover:text-gc-cloud"
+          className="w-full flex items-center justify-center gap-2 rounded border border-gc-steel/60 bg-gc-iron px-3 py-2 text-xs font-semibold text-gc-mist transition-colors hover:border-gc-steel hover:text-gc-cloud"
         >
           Open Contributions Tracker
           <ChevronRight className="h-3.5 w-3.5" />
@@ -279,7 +279,7 @@ export default function ProfilePanel() {
             APPEARANCE
           </h3>
         </div>
-        <div className="flex rounded-lg border border-gc-steel/60 overflow-hidden">
+        <div className="flex rounded border border-gc-steel/60 overflow-hidden">
           {[
             { key: "system", label: "System", icon: Monitor },
             { key: "light",  label: "Light",  icon: Sun },

@@ -67,7 +67,7 @@ function ArrowLeftIcon({ className }) {
 /* ── Inner view ── */
 function HeadcountInner() {
   const navigate = useNavigate();
-  const { count, loading, staffCount, atStaffFloor, incrementCount, decrementCount } = useTotalHeadcount();
+  const { count, loading, zonesTotal, atStaffFloor, incrementCount, decrementCount } = useTotalHeadcount();
   const [ripple, setRipple] = useState(0);
   const [direction, setDirection] = useState(null); // 'up' | 'down'
   const [staffWarning, setStaffWarning] = useState(false);
@@ -90,7 +90,7 @@ function HeadcountInner() {
   /* Wrapped decrement that checks the return value */
   const safeDecrement = useCallback(async () => {
     const result = await decrementCount();
-    if (result === "staff-floor" || result === "blocked") {
+    if (result === "blocked") {
       flashWarning();
       return;
     }
@@ -171,7 +171,7 @@ function HeadcountInner() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.4, delay: 0.2 }}
         onClick={() => navigate("/")}
-        className="absolute top-5 right-5 z-20 flex items-center gap-2 rounded-xl bg-gc-iron border border-gc-steel/60 px-3.5 py-2 text-gc-hint backdrop-blur-sm transition-all hover:border-gc-crimson/40 hover:text-gc-cloud hover:bg-gc-iron/80"
+        className="absolute top-5 right-5 z-20 flex items-center gap-2 rounded bg-gc-iron border border-gc-steel/60 px-3.5 py-2 text-gc-hint backdrop-blur-sm transition-all hover:border-gc-crimson/40 hover:text-gc-cloud hover:bg-gc-iron/80"
       >
         <ArrowLeftIcon className="h-4 w-4" />
         <span className="font-display text-xs tracking-[0.15em] uppercase">Dashboard</span>
@@ -234,11 +234,11 @@ function HeadcountInner() {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              className="flex items-center gap-2 rounded-lg bg-gc-warning/10 border border-gc-warning/30 px-4 py-1.5"
+              className="flex items-center gap-2 rounded bg-gc-warning/10 border border-gc-warning/30 px-4 py-1.5"
             >
               <ShieldAlert className="h-4 w-4 text-gc-warning shrink-0" />
               <p className="font-mono text-xs sm:text-sm tracking-wide uppercase text-gc-warning">
-                Staff Only — {staffCount} active
+                Staff Only — {zonesTotal} in zones
               </p>
             </motion.div>
           ) : (
@@ -263,15 +263,15 @@ function HeadcountInner() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 24 }}
-            className="absolute bottom-32 sm:bottom-36 z-30 mx-4 flex items-center gap-3 rounded-xl bg-gc-warning/15 border border-gc-warning/40 px-5 py-3 backdrop-blur-md shadow-[0_0_30px_rgba(234,179,8,0.15)]"
+            className="absolute bottom-32 sm:bottom-36 z-30 mx-4 flex items-center gap-3 rounded bg-gc-warning/15 border border-gc-warning/40 px-5 py-3 backdrop-blur-md shadow-[0_0_30px_rgba(234,179,8,0.15)]"
           >
             <ShieldAlert className="h-5 w-5 text-gc-warning shrink-0" />
             <div>
-              <p className="font-display text-sm sm:text-base tracking-wide uppercase text-gc-warning">
+              <p className="font-display text-sm sm:text-base tracking-wider uppercase text-gc-warning">
                 Cannot go lower
               </p>
               <p className="font-body text-[11px] sm:text-xs text-gc-warning/70 mt-0.5">
-                Remaining headcount ({count}) accounts for {staffCount} active staff members
+                Remaining headcount ({count}) accounts for {zonesTotal} staff in zones
               </p>
             </div>
           </motion.div>
@@ -289,7 +289,7 @@ function HeadcountInner() {
           onTouchStart={() => startHold(safeDecrement, "down")}
           onTouchEnd={stopHold}
           disabled={count <= 0}
-          className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl backdrop-blur-sm transition-all active:bg-gc-crimson/10 ${
+          className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all active:bg-gc-crimson/10 ${
             atStaffFloor
               ? "bg-gc-warning/10 border border-gc-warning/30 text-gc-warning/60 cursor-not-allowed"
               : "bg-gc-iron/80 border border-gc-steel/60 text-gc-cloud hover:border-gc-crimson/40 hover:bg-gc-steel/60 disabled:opacity-20 disabled:cursor-not-allowed"
@@ -308,7 +308,7 @@ function HeadcountInner() {
           onMouseLeave={stopHold}
           onTouchStart={() => startHold(incrementCount, "up")}
           onTouchEnd={stopHold}
-          className="group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gc-crimson/15 border border-gc-crimson/40 text-gc-crimson backdrop-blur-sm transition-all hover:bg-gc-crimson/25 hover:border-gc-crimson active:bg-gc-crimson/30"
+          className="group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md bg-gc-crimson/15 border border-gc-crimson/40 text-gc-crimson backdrop-blur-sm transition-all hover:bg-gc-crimson/25 hover:border-gc-crimson active:bg-gc-crimson/30"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" />

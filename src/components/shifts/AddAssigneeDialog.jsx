@@ -79,7 +79,7 @@ export default function AddAssigneeDialog({
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
         <motion.div
-          className="w-full max-w-sm rounded-2xl border border-gc-steel/60 bg-gc-night shadow-2xl shadow-black/40 overflow-hidden"
+          className="w-full max-w-sm rounded-md border border-gc-steel/60 bg-gc-night shadow-2xl shadow-black/40 overflow-hidden"
           initial={{ opacity: 0, y: 40, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.97 }}
@@ -92,13 +92,13 @@ export default function AddAssigneeDialog({
                 className="h-3 w-3 shrink-0 rounded-full"
                 style={{ backgroundColor: committeeColor || "#C8102E" }}
               />
-              <h3 className="font-display text-lg font-bold tracking-wide text-gc-white truncate">
+              <h3 className="font-display text-lg font-bold tracking-wider text-gc-white truncate">
                 ADD TO {committeeName?.toUpperCase()}
               </h3>
             </div>
             <button
               onClick={onClose}
-              className="shrink-0 flex h-7 w-7 items-center justify-center rounded-lg text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+              className="shrink-0 flex h-7 w-7 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
             >
               <X className="h-4 w-4" />
             </button>
@@ -195,7 +195,7 @@ function MemberRow({ member, isSuggested = false, onSelect }) {
       whileTap={{ scale: 0.99 }}
       onClick={onSelect}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all",
+        "flex w-full items-center gap-3 rounded px-3 py-2.5 text-left transition-all",
         isSuggested
           ? "bg-gc-warning/5 border border-gc-warning/15 hover:bg-gc-warning/10"
           : "bg-gc-iron border border-gc-steel/50 hover:bg-gc-iron/80 hover:border-gc-steel"

@@ -150,13 +150,13 @@ export default function CreateUserForm({ onCreated }) {
       >
         <div className="flex items-center gap-3 mb-4">
           <div
-            className="flex h-9 w-9 items-center justify-center rounded-lg"
+            className="flex h-9 w-9 items-center justify-center rounded"
             style={{ background: "linear-gradient(135deg, #14B8A6, #0D9488)" }}
           >
             <UserPlus className="h-4.5 w-4.5 text-white" />
           </div>
           <div>
-            <h2 className="font-display text-lg font-bold tracking-wide text-gc-white leading-none">
+            <h2 className="font-display text-lg font-bold tracking-wider text-gc-white leading-none">
               CREATE NEW USER
             </h2>
             <p className="text-[11px] font-body text-gc-mist mt-0.5">
@@ -292,7 +292,7 @@ export default function CreateUserForm({ onCreated }) {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
-                className="flex items-center gap-2 rounded-lg bg-gc-danger/10 border border-gc-danger/20 px-3 py-2 text-xs text-gc-danger font-body"
+                className="flex items-center gap-2 rounded bg-gc-danger/10 border border-gc-danger/20 px-3 py-2 text-xs text-gc-danger font-body"
               >
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 {error}
@@ -345,7 +345,7 @@ export default function CreateUserForm({ onCreated }) {
               {/* Close button */}
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+                className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -353,13 +353,13 @@ export default function CreateUserForm({ onCreated }) {
               {/* Header */}
               <div className="flex items-center gap-3 mb-5">
                 <div
-                  className="flex h-11 w-11 items-center justify-center rounded-xl"
+                  className="flex h-11 w-11 items-center justify-center rounded"
                   style={{ background: "linear-gradient(135deg, #22C55E, #16A34A)" }}
                 >
                   <ShieldCheck className="h-5.5 w-5.5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-display text-xl font-bold tracking-wide text-gc-white">
+                  <h3 className="font-display text-xl font-bold tracking-wider text-gc-white">
                     ACCOUNT CREATED
                   </h3>
                   <p className="text-xs font-body text-gc-mist mt-0.5">
@@ -369,7 +369,7 @@ export default function CreateUserForm({ onCreated }) {
               </div>
 
               {/* Warning */}
-              <div className="flex items-start gap-2.5 rounded-lg border border-gc-warning/25 bg-gc-warning/8 px-4 py-3 mb-4">
+              <div className="flex items-start gap-2.5 rounded border border-gc-warning/25 bg-gc-warning/8 px-4 py-3 mb-4">
                 <AlertCircle className="h-4 w-4 text-gc-warning shrink-0 mt-0.5" />
                 <p className="text-xs text-gc-warning font-body leading-relaxed">
                   <strong>Save this password now.</strong> It will not be shown again.

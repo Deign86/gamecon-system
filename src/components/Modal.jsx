@@ -34,7 +34,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         >
           <motion.div
             className={cn(
-              "w-full rounded-2xl border border-gc-steel/60 bg-gc-night shadow-2xl shadow-black/40 overflow-hidden",
+              "w-full rounded-md border border-gc-steel/40 bg-gc-night shadow-2xl shadow-black/50 overflow-hidden",
               wide ? "max-w-2xl" : "max-w-md"
             )}
             initial={{ opacity: 0, y: 40, scale: 0.97 }}
@@ -42,14 +42,17 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ type: "spring", damping: 28, stiffness: 350 }}
           >
+            {/* Top accent line */}
+            <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gc-crimson/50 to-transparent" />
+
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-gc-steel/40 px-5 py-3.5">
-              <h2 className="font-display text-xl font-bold tracking-wide text-gc-white">
+            <div className="flex items-center justify-between border-b border-gc-steel/30 px-5 py-3.5">
+              <h2 className="font-display text-xl font-bold tracking-[0.1em] text-gc-white">
                 {title}
               </h2>
               <button
                 onClick={onClose}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+                className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
               >
                 <X className="h-4.5 w-4.5" />
               </button>

@@ -48,7 +48,7 @@ export default function ZoneCounterCard({
       onClick={() => onSelect?.(zone.id)}
       onKeyDown={onKey}
       className={cn(
-        "flex items-center justify-between rounded-xl border px-4 py-3 sm:px-6 sm:py-4 outline-none transition-all duration-200 cursor-pointer",
+        "flex items-center justify-between rounded border px-4 py-3 sm:px-6 sm:py-4 outline-none transition-all duration-200 cursor-pointer",
         "bg-gc-night/80",
         selected
           ? "border-gc-crimson shadow-[0_0_24px_rgba(200,16,46,0.2)]"
@@ -68,7 +68,7 @@ export default function ZoneCounterCard({
           disabled={count <= 0}
           aria-label={`Decrease ${zone.name}`}
           className={cn(
-            "flex items-center justify-center rounded-lg font-mono font-bold text-2xl sm:text-3xl transition-all duration-150",
+            "flex items-center justify-center rounded font-mono font-bold text-2xl sm:text-3xl transition-all duration-150",
             "h-12 w-12 sm:h-14 sm:w-14",
             "bg-gc-iron border border-gc-steel text-gc-cloud",
             "hover:bg-gc-steel hover:border-gc-crimson/50 active:scale-90",
@@ -93,7 +93,7 @@ export default function ZoneCounterCard({
           onClick={(e) => { e.stopPropagation(); fire(onIncrement); }}
           aria-label={`Increase ${zone.name}`}
           className={cn(
-            "flex items-center justify-center rounded-lg font-mono font-bold text-2xl sm:text-3xl transition-all duration-150",
+            "flex items-center justify-center rounded font-mono font-bold text-2xl sm:text-3xl transition-all duration-150",
             "h-12 w-12 sm:h-14 sm:w-14",
             "bg-gc-crimson/20 border border-gc-crimson/50 text-gc-crimson",
             "hover:bg-gc-crimson/35 hover:border-gc-crimson active:scale-90"

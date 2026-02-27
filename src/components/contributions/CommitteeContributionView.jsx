@@ -70,14 +70,14 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
   return (
     <div className="space-y-3">
       {/* Summary bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-4 py-3">
+      <div className="flex flex-wrap items-center gap-3 rounded border border-gc-steel/50 bg-gc-iron px-4 py-3">
         <BarChart3 className="h-4 w-4 text-gc-crimson shrink-0" />
         <span className="text-sm font-bold text-gc-cloud">
           {total} {total === 1 ? "entry" : "entries"}
         </span>
         <span className="text-xs text-gc-hint">across {grouped.length} committee{grouped.length !== 1 ? "s" : ""}</span>
         {/* Mini bar chart — colored segments proportional to counts */}
-        <div className="ml-auto flex h-2 min-w-[80px] max-w-[140px] flex-1 overflow-hidden rounded-full bg-gc-steel/20">
+        <div className="ml-auto flex h-2 min-w-[80px] max-w-[140px] flex-1 overflow-hidden rounded bg-gc-steel/20">
           {grouped.map(([id, items]) => {
             const info = committeeInfo(id);
             const pct  = (items.length / total) * 100;
@@ -100,7 +100,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
           return (
             <div
               key={id}
-              className="overflow-hidden rounded-xl border border-gc-steel/50 bg-gc-iron"
+              className="overflow-hidden rounded border border-gc-steel/50 bg-gc-iron"
             >
               {/* Header row */}
               <button
@@ -120,7 +120,7 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
                 </span>
                 {/* Count pill */}
                 <span
-                  className="rounded-full px-2 py-0.5 text-[11px] font-bold"
+                  className="rounded px-2 py-0.5 text-[11px] font-bold"
                   style={{
                     background: `${info.color}18`,
                     color:       info.color,

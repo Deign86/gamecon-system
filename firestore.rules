@@ -189,6 +189,32 @@ service cloud.firestore {
     }
 
     /* ───────────────────────────────────
+     *  Tasks (Kanban Board)
+     *  Read: any auth'd user
+     *  Create/Update: admin or proctor
+     *  Delete: admin only
+     * ─────────────────────────────────── */
+    match /tasks/{id} {
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn()
+                            && callerRole() in ['admin', 'proctor'];
+      allow delete:         if isAdmin();
+    }
+
+    /* ───────────────────────────────────
+     *  Attendance Records (Staff Check-In)
+     *  Read: any auth'd user
+     *  Create/Update: admin or proctor
+     *  Delete: admin only
+     * ─────────────────────────────────── */
+    match /attendanceRecords/{id} {
+      allow read:           if isSignedIn();
+      allow create, update: if isSignedIn()
+                            && callerRole() in ['admin', 'proctor'];
+      allow delete:         if isAdmin();
+    }
+
+    /* ───────────────────────────────────
      *  Audit / Activity Logs
      *  Read: admin only
      *  Write: system only (deny all client writes)

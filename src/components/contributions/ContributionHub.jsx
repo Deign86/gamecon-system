@@ -38,7 +38,7 @@ export default function ContributionHub() {
     <div className="space-y-4">
       {/* Internal tab bar — only shown when multiple tabs are available */}
       {visibleTabs.length > 1 && (
-        <div className="flex gap-1 rounded-xl border border-gc-steel/20 bg-gc-iron/30 p-1">
+        <div className="flex gap-1 rounded border border-gc-steel/20 bg-gc-iron/30 p-1">
           {visibleTabs.map(({ key, label, Icon }) => {
             const active = activeTab === key;
             return (
@@ -47,7 +47,7 @@ export default function ContributionHub() {
                 type="button"
                 onClick={() => setActiveTab(key)}
                 className={cn(
-                  "relative flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2 text-xs sm:text-sm font-semibold transition-all",
+                  "relative flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-2 text-xs sm:text-sm font-semibold transition-all",
                   active
                     ? "bg-gc-void text-gc-white shadow-sm border border-gc-steel/20"
                     : "text-gc-mist hover:text-gc-cloud"
@@ -188,7 +188,7 @@ function MyLogView() {
 
       {/* Recent contributions (my own) */}
       <div>
-        <h3 className="mb-3 font-display text-base font-bold tracking-wide text-gc-mist">
+        <h3 className="mb-3 font-display text-base font-bold tracking-wider text-gc-mist">
           MY RECENT
         </h3>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
@@ -200,7 +200,7 @@ function MyLogView() {
             return (
               <div
                 key={c.id}
-                className="flex items-start gap-3 rounded-lg bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
+                className="flex items-start gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
               >
                 <div
                   className="mt-0.5 h-2 w-2 shrink-0 rounded-full"

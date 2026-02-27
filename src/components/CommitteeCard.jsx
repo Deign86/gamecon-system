@@ -56,7 +56,7 @@ export default function CommitteeCard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg"
+                    className="flex h-8 w-8 items-center justify-center rounded"
                     style={{
                       background: `${comm.color}18`,
                       border: `1px solid ${comm.color}35`,
@@ -78,7 +78,7 @@ export default function CommitteeCard() {
                   {commMembers.map((name) => (
                     <span
                       key={name}
-                      className="inline-flex items-center gap-1 rounded-full bg-gc-iron border border-gc-steel/30 px-2.5 py-1 text-[10px] font-medium text-gc-cloud"
+                      className="inline-flex items-center gap-1 rounded bg-gc-iron border border-gc-steel/30 px-2.5 py-1 text-[10px] font-medium text-gc-cloud"
                     >
                       <span
                         className="h-4 w-4 rounded-full flex items-center justify-center text-[8px] font-bold text-white shrink-0"

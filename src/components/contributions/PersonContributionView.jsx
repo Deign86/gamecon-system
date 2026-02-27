@@ -160,7 +160,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                   key={p.id}
                   onClick={() => setSelectedUser(p)}
                   className={cn(
-                    "w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all",
+                    "w-full flex items-center gap-2.5 rounded px-3 py-2 text-left transition-all",
                     active
                       ? "bg-gc-crimson/15 border border-gc-crimson/40 text-gc-cloud"
                       : "border border-transparent bg-gc-iron text-gc-mist hover:border-gc-steel/50 hover:bg-gc-iron/80"
@@ -168,7 +168,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                 >
                   {/* Avatar */}
                   <div
-                    className="h-7 w-7 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-bold text-white"
+                    className="h-7 w-7 shrink-0 rounded flex items-center justify-center text-[10px] font-bold text-white"
                     style={{
                       background: `linear-gradient(135deg, ${committeeColor(commId)}, #1a1a2e)`,
                     }}
@@ -204,18 +204,18 @@ export default function PersonContributionView({ myEntriesOnly }) {
         ) : (
           <>
             {/* Selected person header */}
-            <div className="flex items-center gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-4 py-3">
+            <div className="flex items-center gap-3 rounded border border-gc-steel/50 bg-gc-iron px-4 py-3">
               {/* Back (mobile) */}
               <button
                 type="button"
                 onClick={() => setSelectedUser(null)}
-                className="sm:hidden rounded-lg p-1 text-gc-mist hover:text-gc-cloud"
+                className="sm:hidden rounded p-1 text-gc-mist hover:text-gc-cloud"
               >
                 <ChevronRight className="h-4 w-4 rotate-180" />
               </button>
 
               <div
-                className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center text-sm font-bold text-white"
+                className="h-9 w-9 shrink-0 rounded flex items-center justify-center text-sm font-bold text-white"
                 style={{
                   background: `linear-gradient(135deg, ${committeeColor(personCommitteeId(selectedUser))}, #1a1a2e)`,
                 }}
@@ -257,7 +257,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                     <button
                       type="button"
                       onClick={openAdd}
-                      className="mt-1 flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-gc-crimson/10 text-gc-crimson border border-gc-crimson/20 hover:bg-gc-crimson/20 transition-colors"
+                      className="mt-1 flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold bg-gc-crimson/10 text-gc-crimson border border-gc-crimson/20 hover:bg-gc-crimson/20 transition-colors"
                     >
                       <Plus className="h-3.5 w-3.5" /> Log first entry
                     </button>
@@ -276,7 +276,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, height: 0 }}
                         transition={{ duration: 0.15 }}
-                        className="flex items-start gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-3.5 py-3"
+                        className="flex items-start gap-3 rounded border border-gc-steel/50 bg-gc-iron px-3.5 py-3"
                       >
                         {/* Committee dot */}
                         <div
@@ -320,7 +320,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                             <button
                               type="button"
                               onClick={() => openEdit(c)}
-                              className="rounded-lg p-1.5 text-gc-mist transition-colors hover:bg-gc-steel/20 hover:text-gc-cloud"
+                              className="rounded p-1.5 text-gc-mist transition-colors hover:bg-gc-steel/20 hover:text-gc-cloud"
                               title="Edit"
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -328,7 +328,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                             <button
                               type="button"
                               onClick={() => handleDelete(c)}
-                              className="rounded-lg p-1.5 text-gc-mist transition-colors hover:bg-gc-danger/20 hover:text-gc-danger"
+                              className="rounded p-1.5 text-gc-mist transition-colors hover:bg-gc-danger/20 hover:text-gc-danger"
                               title="Delete"
                             >
                               <Trash2 className="h-3.5 w-3.5" />

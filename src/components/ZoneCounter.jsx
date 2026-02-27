@@ -44,7 +44,7 @@ export default function ZoneCounter() {
   return (
     <div className="space-y-5">
       {/* Total banner */}
-      <div className="flex items-center justify-between rounded-xl bg-gc-crimson/10 border border-gc-crimson/25 px-4 py-3">
+      <div className="flex items-center justify-between rounded bg-gc-crimson/10 border border-gc-crimson/25 px-4 py-3">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-gc-crimson" />
           <span className="text-sm font-semibold text-gc-cloud">Event Total</span>
@@ -57,7 +57,7 @@ export default function ZoneCounter() {
             href="/headcount/fullscreen"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 rounded-lg bg-gc-iron border border-gc-steel px-2.5 py-1.5 text-[11px] font-semibold text-gc-mist hover:text-gc-cloud hover:border-gc-crimson/50 transition-all"
+            className="flex items-center gap-1.5 rounded bg-gc-iron border border-gc-steel px-2.5 py-1.5 text-[11px] font-semibold text-gc-mist hover:text-gc-cloud hover:border-gc-crimson/50 transition-all"
             title="Open fullscreen display"
           >
             <Maximize2 className="h-3.5 w-3.5" />
@@ -70,7 +70,6 @@ export default function ZoneCounter() {
       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
         {zones.map((zone) => {
           const count = zone.currentCount || 0;
-          const peak  = zone.peakCount || 0;
           const isPulsing = pulsing === zone.id;
 
           return (
@@ -88,9 +87,6 @@ export default function ZoneCounter() {
                 <h3 className="text-sm font-bold text-gc-cloud">
                   {zone.name}
                 </h3>
-                <p className="text-[10px] text-gc-mist font-mono">
-                  Peak: {peak}
-                </p>
               </div>
 
               {/* Counter controls */}
@@ -98,7 +94,7 @@ export default function ZoneCounter() {
                 <button
                   onClick={() => handleDecrement(zone.id)}
                   disabled={count <= 0}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-gc-iron border border-gc-steel text-gc-cloud hover:bg-gc-steel hover:border-gc-crimson/40 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
+                  className="flex h-9 w-9 items-center justify-center rounded bg-gc-iron border border-gc-steel text-gc-cloud hover:bg-gc-steel hover:border-gc-crimson/40 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
                 >
                   <Minus className="h-4 w-4" />
                 </button>
@@ -113,7 +109,7 @@ export default function ZoneCounter() {
 
                 <button
                   onClick={() => handleIncrement(zone.id)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-gc-crimson/20 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/30 hover:border-gc-crimson transition-all active:scale-90"
+                  className="flex h-9 w-9 items-center justify-center rounded bg-gc-crimson/20 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/30 hover:border-gc-crimson transition-all active:scale-90"
                 >
                   <Plus className="h-4 w-4" />
                 </button>

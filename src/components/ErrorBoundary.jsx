@@ -19,21 +19,28 @@ export default class ErrorBoundary extends Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gc-void px-6 text-center">
-          <div className="h-16 w-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center">
+        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gc-void gc-noise px-6 text-center">
+          {/* Corner brackets */}
+          <div className="fixed top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-gc-crimson/15 pointer-events-none" />
+          <div className="fixed bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-gc-crimson/15 pointer-events-none" />
+
+          <div className="h-16 w-16 rounded bg-red-500/10 border border-red-500/25 flex items-center justify-center">
             <AlertTriangle className="h-8 w-8 text-red-500" />
           </div>
           <h1 className="font-display text-3xl font-bold tracking-wider text-gc-white">
-            SOMETHING <span className="text-gc-crimson">BROKE</span>
+            SYSTEM <span className="text-gc-crimson text-shadow-red">ERROR</span>
           </h1>
           <p className="max-w-md text-sm text-gc-mist font-body">
             {this.state.error?.message || "An unexpected error occurred."}
           </p>
+          <p className="text-[9px] font-mono text-gc-hint tracking-wider">
+            ERR_BOUNDARY_CATCH
+          </p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-2 rounded-lg bg-gc-crimson px-6 py-2 text-sm font-semibold text-white hover:bg-gc-crimson/80 transition-colors"
+            className="mt-2 gc-btn-primary text-sm px-6 py-2"
           >
-            RELOAD APP
+            RELOAD SYSTEM
           </button>
         </div>
       );

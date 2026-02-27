@@ -31,7 +31,7 @@ export default function ContributionTabs() {
     >
       {/* Page title */}
       <div className="flex items-center gap-3 px-1">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gc-crimson/15 border border-gc-crimson/25">
+        <div className="flex h-8 w-8 items-center justify-center rounded bg-gc-crimson/15 border border-gc-crimson/25">
           <BookUser className="h-4 w-4 text-gc-crimson" />
         </div>
         <div>
@@ -48,7 +48,7 @@ export default function ContributionTabs() {
           type="button"
           onClick={() => setMyEntriesOnly((p) => !p)}
           className={cn(
-            "ml-auto flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[11px] font-bold transition-all",
+            "ml-auto flex items-center gap-1.5 rounded border px-3 py-1.5 text-[11px] font-bold transition-all",
             myEntriesOnly
               ? "border-gc-crimson/50 bg-gc-crimson/15 text-gc-crimson"
               : "border-gc-steel/50 bg-gc-iron text-gc-mist hover:border-gc-steel/60"
@@ -65,7 +65,7 @@ export default function ContributionTabs() {
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 rounded-xl border border-gc-steel/50 bg-gc-iron/60 p-1">
+      <div className="flex gap-1 rounded border border-gc-steel/50 bg-gc-iron/60 p-1">
         {TABS.map(({ key, label, Icon }) => {
           const active = activeTab === key;
           return (
@@ -74,7 +74,7 @@ export default function ContributionTabs() {
               type="button"
               onClick={() => setActiveTab(key)}
               className={cn(
-                "relative flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold transition-all",
+                "relative flex flex-1 items-center justify-center gap-2 rounded px-3 py-2 text-sm font-semibold transition-all",
                 active
                   ? "bg-gc-void text-gc-white shadow-sm border border-gc-steel/50"
                   : "text-gc-mist hover:text-gc-cloud"

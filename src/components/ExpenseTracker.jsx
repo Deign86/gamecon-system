@@ -43,7 +43,7 @@ export default function ExpenseTracker() {
   return (
     <div className="space-y-5">
       {/* Summary */}
-      <div className="flex items-center justify-between rounded-xl bg-gc-warning/8 border border-gc-warning/20 px-4 py-3">
+      <div className="flex items-center justify-between rounded bg-gc-warning/8 border border-gc-warning/20 px-4 py-3">
         <div className="flex items-center gap-2">
           <TrendingDown className="h-4 w-4 text-gc-warning" />
           <span className="text-sm font-semibold text-gc-cloud">Total Spent</span>
@@ -65,7 +65,7 @@ export default function ExpenseTracker() {
 
       {/* Form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="space-y-3 rounded-xl bg-gc-iron border border-gc-steel/50 p-4">
+        <form onSubmit={handleSubmit} className="space-y-3 rounded bg-gc-iron border border-gc-steel/50 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="mb-1 block text-xs font-semibold uppercase tracking-wider text-gc-mist">
@@ -158,7 +158,7 @@ export default function ExpenseTracker() {
           return (
             <div
               key={exp.id}
-              className="flex items-center gap-3 rounded-lg bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
+              className="flex items-center gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
             >
               <div
                 className="h-2 w-2 shrink-0 rounded-full"

@@ -1,6 +1,13 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,jsx}"],
+  safelist: [
+    /* Attendance status dynamic classes (blue-400 for 'excused') */
+    { pattern: /bg-blue-400(\/.*)?/ },
+    { pattern: /text-blue-400(\/.*)?/ },
+    { pattern: /border-blue-400(\/.*)?/ },
+    { pattern: /ring-blue-400(\/.*)?/ },
+  ],
   theme: {
     extend: {
       colors: {
@@ -26,7 +33,7 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Teko"', "sans-serif"],
+        display: ['"Chakra Petch"', "sans-serif"],
         body:    ['"Lexend"', "sans-serif"],
         mono:    ['"JetBrains Mono"', "monospace"],
       },
@@ -39,6 +46,8 @@ export default {
         "count-pop":   "countPop 0.3s cubic-bezier(0.34,1.56,0.64,1)",
         "diagonal":    "diagonalShift 20s linear infinite",
         "grain":       "grain 0.5s steps(1) infinite",
+        "shimmer":     "shimmer 4s ease-in-out infinite",
+        "border-pulse":"borderPulse 2s ease-in-out infinite",
       },
       keyframes: {
         fadeUp: {
@@ -81,6 +90,14 @@ export default {
           "70%":      { transform: "translate(0,-2%)" },
           "80%":      { transform: "translate(-2%,0)" },
           "90%":      { transform: "translate(1%,1%)" },
+        },
+        shimmer: {
+          "0%":   { backgroundPosition: "200% 0" },
+          "100%": { backgroundPosition: "-200% 0" },
+        },
+        borderPulse: {
+          "0%, 100%": { opacity: "0.3" },
+          "50%":      { opacity: "0.8" },
         },
       },
       backgroundImage: {

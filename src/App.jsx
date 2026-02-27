@@ -15,14 +15,19 @@ const ProfilePanel = lazy(() => import("./components/ProfilePanel"));
 const LogsPanel    = lazy(() => import("./components/LogsPanel"));
 const RoleTasking  = lazy(() => import("./components/RoleTasking"));
 const AdminUsersPage = lazy(() => import("./components/admin/AdminUsersPage"));
+const TaskBoard = lazy(() => import("./components/tasks/TaskBoard"));
 /* ContributionTabs removed — consolidated into Dashboard ContributionHub */
 const FullScreenHeadcountView = lazy(() =>
   import("./components/headcount/FullScreenHeadcountView")
 );
 
 /* ── Tab context ── */
-const TabCtx = createContext();
-export const useTab = () => useContext(TabCtx);
+const TabCtx = createContext(undefined);
+export const useTab = () => {
+  const ctx = useContext(TabCtx);
+  if (!ctx) return { tab: "dashboard", setTab: () => {} };
+  return ctx;
+};
 
 function AppShell() {
   const { user, profile, loading } = useAuth();
@@ -37,11 +42,18 @@ function AppShell() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center gc-diag-bg gc-noise">
+        {/* Corner brackets */}
+        <div className="fixed top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-gc-crimson/20 pointer-events-none" />
+        <div className="fixed bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-gc-crimson/20 pointer-events-none" />
         <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
-          <span className="font-display text-2xl tracking-wider text-gc-crimson text-shadow-red">
-            LOADING GC26…
+          <div className="relative">
+            <div className="h-12 w-12 rounded border-2 border-gc-crimson border-t-transparent animate-spin" />
+            <div className="absolute inset-0 h-12 w-12 rounded border-2 border-transparent border-b-gc-crimson/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
+          </div>
+          <span className="font-display text-xl tracking-[0.2em] text-gc-crimson text-shadow-red">
+            INITIALIZING…
           </span>
+          <span className="text-[10px] font-mono text-gc-hint tracking-widest uppercase">PlayVerse Ops v2.0</span>
         </div>
       </div>
     );
@@ -67,6 +79,7 @@ function AppShell() {
                   {tab === "dashboard"     && <Dashboard />}
                   {tab === "roles"        && <RoleTasking />}
                   {tab === "users"        && <AdminUsersPage />}
+                  {tab === "tasks"       && <TaskBoard />}
                   {tab === "me"           && <ProfilePanel />}
                   {tab === "logs"         && <LogsPanel />}
                 </motion.div>
@@ -85,8 +98,10 @@ function RouteFallback() {
   return (
     <div className="flex h-screen items-center justify-center bg-gc-void">
       <div className="flex flex-col items-center gap-4">
-        <div className="h-12 w-12 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
-        <span className="font-display text-2xl tracking-wider text-gc-crimson text-shadow-red">
+        <div className="relative">
+          <div className="h-10 w-10 rounded border-2 border-gc-crimson border-t-transparent animate-spin" />
+        </div>
+        <span className="font-display text-lg tracking-[0.2em] text-gc-crimson text-shadow-red">
           LOADING…
         </span>
       </div>

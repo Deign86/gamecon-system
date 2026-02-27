@@ -120,7 +120,7 @@ export default function CommitteeScheduleEditor({
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85, x: -20 }}
-              className="flex items-center gap-3 rounded-xl border border-gc-steel/50 bg-gc-iron px-3 py-2"
+              className="flex items-center gap-3 rounded border border-gc-steel/50 bg-gc-iron px-3 py-2"
             >
               <div
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
@@ -154,7 +154,7 @@ export default function CommitteeScheduleEditor({
       </div>
 
       {/* ── Add member controls ── */}
-      <div className="rounded-xl border border-gc-crimson/20 bg-gc-crimson/5 p-3 space-y-2.5">
+      <div className="rounded border border-gc-crimson/20 bg-gc-crimson/5 p-3 space-y-2.5">
         <p className="text-[10px] font-bold uppercase tracking-widest text-gc-crimson">
           Add Member
         </p>
@@ -173,7 +173,7 @@ export default function CommitteeScheduleEditor({
 
         {/* Suggestions dropdown */}
         {search.trim() && suggestions.length > 0 && (
-          <div className="max-h-36 overflow-y-auto rounded-lg border border-gc-steel/50 bg-gc-iron divide-y divide-gc-steel/40">
+          <div className="max-h-36 overflow-y-auto rounded border border-gc-steel/50 bg-gc-iron divide-y divide-gc-steel/40">
             {suggestions.map((p) => (
               <button
                 key={p.id}

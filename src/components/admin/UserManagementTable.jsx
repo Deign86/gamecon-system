@@ -176,7 +176,7 @@ export default function UserManagementTable({
       </div>
 
       {/* ── Table ── */}
-      <div className="overflow-x-auto rounded-xl border border-gc-steel/40 bg-gc-slate/60">
+      <div className="overflow-x-auto rounded border border-gc-steel/40 bg-gc-slate/60">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="h-6 w-6 animate-spin text-gc-crimson" />
@@ -274,7 +274,7 @@ export default function UserManagementTable({
                         {/* Edit */}
                         <button
                           onClick={() => onEdit(u)}
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-crimson hover:bg-gc-crimson/10 transition-colors"
+                          className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-crimson hover:bg-gc-crimson/10 transition-colors"
                           title="Edit role / committee"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -285,7 +285,7 @@ export default function UserManagementTable({
                           onClick={() => onToggleActive(u)}
                           disabled={togglingUid === u.id}
                           className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
+                            "flex h-8 w-8 items-center justify-center rounded transition-colors",
                             u.active !== false
                               ? "text-gc-success hover:text-gc-danger hover:bg-gc-danger/10"
                               : "text-gc-danger hover:text-gc-success hover:bg-gc-success/10",
@@ -307,7 +307,7 @@ export default function UserManagementTable({
                           onClick={() => onSendReset(u)}
                           disabled={resetingUid === u.id}
                           className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-warning hover:bg-gc-warning/10 transition-colors",
+                            "flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-warning hover:bg-gc-warning/10 transition-colors",
                             resetingUid === u.id && "opacity-50 pointer-events-none"
                           )}
                           title="Send password reset email"
@@ -324,7 +324,7 @@ export default function UserManagementTable({
                           onClick={() => onDelete(u)}
                           disabled={deletingUid === u.id}
                           className={cn(
-                            "flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-danger hover:bg-gc-danger/10 transition-colors",
+                            "flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-danger hover:bg-gc-danger/10 transition-colors",
                             deletingUid === u.id && "opacity-50 pointer-events-none"
                           )}
                           title="Delete account"
@@ -356,7 +356,7 @@ export default function UserManagementTable({
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg border border-gc-steel/40 transition-colors",
+                "flex h-8 w-8 items-center justify-center rounded border border-gc-steel/40 transition-colors",
                 page === 0
                   ? "opacity-30 cursor-not-allowed"
                   : "hover:bg-gc-iron/60 hover:border-gc-mist/40"
@@ -368,7 +368,7 @@ export default function UserManagementTable({
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
               className={cn(
-                "flex h-8 w-8 items-center justify-center rounded-lg border border-gc-steel/40 transition-colors",
+                "flex h-8 w-8 items-center justify-center rounded border border-gc-steel/40 transition-colors",
                 page >= totalPages - 1
                   ? "opacity-30 cursor-not-allowed"
                   : "hover:bg-gc-iron/60 hover:border-gc-mist/40"

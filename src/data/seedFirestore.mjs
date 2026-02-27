@@ -11,6 +11,7 @@
 
 import { initializeApp } from "firebase/app";
 import { getFirestore, doc, setDoc, collection } from "firebase/firestore";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -46,20 +47,30 @@ if (!firebaseConfig.projectId) {
 
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
+const auth = getAuth(app);
+
+// Authenticate — set SEED_EMAIL & SEED_PASSWORD in .env (admin account)
+const seedEmail = envVars.SEED_EMAIL;
+const seedPassword = envVars.SEED_PASSWORD;
+if (!seedEmail || !seedPassword) {
+  console.error("❌ Missing SEED_EMAIL or SEED_PASSWORD in .env (use an admin account)");
+  process.exit(1);
+}
 
 // ── Zone data ──
 const ZONES = [
   { id: "ticketing",     name: "Ticketing",       order: 1,  committee: "ticketing",        currentCount: 0, peakCount: 0 },
-  { id: "rcy",           name: "RCY Committee",   order: 2,  committee: "proctors",         currentCount: 0, peakCount: 0 },
-  { id: "esports-1",     name: "Esports Area 1",  order: 3,  committee: "esports",          currentCount: 0, peakCount: 0 },
-  { id: "esports-2",     name: "Esports Area 2",  order: 4,  committee: "esports",          currentCount: 0, peakCount: 0 },
-  { id: "esports-3",     name: "Esports Area 3",  order: 5,  committee: "esports",          currentCount: 0, peakCount: 0 },
-  { id: "holding",       name: "Holding Area",    order: 6,  committee: "guest-relations",  currentCount: 0, peakCount: 0 },
-  { id: "play-prof",     name: "Play w/ Prof",    order: 7,  committee: "proctors",         currentCount: 0, peakCount: 0 },
-  { id: "ttrpg",         name: "TTRPG Zone",      order: 8,  committee: "proctors",         currentCount: 0, peakCount: 0 },
-  { id: "gallery",       name: "Gallery / Booth", order: 9,  committee: "exhibitors",       currentCount: 0, peakCount: 0 },
-  { id: "voting",        name: "Voting Station",  order: 10, committee: "voting",           currentCount: 0, peakCount: 0 },
-  { id: "photobackdrop", name: "Photo Backdrop",  order: 11, committee: "documentation",    currentCount: 0, peakCount: 0 },
+  { id: "rcy",              name: "RCY",              order: 2,  committee: "proctors",         currentCount: 0, peakCount: 0 },
+  { id: "committee-area",  name: "Committee Area",    order: 3,  committee: null,               currentCount: 0, peakCount: 0 },
+  { id: "esports-1",     name: "Esports Area 1",  order: 4,  committee: "esports",          currentCount: 0, peakCount: 0 },
+  { id: "esports-2",     name: "Esports Area 2",  order: 5,  committee: "esports",          currentCount: 0, peakCount: 0 },
+  { id: "esports-3",     name: "Esports Area 3",  order: 6,  committee: "esports",          currentCount: 0, peakCount: 0 },
+  { id: "holding",       name: "Holding Area",    order: 7,  committee: "guest-relations",  currentCount: 0, peakCount: 0 },
+  { id: "play-prof",     name: "Play w/ Prof",    order: 8,  committee: "proctors",         currentCount: 0, peakCount: 0 },
+  { id: "ttrpg",         name: "TTRPG Zone",      order: 9,  committee: "proctors",         currentCount: 0, peakCount: 0 },
+  { id: "gallery",       name: "Exhibitor Area", order: 10, committee: "exhibitors",       currentCount: 0, peakCount: 0 },
+  { id: "voting",        name: "Voting Area",    order: 11, committee: "voting",           currentCount: 0, peakCount: 0 },
+  { id: "photobackdrop", name: "Photo Backdrop",  order: 12, committee: "documentation",    currentCount: 0, peakCount: 0 },
 ];
 
 // ── Committee data ──
@@ -80,6 +91,11 @@ const COMMITTEES = [
 
 async function seed() {
   console.log("🎮 Seeding IT GameCon 2026 data…\n");
+
+  // Sign in as admin
+  console.log("  🔑 Signing in…");
+  await signInWithEmailAndPassword(auth, seedEmail, seedPassword);
+  console.log("  ✅ Authenticated\n");
 
   // Seed zones
   for (const zone of ZONES) {

@@ -127,7 +127,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
 
           {/* Sheet */}
           <motion.div
-            className="relative z-10 w-full max-w-md rounded-2xl border border-gc-steel/50 bg-gc-void shadow-2xl"
+            className="relative z-10 w-full max-w-md rounded-md border border-gc-steel/50 bg-gc-void shadow-2xl"
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
@@ -136,7 +136,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
             {/* Header */}
             <div className="flex items-center justify-between border-b border-gc-steel/40 px-5 py-4">
               <div>
-                <p className="font-display text-sm font-bold tracking-widest text-gc-mist uppercase">
+                <p className="font-display text-sm font-bold tracking-[0.2em] text-gc-mist uppercase">
                   {existing ? "Edit Contribution" : "Log Contribution"}
                 </p>
                 <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-gc-hint">
@@ -145,7 +145,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
                     {targetUser?.name || "—"}
                   </span>
                   <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    className="rounded px-2 py-0.5 text-[10px] font-bold"
                     style={{
                       background: `${committeeColor}18`,
                       color: committeeColor,
@@ -159,7 +159,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 text-gc-mist transition-colors hover:bg-gc-steel/20 hover:text-gc-cloud"
+                className="rounded p-1.5 text-gc-mist transition-colors hover:bg-gc-steel/20 hover:text-gc-cloud"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -201,7 +201,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
                 <button
                   type="button"
                   onClick={onClose}
-                  className="flex-1 rounded-lg border border-gc-steel/50 px-4 py-2.5 text-sm font-semibold text-gc-mist transition-colors hover:bg-gc-steel/20"
+                  className="flex-1 rounded border border-gc-steel/50 px-4 py-2.5 text-sm font-semibold text-gc-mist transition-colors hover:bg-gc-steel/20"
                 >
                   Cancel
                 </button>
@@ -209,7 +209,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
                   type="submit"
                   disabled={busy || !task.trim()}
                   className={cn(
-                    "flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition-all",
+                    "flex flex-1 items-center justify-center gap-2 rounded px-4 py-2.5 text-sm font-bold transition-all",
                     done
                       ? "bg-gc-success/80 text-white"
                       : "gc-btn-primary"

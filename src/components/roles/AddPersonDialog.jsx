@@ -79,7 +79,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
         </div>
 
         {/* Optional initial assignment */}
-        <div className="rounded-xl border border-gc-steel/50 bg-gc-iron p-3 space-y-3">
+        <div className="rounded border border-gc-steel/50 bg-gc-iron p-3 space-y-3">
           <p className="text-[10px] font-bold uppercase tracking-widest text-gc-mist">
             Initial Assignment <span className="text-gc-hint">(optional)</span>
           </p>
@@ -105,7 +105,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
               type="button"
               onClick={() => setDay("")}
               className={cn(
-                "rounded-lg px-3 py-1.5 text-[10px] font-bold border transition-all duration-200",
+                "rounded px-3 py-1.5 text-[10px] font-bold border transition-all duration-200",
                 !day
                   ? "bg-gc-steel/30 text-gc-cloud border-gc-steel/50"
                   : "bg-gc-iron text-gc-mist border-gc-steel/50 hover:text-gc-cloud"
@@ -119,7 +119,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
                 type="button"
                 onClick={() => setDay(d)}
                 className={cn(
-                  "rounded-lg px-3 py-1.5 text-[10px] font-bold border transition-all duration-200",
+                  "rounded px-3 py-1.5 text-[10px] font-bold border transition-all duration-200",
                   day === d
                     ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
                     : "bg-gc-iron text-gc-mist border-gc-steel/50 hover:text-gc-cloud"
@@ -136,7 +136,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
           <motion.p
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-gc-danger bg-gc-danger/10 border border-gc-danger/20 rounded-lg px-3 py-2"
+            className="text-xs text-gc-danger bg-gc-danger/10 border border-gc-danger/20 rounded px-3 py-2"
           >
             {error}
           </motion.p>

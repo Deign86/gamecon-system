@@ -35,7 +35,7 @@ function SourceBadge({ source }) {
   };
   const s = map[source] || map.manual;
   return (
-    <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest", s.cls)}>
+    <span className={cn("inline-flex items-center rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest", s.cls)}>
       {s.label}
     </span>
   );
@@ -91,7 +91,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 20 }}
       transition={{ type: "spring", damping: 26, stiffness: 320 }}
-      className="rounded-xl border border-gc-steel/50 bg-gc-night/95 backdrop-blur-md p-4 space-y-4 shadow-xl shadow-black/40"
+      className="rounded border border-gc-steel/50 bg-gc-night/95 backdrop-blur-md p-4 space-y-4 shadow-xl shadow-black/40"
     >
       {/* ── Header ── */}
       <div className="flex items-center gap-3">
@@ -107,7 +107,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="truncate font-display text-lg font-bold tracking-wide text-gc-white">
+          <p className="truncate font-display text-lg font-bold tracking-wider text-gc-white">
             {person.name}
           </p>
           <div className="flex items-center gap-2 mt-0.5">
@@ -120,7 +120,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
 
         <button
           onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
@@ -146,7 +146,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.85 }}
-              className="flex items-center gap-2 rounded-lg border border-gc-steel/50 bg-gc-iron px-3 py-2"
+              className="flex items-center gap-2 rounded border border-gc-steel/50 bg-gc-iron px-3 py-2"
             >
               <span
                 className="h-2.5 w-2.5 rounded-full shrink-0"
@@ -157,7 +157,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
               </span>
               <span
                 className={cn(
-                  "inline-flex items-center rounded-full border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider",
+                  "inline-flex items-center rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider",
                   DAY_COLORS[a.day] || "bg-gc-steel/30 text-gc-mist border-gc-steel/30"
                 )}
               >
@@ -193,7 +193,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="space-y-2 overflow-hidden rounded-lg border border-gc-crimson/20 bg-gc-crimson/5 p-3"
+          className="space-y-2 overflow-hidden rounded border border-gc-crimson/20 bg-gc-crimson/5 p-3"
           onAnimationComplete={() => setAddError(null)}
         >
           <p className="text-[10px] font-bold uppercase tracking-widest text-gc-crimson">
@@ -221,7 +221,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
                 key={d}
                 onClick={() => { setNewDay(d); setAddError(null); }}
                 className={cn(
-                  "flex-1 rounded-lg px-2 py-1.5 text-[10px] font-bold border transition-all duration-200",
+                  "flex-1 rounded px-2 py-1.5 text-[10px] font-bold border transition-all duration-200",
                   newDay === d
                     ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
                     : "bg-gc-iron text-gc-mist border-gc-steel/50 hover:text-gc-cloud"
@@ -237,7 +237,7 @@ export default function PersonRolesEditor({ person, userId, onClose }) {
             <motion.div
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-lg border border-gc-warning/30 bg-gc-warning/10 px-3 py-2 text-[11px] leading-snug text-gc-warning"
+              className="rounded border border-gc-warning/30 bg-gc-warning/10 px-3 py-2 text-[11px] leading-snug text-gc-warning"
             >
               {addError}
             </motion.div>

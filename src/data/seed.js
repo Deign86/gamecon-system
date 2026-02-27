@@ -2,16 +2,17 @@
 
 export const ZONES = [
   { id: "ticketing",    name: "Ticketing",          order: 1,  committee: "ticketing" },
-  { id: "rcy",          name: "RCY Committee",      order: 2,  committee: "proctors" },
-  { id: "esports-1",    name: "Esports Area 1",     order: 3,  committee: "esports" },
-  { id: "esports-2",    name: "Esports Area 2",     order: 4,  committee: "esports" },
-  { id: "esports-3",    name: "Esports Area 3",     order: 5,  committee: "esports" },
-  { id: "holding",      name: "Holding Area",       order: 6,  committee: "guest-relations" },
-  { id: "play-prof",    name: "Play w/ Prof",       order: 7,  committee: "proctors" },
-  { id: "ttrpg",        name: "TTRPG Zone",         order: 8,  committee: "proctors" },
-  { id: "gallery",      name: "Gallery / Booth",    order: 9,  committee: "exhibitors" },
-  { id: "voting",       name: "Voting Station",     order: 10, committee: "voting" },
-  { id: "photobackdrop",name: "Photo Backdrop",     order: 11, committee: "documentation" },
+  { id: "rcy",             name: "RCY",                order: 2,  committee: "proctors" },
+  { id: "committee-area",  name: "Committee Area",     order: 3,  committee: null },
+  { id: "esports-1",    name: "Esports Area 1",     order: 4,  committee: "esports" },
+  { id: "esports-2",    name: "Esports Area 2",     order: 5,  committee: "esports" },
+  { id: "esports-3",    name: "Esports Area 3",     order: 6,  committee: "esports" },
+  { id: "holding",      name: "Holding Area",       order: 7,  committee: "guest-relations" },
+  { id: "play-prof",    name: "Play w/ Prof",       order: 8,  committee: "proctors" },
+  { id: "ttrpg",        name: "TTRPG Zone",         order: 9,  committee: "proctors" },
+  { id: "gallery",      name: "Exhibitor Area",     order: 10, committee: "exhibitors" },
+  { id: "voting",       name: "Voting Area",        order: 11, committee: "voting" },
+  { id: "photobackdrop",name: "Photo Backdrop",     order: 12, committee: "documentation" },
 ];
 
 export const COMMITTEES = [

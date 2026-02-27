@@ -50,7 +50,7 @@ function DayPill({ day }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
+        "inline-flex items-center rounded border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider",
         colors[day] || "bg-gc-steel/30 text-gc-mist border-gc-steel/30"
       )}
     >
@@ -155,7 +155,7 @@ export default function RoleTasking() {
   if (!isAdmin) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron text-gc-mist">
+        <div className="flex h-16 w-16 items-center justify-center rounded-md bg-gc-iron text-gc-mist">
           <ClipboardList className="h-8 w-8" />
         </div>
         <p className="font-display text-xl font-bold text-gc-cloud">ACCESS RESTRICTED</p>
@@ -227,7 +227,7 @@ export default function RoleTasking() {
             key={key}
             onClick={() => setView(key)}
             className={cn(
-              "flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-all duration-200",
+              "flex items-center gap-1.5 rounded px-4 py-2 text-xs font-semibold transition-all duration-200",
               view === key
                 ? "bg-gc-crimson/15 text-gc-crimson border border-gc-crimson/30"
                 : "bg-gc-iron text-gc-mist border border-gc-steel/60 hover:text-gc-cloud hover:bg-gc-iron/80"
@@ -245,7 +245,7 @@ export default function RoleTasking() {
           variants={itemVariant}
           className="flex flex-col items-center gap-4 py-20 text-center"
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron text-gc-mist">
+          <div className="flex h-16 w-16 items-center justify-center rounded-md bg-gc-iron text-gc-mist">
             <ClipboardList className="h-8 w-8" />
           </div>
           <div>
@@ -311,11 +311,20 @@ export default function RoleTasking() {
                   variants={itemVariant}
                   className="gc-card overflow-hidden"
                 >
-                  <button
+                  {/* Use a div instead of button to avoid nested-button issues */}
+                  <div
                     onClick={() =>
                       setExpandedPerson(isExpanded ? null : person.name)
                     }
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setExpandedPerson(isExpanded ? null : person.name);
+                      }
+                    }}
                   >
                     {/* Avatar */}
                     <div
@@ -339,7 +348,7 @@ export default function RoleTasking() {
                         {person.assignments?.length || 0} assignment{(person.assignments?.length || 0) !== 1 ? "s" : ""}
                         {person.source && (
                           <span className={cn(
-                            "ml-1.5 inline-flex items-center rounded-full border px-1.5 py-px text-[8px] font-bold uppercase tracking-widest",
+                            "ml-1.5 inline-flex items-center rounded border px-1.5 py-px text-[8px] font-bold uppercase tracking-widest",
                             person.source === "excel"  ? "bg-blue-500/12 text-blue-400 border-blue-500/20" :
                             person.source === "mixed"  ? "bg-gc-warning/12 text-gc-warning border-gc-warning/20" :
                                                          "bg-gc-success/12 text-gc-success border-gc-success/20"
@@ -358,7 +367,7 @@ export default function RoleTasking() {
                           setEditingPerson(isEditing ? null : person.id);
                         }}
                         className={cn(
-                          "flex h-7 w-7 items-center justify-center rounded-lg transition-colors mr-1",
+                          "flex h-7 w-7 items-center justify-center rounded transition-colors mr-1",
                           isEditing
                             ? "bg-gc-crimson/20 text-gc-crimson"
                             : "text-gc-mist hover:text-gc-crimson hover:bg-gc-crimson/10"
@@ -374,11 +383,11 @@ export default function RoleTasking() {
                     ) : (
                       <ChevronRight className="h-4 w-4 text-gc-mist" />
                     )}
-                  </button>
+                  </div>
 
                   {/* ── Read-only assignment list ── */}
                   <AnimatePresence initial={false}>
-                    {isExpanded && !isEditing && (
+                    {isExpanded && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: "auto", opacity: 1 }}
@@ -480,7 +489,7 @@ export default function RoleTasking() {
                   key={d}
                   onClick={() => setSelectedDay(d)}
                   className={cn(
-                    "rounded-lg px-3.5 py-2 text-xs font-semibold border transition-all duration-200",
+                    "rounded px-3.5 py-2 text-xs font-semibold border transition-all duration-200",
                     selectedDay === d
                       ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
                       : "bg-gc-iron text-gc-mist border-gc-steel/60 hover:text-gc-cloud"
@@ -499,13 +508,13 @@ export default function RoleTasking() {
           >
             <div className="flex items-center gap-3 px-5 py-4">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
+                className="flex h-10 w-10 items-center justify-center rounded text-white"
                 style={{ background: committeeColor(selectedComm) }}
               >
                 <Users className="h-5 w-5" />
               </div>
               <div className="flex-1">
-                <h3 className="font-display text-lg font-bold tracking-wide text-gc-white">
+                <h3 className="font-display text-lg font-bold tracking-wider text-gc-white">
                   {selectedComm.toUpperCase()}
                 </h3>
                 <p className="text-xs text-gc-mist">
@@ -522,7 +531,7 @@ export default function RoleTasking() {
               <button
                 onClick={() => setEditingCommittee(!editingCommittee)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border transition-all duration-200",
+                  "flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-semibold border transition-all duration-200",
                   editingCommittee
                     ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
                     : "bg-gc-iron text-gc-mist border-gc-steel/60 hover:text-gc-cloud hover:bg-gc-iron/80"
@@ -543,7 +552,7 @@ export default function RoleTasking() {
                     <motion.div
                       key={name}
                       variants={itemVariant}
-                      className="flex items-center gap-3 rounded-xl border border-gc-steel/60 bg-gc-iron px-4 py-3"
+                      className="flex items-center gap-3 rounded border border-gc-steel/60 bg-gc-iron px-4 py-3"
                     >
                       <div
                         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"

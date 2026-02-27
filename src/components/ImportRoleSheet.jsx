@@ -95,7 +95,7 @@ export default function ImportRoleSheet({ onDone }) {
               onDragLeave={() => setDragOver(false)}
               onDrop={onDrop}
               className={cn(
-                "flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-10 cursor-pointer transition-all duration-300",
+                "flex flex-col items-center justify-center gap-3 rounded border-2 border-dashed p-10 cursor-pointer transition-all duration-300",
                 dragOver
                   ? "border-gc-crimson bg-gc-crimson/10 scale-[1.01]"
                   : "border-gc-steel/50 bg-gc-iron/30 hover:border-gc-crimson/50 hover:bg-gc-iron/50"
@@ -107,7 +107,7 @@ export default function ImportRoleSheet({ onDone }) {
                 onChange={onInputChange}
                 className="hidden"
               />
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gc-crimson/15 text-gc-crimson">
+              <div className="flex h-14 w-14 items-center justify-center rounded-md bg-gc-crimson/15 text-gc-crimson">
                 <Upload className="h-7 w-7" />
               </div>
               <div className="text-center">
@@ -124,7 +124,7 @@ export default function ImportRoleSheet({ onDone }) {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mt-3 flex items-start gap-2 rounded-lg border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
+                className="mt-3 flex items-start gap-2 rounded border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
               >
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <span>{error}</span>
@@ -157,7 +157,7 @@ export default function ImportRoleSheet({ onDone }) {
             className="space-y-4"
           >
             {/* File badge */}
-            <div className="flex items-center gap-3 rounded-lg border border-gc-steel/40 bg-gc-iron/40 px-4 py-3">
+            <div className="flex items-center gap-3 rounded border border-gc-steel/40 bg-gc-iron/40 px-4 py-3">
               <FileSpreadsheet className="h-5 w-5 text-gc-success" />
               <div className="flex-1 min-w-0">
                 <p className="truncate text-sm font-medium text-gc-cloud">
@@ -178,7 +178,7 @@ export default function ImportRoleSheet({ onDone }) {
               ].map(({ label, value, accent }) => (
                 <div
                   key={label}
-                  className="flex flex-col items-center gap-1 rounded-xl border border-gc-steel/30 bg-gc-slate p-3"
+                  className="flex flex-col items-center gap-1 rounded border border-gc-steel/30 bg-gc-slate p-3"
                 >
                   <span
                     className="font-display text-2xl font-bold"
@@ -194,7 +194,7 @@ export default function ImportRoleSheet({ onDone }) {
             </div>
 
             {/* Sample names */}
-            <div className="rounded-lg border border-gc-steel/30 bg-gc-iron/40 p-3">
+            <div className="rounded border border-gc-steel/30 bg-gc-iron/40 p-3">
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gc-mist">
                 Sample names
               </p>
@@ -202,13 +202,13 @@ export default function ImportRoleSheet({ onDone }) {
                 {parsed.personRoles.slice(0, 8).map((pr) => (
                   <span
                     key={pr.name}
-                    className="rounded-full bg-gc-steel/40 px-2.5 py-0.5 text-xs text-gc-cloud"
+                    className="rounded bg-gc-steel/40 px-2.5 py-0.5 text-xs text-gc-cloud"
                   >
                     {pr.name}
                   </span>
                 ))}
                 {parsed.personRoles.length > 8 && (
-                  <span className="rounded-full bg-gc-crimson/15 px-2.5 py-0.5 text-xs text-gc-crimson">
+                  <span className="rounded bg-gc-crimson/15 px-2.5 py-0.5 text-xs text-gc-crimson">
                     +{parsed.personRoles.length - 8} more
                   </span>
                 )}
@@ -250,7 +250,7 @@ export default function ImportRoleSheet({ onDone }) {
             exit={{ opacity: 0 }}
             className="flex flex-col items-center gap-4 py-8"
           >
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gc-success/15">
+            <div className="flex h-16 w-16 items-center justify-center rounded bg-gc-success/15">
               <CheckCircle2 className="h-8 w-8 text-gc-success" />
             </div>
             <div className="text-center">

@@ -78,7 +78,7 @@ export function ToastProvider({ children }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ type: "spring", damping: 25, stiffness: 350 }}
-                className={`pointer-events-auto flex items-center gap-3 rounded-xl border ${color.bg} ${color.border} px-4 py-3 shadow-lg shadow-black/30 backdrop-blur-sm w-full`}
+                className={`pointer-events-auto flex items-center gap-3 rounded border ${color.bg} ${color.border} px-4 py-3 shadow-lg shadow-black/40 backdrop-blur-sm w-full`}
               >
                 <Icon className={`h-4.5 w-4.5 shrink-0 ${color.icon}`} />
                 <span className={`text-sm font-body font-medium ${color.text} flex-1`}>
@@ -86,7 +86,7 @@ export function ToastProvider({ children }) {
                 </span>
                 <button
                   onClick={() => dismiss(t.id)}
-                  className="shrink-0 rounded-lg p-1 text-gc-mist hover:text-gc-white transition-colors"
+                  className="shrink-0 rounded p-1 text-gc-mist hover:text-gc-white transition-colors"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>

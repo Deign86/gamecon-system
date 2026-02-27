@@ -65,10 +65,14 @@ export default function LogsPanel() {
       variants={{ hidden: {}, show: { transition: { staggerChildren: 0.04 } } }}
     >
       <motion.div variants={fadeUp} className="mb-4">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="h-1.5 w-1.5 rounded-full bg-gc-crimson animate-pulse" />
+          <span className="text-[9px] font-mono text-gc-hint uppercase tracking-[0.2em]">SYS.LOG — LIVE FEED</span>
+        </div>
         <h2 className="font-display text-2xl font-bold tracking-wider text-gc-white">
           ACTIVITY <span className="text-gc-crimson">LOG</span>
         </h2>
-        <p className="text-xs text-gc-mist mt-0.5">
+        <p className="text-xs text-gc-mist mt-0.5 font-mono">
           All events across the system, most recent first.
         </p>
       </motion.div>
@@ -90,7 +94,7 @@ export default function LogsPanel() {
               className="gc-card flex items-center gap-3 p-3"
             >
               <div
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded"
                 style={{ background: bg, border: `1px solid ${color}25` }}
               >
                 <Icon className="h-4 w-4" style={{ color }} />
@@ -106,7 +110,7 @@ export default function LogsPanel() {
               </div>
 
               <span
-                className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                className="shrink-0 rounded px-2 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider"
                 style={{ background: bg, color, border: `1px solid ${color}25` }}
               >
                 {event.type}

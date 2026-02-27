@@ -20,38 +20,48 @@ export default function TopNav() {
   });
 
   return (
-    <header className="sticky top-0 z-40 gc-slash border-b border-gc-steel/50 backdrop-blur-xl bg-gc-void/80">
+    <header className="sticky top-0 z-40 border-b border-gc-steel/40 backdrop-blur-xl bg-gc-void/90">
+      {/* Top accent line */}
+      <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gc-crimson/60 to-transparent" />
+
       <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
         {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <GCLogo size={36} />
+          <GCLogo size={34} />
           <div className="leading-none">
-            <h1 className="font-display text-xl font-bold tracking-wide text-gc-white">
+            <h1 className="font-display text-xl font-bold tracking-wider text-gc-white">
               PLV <span className="text-gc-crimson">GAMECON</span>
             </h1>
-            <span className="block text-[10px] font-body font-medium tracking-widest text-gc-mist uppercase">
-              2026 OPS
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[9px] font-mono font-medium tracking-[0.2em] text-gc-mist uppercase">
+                OPS PANEL
+              </span>
+              <span className="text-gc-steel text-[8px]">│</span>
+              <span className="text-[8px] font-mono text-gc-hint tracking-wider">v2.0</span>
+            </div>
           </div>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           {/* Live clock */}
-          <div className="hidden sm:flex items-center gap-1.5 text-xs font-mono text-gc-mist">
-            <Clock className="h-3.5 w-3.5" />
+          <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-gc-mist border border-gc-steel/30 rounded px-2 py-1 bg-gc-void/50">
+            <Clock className="h-3 w-3 text-gc-crimson/70" />
             {timeStr}
           </div>
+
+          {/* Dot separator */}
+          <span className="hidden sm:block h-1 w-1 rounded-full bg-gc-steel" />
 
           {/* Sign out */}
           {profile && (
             <button
               onClick={signOut}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gc-crimson/15 border border-gc-crimson/30 px-3 py-1.5 text-xs font-bold font-display leading-none tracking-wide text-gc-crimson hover:bg-gc-crimson hover:text-white transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded bg-gc-crimson/10 border border-gc-crimson/25 px-2.5 py-1.5 text-[10px] font-bold font-display leading-none tracking-[0.15em] uppercase text-gc-crimson hover:bg-gc-crimson hover:text-white transition-colors"
               title="Sign out"
             >
-              <LogOut className="h-3.5 w-3.5" />
-              <span className="translate-y-[2px]">SIGN OUT</span>
+              <LogOut className="h-3 w-3" />
+              EXIT
             </button>
           )}
         </div>

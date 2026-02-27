@@ -64,7 +64,7 @@ export default function AdminResetPanel() {
       {/* Trigger button */}
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-xl border border-gc-danger/30 bg-gc-danger/8 px-4 py-3 text-sm font-semibold text-gc-danger transition-all hover:bg-gc-danger/15 hover:border-gc-danger/50 w-full"
+        className="flex items-center gap-2 rounded border border-gc-danger/30 bg-gc-danger/8 px-4 py-3 text-sm font-semibold text-gc-danger transition-all hover:bg-gc-danger/15 hover:border-gc-danger/50 w-full"
       >
         <Trash2 className="h-4 w-4" />
         Reset System Data
@@ -85,20 +85,20 @@ export default function AdminResetPanel() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.97 }}
               transition={{ type: "spring", damping: 28, stiffness: 350 }}
-              className="w-full max-w-md rounded-2xl border border-gc-danger/30 bg-gc-night shadow-2xl shadow-black/40 overflow-hidden"
+              className="w-full max-w-md rounded-md border border-gc-danger/30 bg-gc-night shadow-2xl shadow-black/40 overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between border-b border-gc-danger/20 bg-gc-danger/5 px-5 py-3.5">
                 <div className="flex items-center gap-2">
                   <ShieldAlert className="h-5 w-5 text-gc-danger" />
-                  <h2 className="font-display text-xl font-bold tracking-wide text-gc-danger">
+                  <h2 className="font-display text-xl font-bold tracking-wider text-gc-danger">
                     DANGER ZONE
                   </h2>
                 </div>
                 {status !== "loading" && (
                   <button
                     onClick={close}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+                    className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -117,7 +117,7 @@ export default function AdminResetPanel() {
                       exit={{ opacity: 0 }}
                       className="space-y-4"
                     >
-                      <div className="flex items-start gap-3 rounded-lg border border-gc-warning/30 bg-gc-warning/8 p-3">
+                      <div className="flex items-start gap-3 rounded border border-gc-warning/30 bg-gc-warning/8 p-3">
                         <AlertTriangle className="mt-0.5 h-5 w-5 text-gc-warning shrink-0" />
                         <div className="text-xs text-gc-cloud leading-relaxed">
                           <p className="font-semibold text-gc-warning mb-1">This will permanently delete:</p>
@@ -156,7 +156,7 @@ export default function AdminResetPanel() {
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex items-start gap-2 rounded-lg border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
+                          className="flex items-start gap-2 rounded border border-gc-danger/30 bg-gc-danger/10 p-3 text-sm text-gc-danger"
                         >
                           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                           <span>{error}</span>
@@ -210,7 +210,7 @@ export default function AdminResetPanel() {
                       exit={{ opacity: 0 }}
                       className="flex flex-col items-center gap-4 py-6"
                     >
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gc-success/15">
+                      <div className="flex h-14 w-14 items-center justify-center rounded bg-gc-success/15">
                         <CheckCircle2 className="h-7 w-7 text-gc-success" />
                       </div>
                       <div className="text-center">

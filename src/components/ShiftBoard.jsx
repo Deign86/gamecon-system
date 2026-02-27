@@ -284,7 +284,7 @@ export default function ShiftBoard() {
               key={block.id}
               onClick={() => setActiveBlock(block.id)}
               className={cn(
-                "shrink-0 rounded-lg px-3 py-2 text-xs font-semibold transition-all border",
+                "shrink-0 rounded px-3 py-2 text-xs font-semibold transition-all border",
                 isActive
                   ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
                   : "bg-gc-iron border-gc-steel/60 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"
@@ -300,7 +300,7 @@ export default function ShiftBoard() {
       </div>
 
       {/* ── Summary bar ── */}
-      <div className="flex items-center justify-between rounded-xl border border-gc-steel/60 bg-gc-iron px-4 py-2.5">
+      <div className="flex items-center justify-between rounded border border-gc-steel/60 bg-gc-iron px-4 py-2.5">
         <div className="flex items-center gap-4 text-xs font-body">
           <span className="flex items-center gap-1.5 text-gc-cloud">
             <Calendar className="h-3.5 w-3.5 text-gc-crimson" />

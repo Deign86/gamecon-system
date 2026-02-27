@@ -127,7 +127,7 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-gc-mist font-body text-sm gap-3">
         <ShieldAlert className="h-10 w-10 text-gc-crimson" />
-        <p className="font-display text-xl text-gc-crimson tracking-wide">ACCESS DENIED</p>
+        <p className="font-display text-xl text-gc-crimson tracking-wider">ACCESS DENIED</p>
         <p>You need admin privileges to view this page.</p>
       </div>
     );
@@ -147,20 +147,20 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
         {onBack && (
           <button
             onClick={onBack}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-gc-steel/40 text-gc-mist hover:text-gc-white hover:border-gc-mist/60 transition-colors"
+            className="flex h-9 w-9 items-center justify-center rounded border border-gc-steel/40 text-gc-mist hover:text-gc-white hover:border-gc-mist/60 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
         )}
         <div className="flex items-center gap-3">
           <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl"
+            className="flex h-10 w-10 items-center justify-center rounded"
             style={{ background: "linear-gradient(135deg, rgb(var(--gc-crimson)), rgb(var(--gc-scarlet)))" }}
           >
             <ShieldAlert className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="font-display text-2xl font-bold tracking-wide text-gc-white leading-none">
+            <h1 className="font-display text-2xl font-bold tracking-wider text-gc-white leading-none">
               USER ACCOUNTS
             </h1>
             <p className="text-xs font-body text-gc-mist mt-0.5">
@@ -205,7 +205,7 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
         title="Disable Account"
       >
         <div className="space-y-4 font-body text-sm">
-          <div className="flex items-start gap-3 rounded-lg border border-gc-danger/20 bg-gc-danger/8 p-4">
+          <div className="flex items-start gap-3 rounded border border-gc-danger/20 bg-gc-danger/8 p-4">
             <AlertCircle className="h-5 w-5 text-gc-danger shrink-0 mt-0.5" />
             <div>
               <p className="text-gc-cloud font-medium">
@@ -247,7 +247,7 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
         title="Delete Account"
       >
         <div className="space-y-4 font-body text-sm">
-          <div className="flex items-start gap-3 rounded-lg border border-gc-danger/20 bg-gc-danger/8 p-4">
+          <div className="flex items-start gap-3 rounded border border-gc-danger/20 bg-gc-danger/8 p-4">
             <AlertCircle className="h-5 w-5 text-gc-danger shrink-0 mt-0.5" />
             <div>
               <p className="text-gc-cloud font-medium">
@@ -291,7 +291,7 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               className={cn(
-                "pointer-events-auto flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-body font-medium shadow-2xl shadow-black/40 border backdrop-blur-md",
+                "pointer-events-auto flex items-center gap-2 rounded px-5 py-3 text-sm font-body font-medium shadow-2xl shadow-black/40 border backdrop-blur-md",
                 toast.type === "success"
                   ? "bg-gc-success/15 text-gc-success border-gc-success/25"
                   : "bg-gc-danger/15 text-gc-danger border-gc-danger/25"
