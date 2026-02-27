@@ -4,6 +4,7 @@
  */
 
 import { initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
@@ -32,11 +33,12 @@ const firebaseConfig = {
   appId:             envVars.VITE_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
 
 const API_KEY = envVars.VITE_FIREBASE_API_KEY;
-const SIGNUP_URL = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`;
+const SIGNUP_URL  = `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${API_KEY}`;
 
 const TEST_USERS = [
   {
@@ -66,7 +68,7 @@ const TEST_USERS = [
 ];
 
 async function createUser({ email, password, name, role, committee, contact }) {
-  // Create auth account via REST
+  // 1. Ensure the Auth account exists
   const res = await fetch(SIGNUP_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -77,15 +79,19 @@ async function createUser({ email, password, name, role, committee, contact }) {
 
   if (data.error) {
     if (data.error.message === "EMAIL_EXISTS") {
-      console.log(`  ⚠️  ${email} already exists — skipping auth creation`);
-      return null;
+      console.log(`  ⚠️  ${email} already exists in Auth — will upsert Firestore profile…`);
+    } else {
+      throw new Error(`Auth error for ${email}: ${data.error.message}`);
     }
-    throw new Error(`Auth error for ${email}: ${data.error.message}`);
+  } else {
+    console.log(`  ➕  Created Auth account for ${email}`);
   }
 
-  const uid = data.localId;
+  // 2. Sign in via the Firebase SDK so Firestore writes are authenticated
+  const cred = await signInWithEmailAndPassword(auth, email, password);
+  const uid  = cred.user.uid;
 
-  // Create Firestore profile
+  // 3. Upsert Firestore profile (merge preserves any existing fields)
   await setDoc(doc(db, "users", uid), {
     name,
     email,
@@ -93,9 +99,11 @@ async function createUser({ email, password, name, role, committee, contact }) {
     committee,
     contact,
     createdAt: serverTimestamp(),
-  });
+  }, { merge: true });
 
-  console.log(`  ✅ ${role.toUpperCase().padEnd(15)} ${email} (uid: ${uid})`);
+  await signOut(auth);
+
+  console.log(`  ✅  ${role.toUpperCase().padEnd(15)} ${email} (uid: ${uid})`);
   return uid;
 }
 
