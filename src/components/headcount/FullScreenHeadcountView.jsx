@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTotalHeadcount } from "../../hooks/useTotalHeadcount";
 import { AuthProvider } from "../../hooks/useAuth";
+import { ShieldAlert } from "lucide-react";
 
 /* ── Eye SVG icon ── */
 function EyeIcon({ className }) {
@@ -66,13 +67,36 @@ function ArrowLeftIcon({ className }) {
 /* ── Inner view ── */
 function HeadcountInner() {
   const navigate = useNavigate();
-  const { count, loading, incrementCount, decrementCount } = useTotalHeadcount();
+  const { count, loading, staffCount, atStaffFloor, incrementCount, decrementCount } = useTotalHeadcount();
   const [ripple, setRipple] = useState(0);
   const [direction, setDirection] = useState(null); // 'up' | 'down'
+  const [staffWarning, setStaffWarning] = useState(false);
+  const [shake, setShake] = useState(false);
   const holdRef = useRef(null);
   const repeatRef = useRef(null);
+  const warningTimer = useRef(null);
 
   const triggerRipple = useCallback(() => setRipple((r) => r + 1), []);
+
+  /* Show staff floor warning for 3 seconds then auto-dismiss */
+  const flashWarning = useCallback(() => {
+    setStaffWarning(true);
+    setShake(true);
+    setTimeout(() => setShake(false), 500);
+    clearTimeout(warningTimer.current);
+    warningTimer.current = setTimeout(() => setStaffWarning(false), 3000);
+  }, []);
+
+  /* Wrapped decrement that checks the return value */
+  const safeDecrement = useCallback(async () => {
+    const result = await decrementCount();
+    if (result === "staff-floor" || result === "blocked") {
+      flashWarning();
+      return;
+    }
+    setDirection("down");
+    triggerRipple();
+  }, [decrementCount, flashWarning, triggerRipple]);
 
   /* Keyboard support */
   useEffect(() => {
@@ -85,24 +109,21 @@ function HeadcountInner() {
       }
       if (e.key === "-" || e.key === "_" || e.key === "ArrowDown") {
         e.preventDefault();
-        decrementCount();
-        setDirection("down");
-        triggerRipple();
+        safeDecrement();
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [incrementCount, decrementCount, triggerRipple]);
+  }, [incrementCount, safeDecrement, triggerRipple]);
 
   /* Hold-to-repeat helpers */
   function startHold(action, dir) {
     action();
-    setDirection(dir);
-    triggerRipple();
+    if (dir === "up") { setDirection(dir); triggerRipple(); }
     holdRef.current = setTimeout(() => {
       repeatRef.current = setInterval(() => {
         action();
-        triggerRipple();
+        if (dir === "up") triggerRipple();
       }, 120);
     }, 400);
   }
@@ -188,36 +209,91 @@ function HeadcountInner() {
               opacity: 0.4,
               scale: 0.95,
             }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="font-display text-[8rem] sm:text-[12rem] lg:text-[16rem] leading-none tracking-tight text-gc-cloud"
+            animate={
+              shake
+                ? { x: [0, -12, 12, -8, 8, -4, 4, 0], y: 0, opacity: 1, scale: 1 }
+                : { y: 0, opacity: 1, scale: 1 }
+            }
+            transition={shake ? { duration: 0.5 } : { type: "spring", stiffness: 400, damping: 25 }}
+            className={`font-display text-[8rem] sm:text-[12rem] lg:text-[16rem] leading-none tracking-tight ${atStaffFloor ? "text-gc-warning" : "text-gc-cloud"}`}
             style={{
-              textShadow:
-                "0 0 60px rgba(200,16,46,0.15), 0 4px 12px rgba(0,0,0,0.5)",
+              textShadow: atStaffFloor
+                ? "0 0 60px rgba(234,179,8,0.2), 0 4px 12px rgba(0,0,0,0.5)"
+                : "0 0 60px rgba(200,16,46,0.15), 0 4px 12px rgba(0,0,0,0.5)",
             }}
           >
             {displayCount}
           </motion.div>
         </div>
 
-        {/* Label */}
-        <p className="font-mono text-xs sm:text-sm tracking-[0.3em] uppercase text-gc-mist/40">
-          Headcount
-        </p>
+        {/* Label — changes when at staff floor */}
+        <AnimatePresence mode="wait">
+          {atStaffFloor ? (
+            <motion.div
+              key="staff-floor-label"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              className="flex items-center gap-2 rounded-lg bg-gc-warning/10 border border-gc-warning/30 px-4 py-1.5"
+            >
+              <ShieldAlert className="h-4 w-4 text-gc-warning shrink-0" />
+              <p className="font-mono text-xs sm:text-sm tracking-wide uppercase text-gc-warning">
+                Staff Only — {staffCount} active
+              </p>
+            </motion.div>
+          ) : (
+            <motion.p
+              key="headcount-label"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="font-mono text-xs sm:text-sm tracking-[0.3em] uppercase text-gc-mist/40"
+            >
+              Headcount
+            </motion.p>
+          )}
+        </AnimatePresence>
       </div>
+
+      {/* Staff floor warning toast */}
+      <AnimatePresence>
+        {staffWarning && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 300, damping: 24 }}
+            className="absolute bottom-32 sm:bottom-36 z-30 mx-4 flex items-center gap-3 rounded-xl bg-gc-warning/15 border border-gc-warning/40 px-5 py-3 backdrop-blur-md shadow-[0_0_30px_rgba(234,179,8,0.15)]"
+          >
+            <ShieldAlert className="h-5 w-5 text-gc-warning shrink-0" />
+            <div>
+              <p className="font-display text-sm sm:text-base tracking-wide uppercase text-gc-warning">
+                Cannot go lower
+              </p>
+              <p className="font-body text-[11px] sm:text-xs text-gc-warning/70 mt-0.5">
+                Remaining headcount ({count}) accounts for {staffCount} active staff members
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Controls */}
       <div className="absolute bottom-10 sm:bottom-14 flex items-center gap-6 z-10">
         {/* Minus */}
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onMouseDown={() => startHold(decrementCount, "down")}
+          onMouseDown={() => startHold(safeDecrement, "down")}
           onMouseUp={stopHold}
           onMouseLeave={stopHold}
-          onTouchStart={() => startHold(decrementCount, "down")}
+          onTouchStart={() => startHold(safeDecrement, "down")}
           onTouchEnd={stopHold}
           disabled={count <= 0}
-          className="group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gc-iron/80 border border-gc-steel/60 text-gc-cloud backdrop-blur-sm transition-all hover:border-gc-crimson/40 hover:bg-gc-steel/60 disabled:opacity-20 disabled:cursor-not-allowed active:bg-gc-crimson/10"
+          className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl backdrop-blur-sm transition-all active:bg-gc-crimson/10 ${
+            atStaffFloor
+              ? "bg-gc-warning/10 border border-gc-warning/30 text-gc-warning/60 cursor-not-allowed"
+              : "bg-gc-iron/80 border border-gc-steel/60 text-gc-cloud hover:border-gc-crimson/40 hover:bg-gc-steel/60 disabled:opacity-20 disabled:cursor-not-allowed"
+          }`}
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="5" y1="12" x2="19" y2="12" />

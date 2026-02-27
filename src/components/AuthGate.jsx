@@ -4,6 +4,28 @@ import { LogIn, AlertCircle, Info } from "lucide-react";
 import { signIn } from "../hooks/useAuth";
 import GCLogo from "./GCLogo";
 
+const AUTH_ERROR_MESSAGES = {
+  "auth/invalid-credential":    "Incorrect email or password. Please try again.",
+  "auth/invalid-email":         "Please enter a valid email address.",
+  "auth/user-disabled":         "This account has been disabled. Contact your admin.",
+  "auth/user-not-found":        "No account found with this email.",
+  "auth/wrong-password":        "Incorrect password. Please try again.",
+  "auth/too-many-requests":     "Too many failed attempts. Please wait a moment and try again.",
+  "auth/network-request-failed":"Network error. Check your connection and try again.",
+  "auth/internal-error":        "An internal error occurred. Please try again later.",
+  "auth/missing-password":      "Please enter your password.",
+  "auth/missing-email":         "Please enter your email address.",
+};
+
+function getFriendlyAuthError(err) {
+  const code = err?.code || "";
+  if (AUTH_ERROR_MESSAGES[code]) return AUTH_ERROR_MESSAGES[code];
+  // Fallback: try to extract code from message
+  const match = err?.message?.match(/\(([^)]+)\)/);
+  if (match && AUTH_ERROR_MESSAGES[match[1]]) return AUTH_ERROR_MESSAGES[match[1]];
+  return "Something went wrong. Please try again.";
+}
+
 export default function AuthGate() {
   const [email, setEmail]   = useState("");
   const [pass, setPass]     = useState("");
@@ -17,7 +39,7 @@ export default function AuthGate() {
     try {
       await signIn(email, pass);
     } catch (err) {
-      setError(err.message?.replace("Firebase: ", "") || "Something went wrong");
+      setError(getFriendlyAuthError(err));
     } finally {
       setBusy(false);
     }

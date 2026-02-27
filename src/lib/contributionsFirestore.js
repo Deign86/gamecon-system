@@ -33,8 +33,13 @@ export function subscribeContributionsByUser(userId, callback) {
     where("userId", "==", userId),
     orderBy("createdAt", "desc")
   );
-  return onSnapshot(q, (snap) =>
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+  return onSnapshot(
+    q,
+    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    (err) => {
+      console.error("subscribeContributionsByUser error:", err);
+      callback([]);
+    }
   );
 }
 
@@ -44,8 +49,13 @@ export function subscribeAllContributions(callback) {
     collection(db, "contributions"),
     orderBy("createdAt", "desc")
   );
-  return onSnapshot(q, (snap) =>
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })))
+  return onSnapshot(
+    q,
+    (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+    (err) => {
+      console.error("subscribeAllContributions error:", err);
+      callback([]);
+    }
   );
 }
 
