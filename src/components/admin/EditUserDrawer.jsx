@@ -18,7 +18,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn, fmtDate } from "../../lib/utils";
-import { COMMITTEE_NAMES, DAY_SLOTS, APP_ROLES } from "../../lib/roleConfig";
+import { COMMITTEE_NAMES, DAY_SLOTS, APP_ROLES, normalizeCommitteeName, normalizeCommittees } from "../../lib/roleConfig";
 import { updateUserRoleAndCommittee } from "../../lib/adminApi";
 
 const ROLE_ICONS = {
@@ -54,15 +54,15 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
   const [newComm, setNewComm]       = useState(COMMITTEE_NAMES[0]);
   const [newDay, setNewDay]         = useState(DAY_SLOTS[0]);
 
-  /* Sync form state whenever user changes */
+  /* Sync form state whenever user changes — normalise committee names to canonical form */
   useEffect(() => {
     if (user) {
       setRole(user.role || "proctor");
       // Support both legacy single `committee` and new `committees` array
       if (Array.isArray(user.committees) && user.committees.length > 0) {
-        setCommittees(user.committees);
+        setCommittees(normalizeCommittees(user.committees));
       } else if (user.committee) {
-        setCommittees([{ committee: user.committee, day: "DAY1/2" }]);
+        setCommittees([{ committee: normalizeCommitteeName(user.committee), day: "DAY1/2" }]);
       } else {
         setCommittees([]);
       }
@@ -103,8 +103,11 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
     }
   };
 
+  const MAX_COMMITTEES = 3;
+
   /* helpers for committee pill management */
   const addCommitteeEntry = () => {
+    if (committees.length >= MAX_COMMITTEES) return;
     const pair = { committee: newComm, day: newDay };
     const dup = committees.some(
       (c) => c.committee === pair.committee && c.day === pair.day
@@ -120,12 +123,12 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
     setCommittees((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  /* Serialise for comparison */
+  /* Serialise for comparison — normalise so dirty-check matches loaded state */
   const origCommittees = user
     ? (Array.isArray(user.committees) && user.committees.length > 0
-        ? user.committees
+        ? normalizeCommittees(user.committees)
         : user.committee
-          ? [{ committee: user.committee, day: "DAY1/2" }]
+          ? [{ committee: normalizeCommitteeName(user.committee), day: "DAY1/2" }]
           : [])
     : [];
 
@@ -262,6 +265,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
               <div>
                 <label className="block text-[11px] font-body font-semibold uppercase tracking-wider text-gc-mist mb-2">
                   Committees
+                  <span className="ml-2 font-mono text-gc-mist/50 text-[10px]">{committees.length}/{MAX_COMMITTEES}</span>
                 </label>
 
                 {/* Existing assignment pills */}
@@ -330,7 +334,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                       Cancel
                     </button>
                   </div>
-                ) : (
+                ) : committees.length < MAX_COMMITTEES ? (
                   <button
                     onClick={() => setAddingComm(true)}
                     className="flex items-center gap-1.5 text-[10px] text-gc-mist hover:text-gc-crimson transition-colors"
@@ -338,6 +342,8 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                     <Plus className="h-3 w-3" />
                     Add committee assignment
                   </button>
+                ) : (
+                  <p className="text-[10px] text-gc-mist/40 italic">Maximum {MAX_COMMITTEES} committees reached.</p>
                 )}
               </div>
 

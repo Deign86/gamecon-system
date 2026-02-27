@@ -23,6 +23,77 @@ initializeApp();
 const VALID_ROLES = ["admin", "proctor", "head", "committee-head", "viewer"];
 const ROLE_RANK = { admin: 3, proctor: 2, head: 1, "committee-head": 1, viewer: 0 };
 
+/* ── Committee name normalisation ──
+ * Maps every known variant (slug IDs, short names, header variants)
+ * to the canonical COMMITTEE_MAP key from roleConfig.js.
+ */
+const CANONICAL_COMMITTEES = [
+  "Proctors", "Marketing", "Creatives", "Awards & Prizes",
+  "Documentation/Photographers", "Exhibitors", "Venue Designer & Management",
+  "Ticketing", "Voting", "Guest Relations Officers", "Technical Committee",
+  "E-Sport Organizers", "Esports Technical", "Shoutcaster",
+];
+
+const COMMITTEE_VARIANT_MAP = {
+  // slug IDs
+  "proctors":           "Proctors",
+  "marketing":          "Marketing",
+  "creatives":          "Creatives",
+  "awards-prizes":      "Awards & Prizes",
+  "documentation":      "Documentation/Photographers",
+  "exhibitors":         "Exhibitors",
+  "venue-design":       "Venue Designer & Management",
+  "ticketing":          "Ticketing",
+  "voting":             "Voting",
+  "guest-relations":    "Guest Relations Officers",
+  "technical":          "Technical Committee",
+  "esports":            "E-Sport Organizers",
+  "esports-technical":  "Esports Technical",
+  "shoutcaster":        "Shoutcaster",
+  // short display names (from seed data)
+  "venue design":            "Venue Designer & Management",
+  "guest relations":         "Guest Relations Officers",
+  // header / spreadsheet variants
+  "venue design & management":      "Venue Designer & Management",
+  "venue design and management":     "Venue Designer & Management",
+  "venue designer and management":   "Venue Designer & Management",
+  "venue designer & management":     "Venue Designer & Management",
+  "documentation/ photographers":    "Documentation/Photographers",
+  "documentation / photographers":   "Documentation/Photographers",
+  "documentation/photographers":     "Documentation/Photographers",
+  "e-sport organizers":              "E-Sport Organizers",
+  "e-sports organizers":             "E-Sport Organizers",
+  "technical committee":             "Technical Committee",
+  "esports technical":               "Esports Technical",
+  "e-sport game technicals":         "Esports Technical",
+};
+
+// Also add canonical names mapping to themselves (lowercase)
+for (const c of CANONICAL_COMMITTEES) {
+  COMMITTEE_VARIANT_MAP[c.toLowerCase()] = c;
+}
+
+function normalizeCommitteeName(raw) {
+  if (!raw || typeof raw !== "string") return raw;
+  const key = raw.trim().toLowerCase();
+  return COMMITTEE_VARIANT_MAP[key] || raw.trim();
+}
+
+function normalizeCommittees(arr) {
+  if (!Array.isArray(arr)) return arr;
+  const seen = new Set();
+  const result = [];
+  for (const entry of arr) {
+    const canonical = normalizeCommitteeName(entry.committee);
+    const k = `${canonical}::${entry.day}`;
+    if (!seen.has(k)) {
+      seen.add(k);
+      result.push({ committee: canonical, day: entry.day });
+    }
+  }
+  return result;
+}
+
 /* ── Input validation helpers ── */
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function assertString(val, name, maxLen = 500) {
@@ -45,13 +116,7 @@ async function assertAdmin(request) {
 }
 
 /* ── Shared options for all callable functions ── */
-const ALLOWED_ORIGINS = [
-  "https://playverse-ops.vercel.app",
-  "http://localhost:5173",
-  "http://localhost:4173",
-  "http://localhost:3000",
-];
-const callOpts = { cors: ALLOWED_ORIGINS };
+const callOpts = { cors: true };
 
 /* ─── Helper: generate a password that meets Firebase requirements ─── */
 function generatePassword(length = 16) {
@@ -117,9 +182,9 @@ exports.createUserAccount = onCall(callOpts, async (request) => {
   // Build committees array — support both legacy single field and new array
   let committees = [];
   if (Array.isArray(initCommittees) && initCommittees.length > 0) {
-    committees = initCommittees;
+    committees = normalizeCommittees(initCommittees);
   } else if (initialCommittee) {
-    committees = [{ committee: initialCommittee, day: "DAY1/2" }];
+    committees = [{ committee: normalizeCommitteeName(initialCommittee), day: "DAY1/2" }];
   }
 
   // 3. Create Firestore user doc
@@ -162,15 +227,16 @@ exports.updateUserRoleAndCommittee = onCall(callOpts, async (request) => {
 
   // 1. Update Firestore user doc
   const update = { role };
-  // Support new committees array
+  // Support new committees array — normalise names to canonical form
   if (Array.isArray(committees)) {
-    update.committees = committees;
+    update.committees = normalizeCommittees(committees);
     // Keep legacy field in sync (first committee name or null)
-    update.committee = committees.length > 0 ? committees[0].committee : null;
+    update.committee = update.committees.length > 0 ? update.committees[0].committee : null;
   } else if (committee !== undefined) {
     // Legacy single committee field
-    update.committee = committee || null;
-    update.committees = committee ? [{ committee, day: "DAY1/2" }] : [];
+    const normComm = committee ? normalizeCommitteeName(committee) : null;
+    update.committee = normComm;
+    update.committees = normComm ? [{ committee: normComm, day: "DAY1/2" }] : [];
   }
   if (typeof active === "boolean") update.active = active;
   update.updatedAt = FieldValue.serverTimestamp();
@@ -210,8 +276,9 @@ exports.setUserRole = onCall(callOpts, async (request) => {
 
   const update = { role };
   if (committee !== undefined) {
-    update.committee = committee;
-    update.committees = committee ? [{ committee, day: "DAY1/2" }] : [];
+    const normComm = committee ? normalizeCommitteeName(committee) : null;
+    update.committee = normComm;
+    update.committees = normComm ? [{ committee: normComm, day: "DAY1/2" }] : [];
   }
   await getFirestore().doc(`users/${uid}`).update(update);
   await getAuth().setCustomUserClaims(uid, { role });

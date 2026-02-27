@@ -9,7 +9,7 @@ import {
   Vote,
   DoorOpen,
   Hourglass,
-  Landmark,
+  BriefcaseMedical,
   MapPin,
 } from "lucide-react";
 
@@ -67,6 +67,6 @@ export function getZoneIcon(name = "") {
   if (n.includes("vote") || n.includes("voting"))   return Vote;
   if (n.includes("entrance") || n.includes("exit")) return DoorOpen;
   if (n.includes("holding"))                         return Hourglass;
-  if (n.includes("rcy"))                             return Landmark;
+  if (n.includes("rcy"))                             return BriefcaseMedical;
   return MapPin;
 }

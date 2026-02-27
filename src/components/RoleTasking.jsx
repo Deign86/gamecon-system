@@ -77,25 +77,14 @@ export default function RoleTasking() {
   const { user, profile } = useAuth();
   const isAdmin = profile?.role === "admin";
 
-  /* ── Admin gate — non-admins see nothing ── */
-  if (!isAdmin) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron/60 text-gc-mist">
-          <ClipboardList className="h-8 w-8" />
-        </div>
-        <p className="font-display text-xl font-bold text-gc-cloud">ACCESS RESTRICTED</p>
-        <p className="text-sm text-gc-mist">Only admins can view Role &amp; Tasking data.</p>
-      </div>
-    );
-  }
-
-  /* ── Firestore subscriptions ── */
+  /* ── Firestore subscriptions (hooks MUST be called unconditionally) ── */
   const [persons, setPersons]     = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading]     = useState(true);
 
   useEffect(() => {
+    if (!isAdmin) { setLoading(false); return; }
+
     let loaded = 0;
     const done = () => { if (++loaded >= 2) setLoading(false); };
 
@@ -110,7 +99,7 @@ export default function RoleTasking() {
     }, () => done());
 
     return () => { unsub1(); unsub2(); };
-  }, []);
+  }, [isAdmin]);
 
   /* ── tab state ── */
   const [view, setView] = useState("person"); // "person" | "committee"
@@ -161,6 +150,19 @@ export default function RoleTasking() {
 
     return { committee: selectedComm, day: selectedDay, members };
   }, [schedules, selectedComm, selectedDay]);
+
+  /* ── Admin gate — non-admins see nothing ── */
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gc-iron/60 text-gc-mist">
+          <ClipboardList className="h-8 w-8" />
+        </div>
+        <p className="font-display text-xl font-bold text-gc-cloud">ACCESS RESTRICTED</p>
+        <p className="text-sm text-gc-mist">Only admins can view Role &amp; Tasking data.</p>
+      </div>
+    );
+  }
 
   /* ── loading state ── */
   if (loading) {
@@ -307,7 +309,6 @@ export default function RoleTasking() {
                 <motion.div
                   key={person.name}
                   variants={itemVariant}
-                  layout
                   className="gc-card overflow-hidden"
                 >
                   <button

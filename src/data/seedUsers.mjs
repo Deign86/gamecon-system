@@ -46,7 +46,7 @@ const TEST_USERS = [
     password: "Admin@GC2026",
     name: "GC26 Admin",
     role: "admin",
-    committee: "technical",
+    committee: "Technical Committee",
     contact: "+63 912 345 6789",
   },
   // {

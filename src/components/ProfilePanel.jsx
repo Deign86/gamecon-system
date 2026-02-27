@@ -6,8 +6,17 @@ import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { useCollection } from "../hooks/useFirestore";
 import { COMMITTEES } from "../data/seed";
+import { normalizeCommitteeName } from "../lib/roleConfig";
 import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";
+
+/**
+ * Build a lookup: canonical committee name → seed COMMITTEES entry.
+ * Uses normalizeCommitteeName to map each seed slug to its canonical name.
+ */
+const SEED_BY_CANONICAL = Object.fromEntries(
+  COMMITTEES.map((c) => [normalizeCommitteeName(c.id), c])
+);
 import AdminResetPanel from "./AdminResetPanel";
 import { useTab } from "../App";
 
@@ -21,15 +30,15 @@ export default function ProfilePanel() {
   const { setTab } = useTab();
   const { docs: myContribs } = useCollection("contributions");
 
-  // Derive active committee IDs (support both new `committees` array and legacy `committee` string)
-  const myCommitteeIds = Array.isArray(profile?.committees) && profile.committees.length > 0
-    ? [...new Set(profile.committees.map((c) => c.committee || c))]
+  // Derive active canonical committee names (normalise slugs + legacy values)
+  const myCommitteeNames = Array.isArray(profile?.committees) && profile.committees.length > 0
+    ? [...new Set(profile.committees.map((c) => normalizeCommitteeName(c.committee || c)))]
     : profile?.committee
-      ? [profile.committee]
+      ? [normalizeCommitteeName(profile.committee)]
       : [];
 
-  const myCommittees = myCommitteeIds
-    .map((id) => COMMITTEES.find((c) => c.id === id))
+  const myCommittees = myCommitteeNames
+    .map((name) => SEED_BY_CANONICAL[name])
     .filter(Boolean);
 
   // For the avatar gradient, use first committee color
@@ -40,29 +49,28 @@ export default function ProfilePanel() {
 
   const MAX_COMMITTEES = 3;
 
-  async function handleCommitteeToggle(cid) {
+  async function handleCommitteeToggle(canonicalName) {
     if (!user || saving) return;
-    const isActive = myCommitteeIds.includes(cid);
-    if (!isActive && myCommitteeIds.length >= MAX_COMMITTEES) return;
+    const isActive = myCommitteeNames.includes(canonicalName);
+    if (!isActive && myCommitteeNames.length >= MAX_COMMITTEES) return;
     setSaving(true);
     try {
-      const isActive = myCommitteeIds.includes(cid);
-      let newIds;
+      let newNames;
       if (isActive) {
-        newIds = myCommitteeIds.filter((id) => id !== cid);
+        newNames = myCommitteeNames.filter((n) => n !== canonicalName);
       } else {
-        newIds = [...myCommitteeIds, cid];
+        newNames = [...myCommitteeNames, canonicalName];
       }
-      // Store as committees array of { committee, day } pairs (matches admin format)
-      const newCommittees = newIds.map((id) => ({ committee: id, day: "DAY1/2" }));
+      // Store canonical names as { committee, day } pairs (matches admin format)
+      const newCommittees = newNames.map((name) => ({ committee: name, day: "DAY1/2" }));
       await updateDoc(doc(db, "users", user.uid), {
         committees: newCommittees,
-        committee: newIds[0] || "",           // keep legacy field in sync
+        committee: newNames[0] || "",           // keep legacy field in sync
       });
       setProfile((prev) => ({
         ...prev,
         committees: newCommittees,
-        committee: newIds[0] || "",
+        committee: newNames[0] || "",
       }));
     } catch (e) {
       // silently handled — user sees loading state
@@ -132,7 +140,7 @@ export default function ProfilePanel() {
           <h3 className="font-display text-base font-bold tracking-wide text-gc-mist">
             MY COMMITTEES
           </h3>
-          <span className="ml-auto font-mono text-xs text-gc-mist">{myCommitteeIds.length}/{MAX_COMMITTEES}</span>
+          <span className="ml-auto font-mono text-xs text-gc-mist">{myCommitteeNames.length}/{MAX_COMMITTEES}</span>
         </div>
 
         {/* Currently selected pills */}
@@ -184,14 +192,15 @@ export default function ProfilePanel() {
             >
               <div className="mt-2 grid grid-cols-2 gap-1.5 max-h-[260px] overflow-y-auto pr-1">
                 {COMMITTEES.map((c) => {
-                  const active = myCommitteeIds.includes(c.id);
-                  const atMax = !active && myCommitteeIds.length >= MAX_COMMITTEES;
+                  const canonical = normalizeCommitteeName(c.id);
+                  const active = myCommitteeNames.includes(canonical);
+                  const atMax = !active && myCommitteeNames.length >= MAX_COMMITTEES;
                   return (
                     <button
                       key={c.id}
                       type="button"
                       disabled={saving || atMax}
-                      onClick={() => handleCommitteeToggle(c.id)}
+                      onClick={() => handleCommitteeToggle(canonical)}
                       className={cn(
                         "flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-all",
                         active
