@@ -145,12 +145,9 @@ export default function ShiftBoard() {
 
       const nameSet = new Set();
 
-      // Crowd Control draws candidates from Proctors & Technical by default
+      // Crowd Control draws candidates from ALL committees
       if (c.id === "crowd-control") {
-        const combined = schedules.filter(
-          (s) => s.committee === "Proctors" || s.committee === "Technical Committee"
-        );
-        for (const sched of combined) {
+        for (const sched of schedules) {
           for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
         }
       } else {
@@ -174,13 +171,12 @@ export default function ShiftBoard() {
       if (!roleName) { map[c.id] = []; continue; }
 
       const nameSet = new Set();
-      // Crowd Control suggested members come from Proctors & Technical schedules
+      // Crowd Control suggested members come from ALL committees for this day
       if (c.id === "crowd-control") {
-        const combined = schedules.filter(
-          (s) => (s.committee === "Proctors" || s.committee === "Technical Committee") &&
-                 (s.day === dayLabel || s.day === "DAY1/2")
+        const daySchedules = schedules.filter(
+          (s) => s.day === dayLabel || s.day === "DAY1/2"
         );
-        for (const sched of combined) {
+        for (const sched of daySchedules) {
           for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
         }
       } else {

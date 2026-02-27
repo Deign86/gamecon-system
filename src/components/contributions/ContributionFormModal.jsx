@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, CheckCircle } from "lucide-react";
-import { COMMITTEES } from "../../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../../data/seed";
 import { createContribution, updateContribution } from "../../lib/contributionsFirestore";
 import { logActivity } from "../../lib/auditLog";
 import { useAuth } from "../../hooks/useAuth";

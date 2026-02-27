@@ -31,6 +31,9 @@ export const COMMITTEES = [
   { id: "esports",         name: "Esports",           color: "#E31837" },
 ];
 
+/** Committees excluding shift-only entries (Crowd Control) — use in pickers, contributions, etc. */
+export const ROLE_COMMITTEES = COMMITTEES.filter((c) => c.id !== "crowd-control");
+
 /**
  * Required staff count per committee per shift block.
  * Derived from the Gamecon Crowd Control Plan — "Inside-Hall Staff Distribution"

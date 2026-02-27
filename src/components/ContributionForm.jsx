@@ -3,7 +3,7 @@ import { Send, CheckCircle } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
-import { COMMITTEES } from "../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../data/seed";
 import { fmtDate, cn } from "../lib/utils";
 
 export default function ContributionForm() {
