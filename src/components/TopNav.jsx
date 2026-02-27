@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Clock } from "lucide-react";
+import { Clock, LogOut } from "lucide-react";
 import { useAuth, signOut } from "../hooks/useAuth";
 import { cn } from "../lib/utils";
 import GCLogo from "./GCLogo";
@@ -43,22 +43,15 @@ export default function TopNav() {
             {timeStr}
           </div>
 
-          {/* User chip */}
+          {/* Sign out */}
           {profile && (
             <button
               onClick={signOut}
-              className="flex items-center gap-2 rounded-lg bg-gc-iron/60 px-3 py-1.5 text-xs font-medium text-gc-cloud hover:bg-gc-steel/60 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gc-crimson/15 border border-gc-crimson/30 px-3 py-1.5 text-xs font-bold font-display leading-none tracking-wide text-gc-crimson hover:bg-gc-crimson hover:text-white transition-colors"
               title="Sign out"
             >
-              <span
-                className="flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-bold text-white"
-                style={{ background: "linear-gradient(135deg, #C8102E, #E31837)" }}
-              >
-                {(profile.name || "U")[0].toUpperCase()}
-              </span>
-              <span className="hidden sm:inline max-w-[100px] truncate">
-                {profile.name || profile.email}
-              </span>
+              <LogOut className="h-3.5 w-3.5" />
+              <span className="translate-y-[1px]">SIGN OUT</span>
             </button>
           )}
         </div>
