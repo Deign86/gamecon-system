@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -38,6 +38,7 @@ const cardVariant = {
 
 export default function Dashboard() {
   const [activeModal, setActiveModal] = useState(null);
+  const closeModal = useCallback(() => setActiveModal(null), []);
 
   function openModal(key) {
     setActiveModal(key);
@@ -117,7 +118,7 @@ export default function Dashboard() {
       {/* Modals */}
       <Modal
         open={activeModal === "headcount"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         title="LIVE HEADCOUNT"
         wide
       >
@@ -126,7 +127,7 @@ export default function Dashboard() {
 
       <Modal
         open={activeModal === "shifts"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         title="SHIFT BOARD"
         wide
       >
@@ -135,7 +136,7 @@ export default function Dashboard() {
 
       <Modal
         open={activeModal === "contributions"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         title="CONTRIBUTIONS"
         wide
       >
@@ -144,7 +145,7 @@ export default function Dashboard() {
 
       <Modal
         open={activeModal === "budget"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         title="BUDGET MONITOR"
         wide
       >
@@ -153,7 +154,7 @@ export default function Dashboard() {
 
       <Modal
         open={activeModal === "incidents"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         title="INCIDENTS"
         wide
       >
@@ -162,7 +163,7 @@ export default function Dashboard() {
 
       <Modal
         open={activeModal === "committees"}
-        onClose={() => setActiveModal(null)}
+        onClose={closeModal}
         title="COMMITTEES"
         wide
       >

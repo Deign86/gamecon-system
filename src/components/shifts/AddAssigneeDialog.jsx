@@ -67,17 +67,17 @@ export default function AddAssigneeDialog({
     return { suggested: sug, others: oth };
   }, [allMembers, search, assignedSet, suggestedSet]);
 
-  if (!open) return null;
-
   return (
     <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm px-2 pb-2 sm:p-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={(e) => e.target === e.currentTarget && onClose()}
-      >
+      {open && (
+        <motion.div
+          key="add-assignee-overlay"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm px-2 pb-2 sm:p-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1, pointerEvents: "auto" }}
+          exit={{ opacity: 0, pointerEvents: "none" }}
+          onClick={(e) => e.target === e.currentTarget && onClose()}
+        >
         <motion.div
           className="w-full max-w-sm rounded-2xl border border-gc-steel/60 bg-gc-night shadow-2xl shadow-black/40 overflow-hidden"
           initial={{ opacity: 0, y: 40, scale: 0.97 }}
@@ -182,6 +182,7 @@ export default function AddAssigneeDialog({
           </div>
         </motion.div>
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }

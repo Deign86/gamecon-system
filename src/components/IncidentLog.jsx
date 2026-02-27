@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, Send, Shield, Clock, MapPin } from "lucide-react";
+import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { ZONES } from "../data/seed";
@@ -11,14 +11,34 @@ const SEVERITY = [
   { value: "high",   label: "High",   color: "gc-chip-red" },
 ];
 
+const CAN_RESOLVE = ["admin", "proctor", "head", "committee-head"];
+
 export default function IncidentLog() {
   const { user, profile } = useAuth();
-  const { docs: incidents, add } = useCollection("incidents");
+  const { docs: incidents, add, update } = useCollection("incidents");
   const [title, setTitle]     = useState("");
   const [zone, setZone]       = useState("");
   const [severity, setSeverity] = useState("low");
   const [details, setDetails] = useState("");
   const [busy, setBusy]       = useState(false);
+  const [resolving, setResolving] = useState(null);
+
+  const canResolve = CAN_RESOLVE.includes(profile?.role);
+
+  async function handleResolve(incId, newStatus) {
+    setResolving(incId);
+    try {
+      await update(incId, {
+        status: newStatus,
+        ...(newStatus === "resolved" && {
+          resolvedBy: user.uid,
+          resolvedByName: profile?.name || "Unknown",
+        }),
+      });
+    } finally {
+      setResolving(null);
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -133,13 +153,13 @@ export default function IncidentLog() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1 shrink-0">
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
                     <span className={cn(sev?.color || "gc-chip", "text-[10px]")}>
                       {inc.severity}
                     </span>
                     <span
                       className={cn(
-                        "text-[10px] font-semibold",
+                        "text-[10px] font-semibold uppercase tracking-wide",
                         inc.status === "open"     ? "text-gc-danger" :
                         inc.status === "resolved" ? "text-gc-success" :
                         "text-gc-warning"
@@ -147,8 +167,57 @@ export default function IncidentLog() {
                     >
                       {inc.status}
                     </span>
+
+                    {canResolve && inc.status === "open" && (
+                      <button
+                        onClick={() => handleResolve(inc.id, "resolved")}
+                        disabled={resolving === inc.id}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-md px-2 py-0.5",
+                          "text-[10px] font-bold uppercase tracking-wider",
+                          "bg-gc-success/10 text-gc-success border border-gc-success/20",
+                          "hover:bg-gc-success/20 transition-colors",
+                          "disabled:opacity-50 disabled:cursor-not-allowed"
+                        )}
+                      >
+                        {resolving === inc.id ? (
+                          <span className="h-3 w-3 rounded-full border-2 border-gc-success border-t-transparent animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-3 w-3" />
+                        )}
+                        Resolve
+                      </button>
+                    )}
+
+                    {canResolve && inc.status === "resolved" && (
+                      <button
+                        onClick={() => handleResolve(inc.id, "open")}
+                        disabled={resolving === inc.id}
+                        className={cn(
+                          "inline-flex items-center gap-1 rounded-md px-2 py-0.5",
+                          "text-[10px] font-bold uppercase tracking-wider",
+                          "bg-gc-warning/10 text-gc-warning border border-gc-warning/20",
+                          "hover:bg-gc-warning/20 transition-colors",
+                          "disabled:opacity-50 disabled:cursor-not-allowed"
+                        )}
+                      >
+                        {resolving === inc.id ? (
+                          <span className="h-3 w-3 rounded-full border-2 border-gc-warning border-t-transparent animate-spin" />
+                        ) : (
+                          <RotateCcw className="h-3 w-3" />
+                        )}
+                        Reopen
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                {inc.status === "resolved" && inc.resolvedByName && (
+                  <div className="mt-1.5 pt-1.5 border-t border-gc-steel/30 flex items-center gap-1 text-[10px] text-gc-success/60 font-mono">
+                    <CheckCircle className="h-3 w-3" />
+                    Resolved by {inc.resolvedByName}
+                  </div>
+                )}
               </div>
             );
           })}
