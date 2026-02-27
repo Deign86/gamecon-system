@@ -28,11 +28,12 @@ export async function requestFCMToken() {
       return null;
     }
 
-    // Register the service worker if not already done
-    const swRegistration = await navigator.serviceWorker.register(
+    // Register the service worker and wait until it is active
+    await navigator.serviceWorker.register(
       "/firebase-messaging-sw.js",
       { scope: "/" }
     );
+    const swRegistration = await navigator.serviceWorker.ready;
 
     // Request notification permission
     const permission = await Notification.requestPermission();

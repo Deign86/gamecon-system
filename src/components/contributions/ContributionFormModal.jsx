@@ -7,6 +7,44 @@ import { useAuth } from "../../hooks/useAuth";
 import { cn } from "../../lib/utils";
 
 /**
+ * Convert a canonical committee name ("Proctors", "Documentation/Photographers", …)
+ * or already-valid committee ID ("proctors", "documentation") to a seed.js ID.
+ */
+function resolveCommitteeId(name) {
+  if (!name) return "";
+  const n = name.toLowerCase().trim();
+  const byId   = COMMITTEES.find((c) => c.id === n);
+  if (byId) return byId.id;
+  const byName = COMMITTEES.find((c) => c.name.toLowerCase() === n);
+  if (byName) return byName.id;
+  const firstWord = n.split(/[\s/&,-]+/)[0];
+  const byFirst = COMMITTEES.find((c) =>
+    c.name.toLowerCase().startsWith(firstWord) || c.id.startsWith(firstWord)
+  );
+  return byFirst?.id || "";
+}
+
+/**
+ * Extract the default committee ID from a targetUser object.
+ * Supports both:
+ *   - roleAssignment shape: { assignments: [{committee: "Proctors", day}] }
+ *   - legacy users shape:   { committees: [{committee: "proctors", day}] | "proctors" }
+ */
+function defaultCommitteeFor(targetUser) {
+  if (!targetUser) return "";
+  // roleAssignments shape
+  if (Array.isArray(targetUser.assignments) && targetUser.assignments.length > 0) {
+    return resolveCommitteeId(targetUser.assignments[0]?.committee || "");
+  }
+  // users shape
+  if (Array.isArray(targetUser.committees) && targetUser.committees.length > 0) {
+    const first = targetUser.committees[0];
+    return resolveCommitteeId(typeof first === "string" ? first : first?.committee || "");
+  }
+  return resolveCommitteeId(targetUser.committee || "");
+}
+
+/**
  * ContributionFormModal
  *
  * Props:
@@ -18,29 +56,24 @@ import { cn } from "../../lib/utils";
 export default function ContributionFormModal({ open, onClose, targetUser, existing }) {
   const { user } = useAuth();
 
-  const defaultComm =
-    existing?.committee ||
-    (Array.isArray(targetUser?.committees) && targetUser.committees.length > 0
-      ? targetUser.committees[0]?.committee || targetUser.committees[0]
-      : "");
+  // Committee is derived from the person's imported assignments — not user-editable.
+  // For edits, preserve the already-stored committee value.
+  const committeeId = existing?.committee || defaultCommitteeFor(targetUser);
+  const committeeName = COMMITTEES.find((c) => c.id === committeeId)?.name
+    || (Array.isArray(targetUser?.assignments) && targetUser.assignments[0]?.committee)
+    || "General";
+  const committeeColor = COMMITTEES.find((c) => c.id === committeeId)?.color || "#64748B";
 
-  const [task, setTask]     = useState(existing?.task || "");
+  const [task, setTask]       = useState(existing?.task || "");
   const [details, setDetails] = useState(existing?.details || existing?.description || "");
-  const [comm, setComm]     = useState(defaultComm);
-  const [busy, setBusy]     = useState(false);
-  const [done, setDone]     = useState(false);
+  const [busy, setBusy]       = useState(false);
+  const [done, setDone]       = useState(false);
 
-  // Reset form when modal opens for a new entry
+  // Reset form when modal opens
   useEffect(() => {
     if (open) {
       setTask(existing?.task || "");
       setDetails(existing?.details || existing?.description || "");
-      setComm(
-        existing?.committee ||
-        (Array.isArray(targetUser?.committees) && targetUser.committees.length > 0
-          ? targetUser.committees[0]?.committee || targetUser.committees[0]
-          : "")
-      );
       setDone(false);
     }
   }, [open, existing, targetUser]);
@@ -54,13 +87,12 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
         await updateContribution(existing.id, {
           task: task.trim(),
           details: details.trim(),
-          committee: comm,
         });
       } else {
         await createContribution({
           userId:    targetUser.id,
           userName:  targetUser.name,
-          committee: comm,
+          committee: committeeId,
           task,
           details,
           loggedBy:  user.uid,
@@ -107,10 +139,20 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
                 <p className="font-display text-sm font-bold tracking-widest text-gc-mist uppercase">
                   {existing ? "Edit Contribution" : "Log Contribution"}
                 </p>
-                <p className="mt-0.5 text-xs text-gc-mist/60">
+                <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-gc-mist/60">
                   For{" "}
                   <span className="font-semibold text-gc-cloud">
                     {targetUser?.name || "—"}
+                  </span>
+                  <span
+                    className="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                    style={{
+                      background: `${committeeColor}18`,
+                      color: committeeColor,
+                      border: `1px solid ${committeeColor}30`,
+                    }}
+                  >
+                    {committeeName}
                   </span>
                 </p>
               </div>
@@ -139,25 +181,6 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
                   required
                   autoFocus
                 />
-              </div>
-
-              {/* Committee */}
-              <div>
-                <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gc-mist">
-                  Committee
-                </label>
-                <select
-                  value={comm}
-                  onChange={(e) => setComm(e.target.value)}
-                  className="gc-input"
-                >
-                  <option value="">General</option>
-                  {COMMITTEES.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
               </div>
 
               {/* Details */}

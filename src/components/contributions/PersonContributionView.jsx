@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Plus, Pencil, Trash2, Shield, UserRound, ChevronRight, ClipboardList } from "lucide-react";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "../../firebase";
 import { useAuth } from "../../hooks/useAuth";
 import { COMMITTEES } from "../../data/seed";
+import { subscribeRoleAssignments } from "../../lib/roleFirestore";
 import { fmtDate, initials, cn } from "../../lib/utils";
 import {
   subscribeContributionsByUser,
@@ -14,36 +13,56 @@ import ContributionFormModal from "./ContributionFormModal";
 
 const CAN_WRITE_ROLES = ["admin", "proctor", "head", "committee-head"];
 
+/**
+ * Map a canonical committee name (from roleAssignments, e.g. "Proctors",
+ * "Documentation/Photographers") to a seed.js committee ID ("proctors",
+ * "documentation"). Falls back to empty string if nothing matches.
+ */
+function committeeNameToId(name) {
+  if (!name) return "";
+  const n = name.toLowerCase().trim();
+  // 1. exact id
+  const byId = COMMITTEES.find((c) => c.id === n);
+  if (byId) return byId.id;
+  // 2. exact display name
+  const byName = COMMITTEES.find((c) => c.name.toLowerCase() === n);
+  if (byName) return byName.id;
+  // 3. first significant word (handles "Documentation/Photographers" → "documentation")
+  const firstWord = n.split(/[\s/&,-]+/)[0];
+  const byFirst = COMMITTEES.find((c) =>
+    c.name.toLowerCase().startsWith(firstWord) ||
+    c.id.startsWith(firstWord)
+  );
+  return byFirst?.id || "";
+}
+
 export default function PersonContributionView({ myEntriesOnly }) {
   const { user, profile } = useAuth();
   const canWrite = CAN_WRITE_ROLES.includes(profile?.role);
   const isAdmin  = profile?.role === "admin";
 
-  /* ── Users list ─────────────────────────────────────── */
-  const [allUsers, setAllUsers]       = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  /* ── Imported roster (roleAssignments) ─────────────── */
+  const [allPeople, setAllPeople]       = useState([]);
+  const [loadingPeople, setLoadingPeople] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, "users"), orderBy("name"));
-    return onSnapshot(q, (snap) => {
-      setAllUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-      setLoadingUsers(false);
+    const unsub = subscribeRoleAssignments((docs) => {
+      setAllPeople(docs);
+      setLoadingPeople(false);
     });
+    return unsub;
   }, []);
 
   /* ── Search / selection ─────────────────────────────── */
   const [search, setSearch]           = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const filteredUsers = useMemo(() => {
+  const filteredPeople = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return allUsers.filter(
-      (u) =>
-        !q ||
-        u.name?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q)
+    return allPeople.filter(
+      (p) => !q || p.name?.toLowerCase().includes(q)
     );
-  }, [allUsers, search]);
+  }, [allPeople, search]);
 
   /* ── Contributions for selected user ───────────────── */
   const [contribs, setContribs]       = useState([]);
@@ -83,6 +102,13 @@ export default function PersonContributionView({ myEntriesOnly }) {
   }
 
   /* ── Helpers ────────────────────────────────────────── */
+  function personCommitteeId(person) {
+    // roleAssignment persons have assignments[].committee = canonical name
+    const first = Array.isArray(person?.assignments) && person.assignments.length > 0
+      ? person.assignments[0]?.committee
+      : null;
+    return committeeNameToId(first || "");
+  }
   function committeeLabel(id) {
     return COMMITTEES.find((c) => c.id === id)?.name || "General";
   }
@@ -117,19 +143,22 @@ export default function PersonContributionView({ myEntriesOnly }) {
 
         {/* User list */}
         <div className="flex-1 space-y-1 overflow-y-auto max-h-[55vh] sm:max-h-[calc(100vh-280px)] pr-0.5">
-          {loadingUsers ? (
+          {loadingPeople ? (
             <div className="flex justify-center py-8">
               <span className="h-5 w-5 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
             </div>
-          ) : filteredUsers.length === 0 ? (
-            <p className="text-center text-sm text-gc-mist/50 py-6">No users found.</p>
+          ) : filteredPeople.length === 0 ? (
+            <p className="text-center text-sm text-gc-mist/50 py-6">
+              {allPeople.length === 0 ? "No roster imported yet." : "No match."}
+            </p>
           ) : (
-            filteredUsers.map((u) => {
-              const active = selectedUser?.id === u.id;
+            filteredPeople.map((p) => {
+              const active  = selectedUser?.id === p.id;
+              const commId  = personCommitteeId(p);
               return (
                 <button
-                  key={u.id}
-                  onClick={() => setSelectedUser(u)}
+                  key={p.id}
+                  onClick={() => setSelectedUser(p)}
                   className={cn(
                     "w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all",
                     active
@@ -141,20 +170,19 @@ export default function PersonContributionView({ myEntriesOnly }) {
                   <div
                     className="h-7 w-7 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-bold text-white"
                     style={{
-                      background: `linear-gradient(135deg, ${committeeColor(
-                        Array.isArray(u.committees) && u.committees.length > 0
-                          ? u.committees[0]?.committee || u.committees[0]
-                          : u.committee
-                      )}, #1a1a2e)`,
+                      background: `linear-gradient(135deg, ${committeeColor(commId)}, #1a1a2e)`,
                     }}
                   >
-                    {initials(u.name)}
+                    {initials(p.name)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn("text-sm font-semibold truncate", active && "text-white")}>
-                      {u.name}
+                      {p.name}
                     </p>
-                    <p className="text-[10px] font-mono text-gc-mist/50 truncate">{u.role}</p>
+                    {/* Show first committee assignment */}
+                    <p className="text-[10px] font-mono text-gc-mist/50 truncate">
+                      {p.assignments?.[0]?.committee || "—"}
+                    </p>
                   </div>
                   {active && (
                     <ChevronRight className="h-3.5 w-3.5 shrink-0 text-gc-crimson" />
@@ -189,11 +217,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
               <div
                 className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center text-sm font-bold text-white"
                 style={{
-                  background: `linear-gradient(135deg, ${committeeColor(
-                    Array.isArray(selectedUser.committees) && selectedUser.committees.length > 0
-                      ? selectedUser.committees[0]?.committee || selectedUser.committees[0]
-                      : selectedUser.committee
-                  )}, #1a1a2e)`,
+                  background: `linear-gradient(135deg, ${committeeColor(personCommitteeId(selectedUser))}, #1a1a2e)`,
                 }}
               >
                 {initials(selectedUser.name)}
@@ -203,7 +227,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                 <p className="text-sm font-bold text-gc-white truncate">{selectedUser.name}</p>
                 <p className="flex items-center gap-1 text-[10px] font-mono text-gc-mist/60">
                   <Shield className="h-2.5 w-2.5" />
-                  {selectedUser.role} · {displayedContribs.length} entr{displayedContribs.length === 1 ? "y" : "ies"}
+                  {selectedUser.assignments?.[0]?.committee || "—"} · {displayedContribs.length} entr{displayedContribs.length === 1 ? "y" : "ies"}
                 </p>
               </div>
 
