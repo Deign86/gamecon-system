@@ -84,6 +84,10 @@ export const COMMITTEE_MAP = {
     headers: ["Shoutcaster"],
     days: ["DAY1/2"],
   },
+  "Crowd Control": {
+    headers: ["Crowd Control", "CrowdControl", "Crowd_Control"],
+    days: ["DAY 1", "DAY 2"],
+  },
 };
 
 /** All canonical committee names in display order */
@@ -111,6 +115,8 @@ const SLUG_TO_CANONICAL = {
   "esports":         "E-Sport Organizers",
   "esports-technical": "Esports Technical",
   "shoutcaster":     "Shoutcaster",
+  "crowd-control":   "Crowd Control",
+  "crowd_control":   "Crowd Control",
 };
 
 /**

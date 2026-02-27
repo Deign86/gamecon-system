@@ -10,6 +10,7 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
+import { getShiftLimits } from "../../lib/shiftLimitsConfig";
 
 /**
  * A single committee row in the shift board.
@@ -20,6 +21,7 @@ import { cn, initials } from "../../lib/utils";
  *   isAdmin       – boolean
  *   currentUserId – uid of current user
  *   onAdd         – (committeeId) => void  — opens the add-assignee dialog
+ *   dayBlock      – string (e.g. "d2-morning") for day-block-aware limits
  *   onRemove      – (shiftId, userId, userName) => void
  */
 export default function ShiftCommitteeRow({
@@ -27,13 +29,19 @@ export default function ShiftCommitteeRow({
   shift,
   isAdmin,
   currentUserId,
+  dayBlock,
   onAdd,
   onRemove,
 }) {
   const [expanded, setExpanded] = useState(true);
   const assignees = shift?.assignees || [];
-  const required = shift?.requiredCount ?? 1;
-  const underStaffed = assignees.length < required;
+
+  // Resolve limits dynamically from config (overrides stale stored values)
+  const configLimits = getShiftLimits(committee.id, dayBlock);
+  const minRequired = configLimits?.min ?? shift?.minRequired ?? shift?.requiredCount ?? 1;
+  const maxAllowed = configLimits?.max ?? shift?.maxAllowed ?? shift?.requiredCount ?? Infinity;
+  const underStaffed = assignees.length < minRequired;
+  const isFull = assignees.length >= maxAllowed;
   const accentColor = committee.color || "#C8102E";
 
   return (
@@ -60,7 +68,7 @@ export default function ShiftCommitteeRow({
             {committee.name}
           </span>
           <span className="ml-2 text-xs text-gc-mist font-body">
-            {assignees.length}/{required}
+            {assignees.length}/{isFinite(maxAllowed) ? maxAllowed : "—"}
           </span>
         </div>
 
@@ -68,12 +76,22 @@ export default function ShiftCommitteeRow({
         {underStaffed ? (
           <span className="flex items-center gap-1 rounded bg-gc-danger/12 border border-gc-danger/25 px-2 py-0.5 text-[10px] font-bold text-gc-danger">
             <AlertCircle className="h-3 w-3" />
-            NEEDS {required - assignees.length}
+            NEEDS {Math.max(0, minRequired - assignees.length)}
           </span>
-        ) : (
+        ) : isFull ? (
           <span className="flex items-center gap-1 rounded bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
             <CheckCircle2 className="h-3 w-3" />
-            FILLED
+            FULL
+          </span>
+        ) : assignees.length === 0 && minRequired === 0 ? (
+          <span className="flex items-center gap-1 rounded bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
+            <CheckCircle2 className="h-3 w-3" />
+            OK
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 rounded bg-gc-warning/12 border border-gc-warning/25 px-2 py-0.5 text-[10px] font-bold text-gc-warning">
+            <AlertCircle className="h-3 w-3" />
+            OPEN
           </span>
         )}
 
@@ -161,10 +179,17 @@ export default function ShiftCommitteeRow({
               {isAdmin && (
                 <button
                   onClick={() => onAdd(committee.id)}
-                  className="mt-1 inline-flex items-center gap-1.5 rounded border border-dashed border-gc-steel bg-gc-iron px-3 py-1.5 text-xs font-body font-semibold text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5 transition-all"
+                  disabled={isFull}
+                  title={isFull ? `Max staff for this role reached (${maxAllowed})` : undefined}
+                  className={cn(
+                    "mt-1 inline-flex items-center gap-1.5 rounded border border-dashed px-3 py-1.5 text-xs font-body font-semibold transition-all",
+                    isFull
+                      ? "bg-gc-steel/30 border-gc-steel/30 text-gc-mist cursor-not-allowed"
+                      : "border-gc-steel bg-gc-iron text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5"
+                  )}
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  Add Member
+                  {isFull ? "Full" : "Add Member"}
                 </button>
               )}
             </div>

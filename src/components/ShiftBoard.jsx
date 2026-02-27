@@ -43,6 +43,7 @@ const COMMITTEE_ROLE_MAP = {
   creatives:       "Creatives",
   "awards-prizes": "Awards & Prizes",
   documentation:   "Documentation/Photographers",
+  "crowd-control": "Crowd Control",
   exhibitors:      "Exhibitors",
   "venue-design":  "Venue Designer & Management",
   ticketing:       "Ticketing",
@@ -142,14 +143,20 @@ export default function ShiftBoard() {
       const roleName = COMMITTEE_ROLE_MAP[c.id];
       if (!roleName) { map[c.id] = []; continue; }
 
-      // Collect ALL members across every day variant for this committee
       const nameSet = new Set();
-      const matchingSchedules = schedules.filter(
-        (s) => s.committee === roleName
-      );
-      for (const sched of matchingSchedules) {
-        for (const name of sched.members || []) {
-          if (name.trim()) nameSet.add(name.trim());
+
+      // Crowd Control draws candidates from Proctors & Technical by default
+      if (c.id === "crowd-control") {
+        const combined = schedules.filter(
+          (s) => s.committee === "Proctors" || s.committee === "Technical Committee"
+        );
+        for (const sched of combined) {
+          for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
+        }
+      } else {
+        const matchingSchedules = schedules.filter((s) => s.committee === roleName);
+        for (const sched of matchingSchedules) {
+          for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
         }
       }
 
@@ -166,17 +173,22 @@ export default function ShiftBoard() {
       const roleName = COMMITTEE_ROLE_MAP[c.id];
       if (!roleName) { map[c.id] = []; continue; }
 
-      // Find matching schedule(s) — DAY1/2 matches both days
-      const matchingSchedules = schedules.filter(
-        (s) =>
-          s.committee === roleName &&
-          (s.day === dayLabel || s.day === "DAY1/2")
-      );
-
       const nameSet = new Set();
-      for (const sched of matchingSchedules) {
-        for (const name of sched.members || []) {
-          if (name.trim()) nameSet.add(name.trim());
+      // Crowd Control suggested members come from Proctors & Technical schedules
+      if (c.id === "crowd-control") {
+        const combined = schedules.filter(
+          (s) => (s.committee === "Proctors" || s.committee === "Technical Committee") &&
+                 (s.day === dayLabel || s.day === "DAY1/2")
+        );
+        for (const sched of combined) {
+          for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
+        }
+      } else {
+        const matchingSchedules = schedules.filter(
+          (s) => s.committee === roleName && (s.day === dayLabel || s.day === "DAY1/2")
+        );
+        for (const sched of matchingSchedules) {
+          for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
         }
       }
 
@@ -251,7 +263,12 @@ export default function ShiftBoard() {
         });
         toast(`${member.name} added to ${comm.name}.`, "success");
       } catch (err) {
-        toast("Failed to add assignee.", "error");
+        // If backend rejects due to maxAllowed, surface a helpful toast
+        if (err?.message?.includes("Max staff")) {
+          toast(err.message.replace(/Max staff for /, ""), "error");
+        } else {
+          toast("Failed to add assignee.", "error");
+        }
       }
     },
     [addDialog.committeeId, displayBlock, user, toast]
@@ -286,7 +303,7 @@ export default function ShiftBoard() {
       const s = shiftMap[c.id];
       const count = s?.assignees?.length || 0;
       total += count;
-      if (count < (s?.requiredCount ?? 1)) under++;
+      if (count < (s?.minRequired ?? s?.requiredCount ?? 1)) under++;
     }
     // If no shifts exist yet, all committees are under-staffed
     if (shifts.length === 0) under = COMMITTEES.length;
@@ -322,6 +339,10 @@ export default function ShiftBoard() {
             </button>
           );
         })}
+      </div>
+      {/* Legend */}
+      <div className="text-xs text-gc-mist px-1">
+        Exhibitors: 1 per booth · Ticketing/Voting: 3–4 · Crowd Control: 12–24 · Documentation: 2–4 · Guest Relations: 4–6 · Marketing: 2 · Awards: up to 4
       </div>
 
       {/* ── Summary bar ── */}
@@ -409,6 +430,7 @@ export default function ShiftBoard() {
                 shift={shift}
                 isAdmin={isAdmin}
                 currentUserId={user?.uid}
+                dayBlock={displayBlock}
                 onAdd={openAddDialog}
                 onRemove={handleRemoveAssignee}
               />

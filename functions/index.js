@@ -13,10 +13,12 @@
  */
 
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const crypto = require("crypto");
+const { getShiftLimits } = require("./shiftLimitsConfig");
 
 initializeApp();
 
@@ -380,4 +382,67 @@ exports.deleteUser = onCall(callOpts, async (request) => {
 
   return { success: true };
 });
+
+/* ─────────────────────────────────────────────────────
+ *  validateCommitteeShiftLimits
+ *  Firestore trigger: committeeShifts/{docId}
+ *
+ *  Runs on every write to a committeeShifts document.
+ *  If the number of assignees exceeds the configured
+ *  maxAllowed for that committee, the write is rolled
+ *  back to the previous state (or deleted if new).
+ * ───────────────────────────────────────────────────── */
+exports.validateCommitteeShiftLimits = onDocumentWritten(
+  "committeeShifts/{docId}",
+  async (event) => {
+    const after = event.data?.after;
+    // Document was deleted — nothing to validate
+    if (!after || !after.exists) return;
+
+    const data = after.data();
+    const committeeId = data.committeeId;
+    const assignees = data.assignees || [];
+
+    // Resolve configured limit (day-block aware)
+    const dayBlock = data.dayBlock;
+    const limits = getShiftLimits(committeeId, dayBlock);
+
+    // If no limits configured for this committee, skip
+    if (!limits) return;
+
+    const maxAllowed = data.maxAllowed ?? limits.max;
+
+    if (assignees.length > maxAllowed) {
+      const before = event.data?.before;
+
+      if (before && before.exists) {
+        // Roll back to previous state
+        const prevData = before.data();
+        console.warn(
+          `[ShiftLimits] Reverting ${event.params.docId}: ` +
+          `${assignees.length} assignees exceeds max ${maxAllowed}. ` +
+          `Rolling back to ${(prevData.assignees || []).length} assignees.`
+        );
+        await after.ref.set(prevData);
+      } else {
+        // New document that already violates — trim assignees to maxAllowed
+        console.warn(
+          `[ShiftLimits] New doc ${event.params.docId} created with ` +
+          `${assignees.length} assignees, trimming to max ${maxAllowed}.`
+        );
+        await after.ref.update({
+          assignees: assignees.slice(0, maxAllowed),
+        });
+      }
+    }
+
+    // Ensure minRequired and maxAllowed fields are always present (use day-block-aware limits)
+    const updates = {};
+    if (data.minRequired == null) updates.minRequired = limits.min;
+    if (data.maxAllowed == null) updates.maxAllowed = limits.max;
+    if (Object.keys(updates).length > 0) {
+      await after.ref.update(updates);
+    }
+  }
+);
 

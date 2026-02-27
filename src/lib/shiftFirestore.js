@@ -25,6 +25,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { COMMITTEE_REQUIRED_STAFF } from "../data/seed";
+import { getShiftLimits } from "./shiftLimitsConfig";
 
 const COLLECTION = "committeeShifts";
 
@@ -87,12 +88,18 @@ export async function upsertCommitteeShift(shift, updatedByUid) {
   const docId = shiftDocId(shift.dayBlock, shift.committeeId);
   const ref = doc(db, COLLECTION, docId);
 
+  // Attach configured limits if available (day-block aware)
+  const limits = getShiftLimits(shift.committeeId, shift.dayBlock) || { min: shift.requiredCount ?? 1, max: shift.requiredCount ?? 1 };
+
   await setDoc(ref, {
     dayBlock: shift.dayBlock,
     committeeId: shift.committeeId,
     committeeName: shift.committeeName,
     assignees: shift.assignees || [],
-    requiredCount: shift.requiredCount ?? 1,
+    // backward-compatible field
+    requiredCount: shift.requiredCount ?? limits.min,
+    minRequired: limits.min,
+    maxAllowed: limits.max,
     updatedAt: serverTimestamp(),
     updatedBy: updatedByUid,
   });
@@ -122,13 +129,17 @@ export async function addAssigneeToShift(
     const snap = await txn.get(ref);
 
     if (!snap.exists()) {
-      // Create the document with this first assignee
+      // Create the document with this first assignee and attach limits (day-block aware)
+      const limits = getShiftLimits(committeeId, dayBlock) || { min: COMMITTEE_REQUIRED_STAFF[committeeId] ?? 1, max: COMMITTEE_REQUIRED_STAFF[committeeId] ?? 1 };
+
       txn.set(ref, {
         dayBlock,
         committeeId,
         committeeName,
         assignees: [user],
-        requiredCount: COMMITTEE_REQUIRED_STAFF[committeeId] ?? 1,
+        requiredCount: limits.min,
+        minRequired: limits.min,
+        maxAllowed: limits.max,
         updatedAt: serverTimestamp(),
         updatedBy: updatedByUid,
       });
@@ -139,6 +150,13 @@ export async function addAssigneeToShift(
         (a) => a.userId === user.userId
       );
       if (alreadyAssigned) return;
+
+      // Enforce maxAllowed if configured
+      const maxAllowed = data.maxAllowed ?? (COMMITTEE_REQUIRED_STAFF[committeeId] ?? Infinity);
+      const currentCount = (data.assignees || []).length;
+      if (currentCount >= maxAllowed) {
+        throw new Error(`Max staff for ${committeeId} reached (${maxAllowed})`);
+      }
 
       txn.update(ref, {
         assignees: [...(data.assignees || []), user],
@@ -191,17 +209,20 @@ export async function initialiseBlockShifts(dayBlock, committees, updatedByUid) 
 
   const promises = committees
     .filter((c) => !existingIds.has(c.id))
-    .map((c) =>
-      setDoc(doc(db, COLLECTION, shiftDocId(dayBlock, c.id)), {
+    .map((c) => {
+      const limits = getShiftLimits(c.id, dayBlock) || { min: COMMITTEE_REQUIRED_STAFF[c.id] ?? 1, max: COMMITTEE_REQUIRED_STAFF[c.id] ?? 1 };
+      return setDoc(doc(db, COLLECTION, shiftDocId(dayBlock, c.id)), {
         dayBlock,
         committeeId: c.id,
         committeeName: c.name,
         assignees: [],
-        requiredCount: COMMITTEE_REQUIRED_STAFF[c.id] ?? 1,
+        requiredCount: limits.min,
+        minRequired: limits.min,
+        maxAllowed: limits.max,
         updatedAt: serverTimestamp(),
         updatedBy: updatedByUid,
-      })
-    );
+      });
+    });
 
   await Promise.all(promises);
 }
