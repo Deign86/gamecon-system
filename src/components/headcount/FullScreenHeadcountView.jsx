@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTotalHeadcount } from "../../hooks/useTotalHeadcount";
-import { AuthProvider } from "../../hooks/useAuth";
+import { AuthProvider, useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { ShieldAlert } from "lucide-react";
 
@@ -68,6 +68,8 @@ function ArrowLeftIcon({ className }) {
 /* ── Inner view ── */
 function HeadcountInner() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
+  const isViewer = profile?.role === "viewer";
   const { count, loading, zonesTotal, atStaffFloor, incrementCount, decrementCount } = useTotalHeadcount();
   const [ripple, setRipple] = useState(0);
   const [direction, setDirection] = useState(null); // 'up' | 'down'
@@ -103,6 +105,7 @@ function HeadcountInner() {
 
   /* Keyboard support */
   useEffect(() => {
+    if (isViewer) return;
     function onKey(e) {
       if (e.key === "+" || e.key === "=" || e.key === "ArrowUp") {
         e.preventDefault();
@@ -117,10 +120,11 @@ function HeadcountInner() {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [incrementCount, safeDecrement, triggerRipple]);
+  }, [isViewer, incrementCount, safeDecrement, triggerRipple]);
 
   /* Hold-to-repeat helpers */
   function startHold(action, dir) {
+    if (isViewer) return;
     action();
     if (dir === "up") { setDirection(dir); triggerRipple(); }
     holdRef.current = setTimeout(() => {
@@ -298,11 +302,13 @@ function HeadcountInner() {
           onMouseLeave={stopHold}
           onTouchStart={() => startHold(safeDecrement, "down")}
           onTouchEnd={stopHold}
-          disabled={count <= 0}
+          disabled={isViewer || count <= 0}
           className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all active:bg-gc-crimson/10 ${
-            atStaffFloor
-              ? "bg-gc-warning/10 border border-gc-warning/30 text-gc-warning/60 cursor-not-allowed"
-              : "bg-gc-iron/80 border border-gc-steel/60 text-gc-cloud hover:border-gc-crimson/40 hover:bg-gc-steel/60 disabled:opacity-20 disabled:cursor-not-allowed"
+            isViewer
+              ? "bg-gc-iron/40 border border-gc-steel/30 text-gc-hint cursor-not-allowed opacity-30"
+              : atStaffFloor
+                ? "bg-gc-warning/10 border border-gc-warning/30 text-gc-warning/60 cursor-not-allowed"
+                : "bg-gc-iron/80 border border-gc-steel/60 text-gc-cloud hover:border-gc-crimson/40 hover:bg-gc-steel/60 disabled:opacity-20 disabled:cursor-not-allowed"
           }`}
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -318,7 +324,12 @@ function HeadcountInner() {
           onMouseLeave={stopHold}
           onTouchStart={() => startHold(incrementCount, "up")}
           onTouchEnd={stopHold}
-          className="group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md bg-gc-crimson/15 border border-gc-crimson/40 text-gc-crimson backdrop-blur-sm transition-all hover:bg-gc-crimson/25 hover:border-gc-crimson active:bg-gc-crimson/30"
+          disabled={isViewer}
+          className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all ${
+            isViewer
+              ? "bg-gc-iron/40 border border-gc-steel/30 text-gc-hint cursor-not-allowed opacity-30"
+              : "bg-gc-crimson/15 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/25 hover:border-gc-crimson active:bg-gc-crimson/30"
+          }`}
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" />

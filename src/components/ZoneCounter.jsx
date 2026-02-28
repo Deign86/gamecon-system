@@ -13,6 +13,7 @@ const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in 
 export default function ZoneCounter() {
   const { zones, incrementZone, decrementZone, loading } = useHeadcount();
   const { user, profile } = useAuth();
+  const isViewer = profile?.role === "viewer";
   const navigate = useNavigate();
   const [pulsing, setPulsing] = useState(null);
 
@@ -27,6 +28,7 @@ export default function ZoneCounter() {
   }, [navigate]);
 
   async function handleIncrement(zoneId) {
+    if (isViewer) return;
     setPulsing(zoneId);
     await incrementZone(zoneId, user?.uid);
     const zoneName = zones.find(z => z.id === zoneId)?.name || zoneId;
@@ -42,6 +44,7 @@ export default function ZoneCounter() {
   }
 
   async function handleDecrement(zoneId) {
+    if (isViewer) return;
     setPulsing(zoneId);
     await decrementZone(zoneId, user?.uid);
     const zoneName = zones.find(z => z.id === zoneId)?.name || zoneId;
@@ -125,7 +128,7 @@ export default function ZoneCounter() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleDecrement(zone.id)}
-                  disabled={count <= 0}
+                  disabled={isViewer || count <= 0}
                   className="flex h-9 w-9 items-center justify-center rounded bg-gc-iron border border-gc-steel text-gc-cloud hover:bg-gc-steel hover:border-gc-crimson/40 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
                 >
                   <Minus className="h-4 w-4" />
@@ -141,7 +144,8 @@ export default function ZoneCounter() {
 
                 <button
                   onClick={() => handleIncrement(zone.id)}
-                  className="flex h-9 w-9 items-center justify-center rounded bg-gc-crimson/20 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/30 hover:border-gc-crimson transition-all active:scale-90"
+                  disabled={isViewer}
+                  className="flex h-9 w-9 items-center justify-center rounded bg-gc-crimson/20 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/30 hover:border-gc-crimson transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Plus className="h-4 w-4" />
                 </button>

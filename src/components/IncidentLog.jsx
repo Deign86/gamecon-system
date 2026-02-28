@@ -17,6 +17,7 @@ const CAN_RESOLVE = ["admin", "proctor", "head", "committee-head"];
 
 export default function IncidentLog() {
   const { user, profile } = useAuth();
+  const isViewer = profile?.role === "viewer";
   const { docs: incidents, add, update } = useCollection("incidents");
   const [title, setTitle]     = useState("");
   const [zone, setZone]       = useState("");
@@ -53,7 +54,7 @@ export default function IncidentLog() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (isViewer || !title.trim()) return;
     setBusy(true);
     try {
       await add({
@@ -84,7 +85,8 @@ export default function IncidentLog() {
 
   return (
     <div className="space-y-5">
-      {/* Quick report form */}
+      {/* Quick report form — hidden for viewer role */}
+      {!isViewer && (
       <form onSubmit={handleSubmit} className="space-y-3 rounded bg-gc-danger/5 border border-gc-danger/15 p-4">
         <div className="flex items-center gap-2 mb-1">
           <AlertTriangle className="h-4 w-4 text-gc-danger" />
@@ -138,6 +140,7 @@ export default function IncidentLog() {
           )}
         </button>
       </form>
+      )}
 
       {/* Incident list */}
       <div>
