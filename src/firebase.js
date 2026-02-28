@@ -80,36 +80,38 @@ const isNativeApp =
   (typeof window !== "undefined" &&
     window.__TAURI_INTERNALS__ !== undefined);
 
-const recaptchaKey    = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY;
+const recaptchaKey     = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY;
 const nativeDebugToken = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN;
 
-if (isNativeApp) {
-  /* ─── Native (Capacitor / Tauri) ───
-   * reCAPTCHA Enterprise cannot execute inside Android System WebView or
-   * Edge WebView2.  Instead we use a static debug token that has been
-   * pre-registered in the Firebase Console.
-   *
-   * When FIREBASE_APPCHECK_DEBUG_TOKEN is set the SDK completely bypasses
-   * the provider you pass and exchanges the debug token directly — so the
-   * CustomProvider stub below is never actually called. */
-  const token = nativeDebugToken || (import.meta.env.DEV && true);
-  if (token) {
-    // eslint-disable-next-line no-restricted-globals
-    self.FIREBASE_APPCHECK_DEBUG_TOKEN = token;
-    initializeAppCheck(app, {
-      provider: new CustomProvider({
-        getToken: () =>
-          Promise.resolve({ token: "N/A", expireTimeMillis: 0 }),
-      }),
-      isTokenAutoRefreshEnabled: true,
-    });
-  }
-} else if (recaptchaKey) {
-  /* ─── Standard browser ─── */
+if (import.meta.env.DEV && !nativeDebugToken) {
+  /* ─── Development without a registered debug token ───
+   * Skip App Check entirely so unregistered debug-token exchanges
+   * don't cause 403 errors that cascade into auth failures.
+   * Cloud Functions should also have ENFORCE_APP_CHECK=false in dev. */
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-restricted-globals
-    self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+    console.info(
+      "[App Check] Skipped in development. Set VITE_APPCHECK_DEBUG_TOKEN " +
+      "in .env to enable (register the token in Firebase Console first)."
+    );
   }
+} else if (isNativeApp || nativeDebugToken) {
+  /* ─── Native (Capacitor / Tauri) or explicit debug token ───
+   * reCAPTCHA cannot run inside WebViews. Use a pre-registered
+   * debug token from Firebase Console → App Check → Manage debug tokens.
+   *
+   * When FIREBASE_APPCHECK_DEBUG_TOKEN is set, the SDK bypasses the
+   * provider and exchanges the debug token directly. */
+  // eslint-disable-next-line no-restricted-globals
+  self.FIREBASE_APPCHECK_DEBUG_TOKEN = nativeDebugToken;
+  initializeAppCheck(app, {
+    provider: new CustomProvider({
+      getToken: () =>
+        Promise.resolve({ token: "N/A", expireTimeMillis: 0 }),
+    }),
+    isTokenAutoRefreshEnabled: true,
+  });
+} else if (recaptchaKey) {
+  /* ─── Production browser ─── */
   initializeAppCheck(app, {
     provider: new ReCaptchaEnterpriseProvider(recaptchaKey),
     isTokenAutoRefreshEnabled: true,
