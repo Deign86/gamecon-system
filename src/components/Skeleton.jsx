@@ -603,6 +603,120 @@ export function IncidentLogSkeleton() {
   );
 }
 
+/** Profile Panel (Me tab) — avatar card + committees + contributions + appearance + notification + password + event info */
+export function ProfilePanelSkeleton() {
+  return (
+    <div className="mx-auto max-w-md space-y-4">
+      {/* ── Profile card ── */}
+      <div className="gc-card-accent p-6 text-center">
+        <SkeletonBlock className="mx-auto mb-3 h-16 w-16 rounded-md" />
+        <SkeletonBlock className="mx-auto h-6 w-40 mb-3" />
+        <div className="mt-3 flex flex-wrap justify-center gap-2">
+          <SkeletonBlock className="h-6 w-16 rounded-full" />
+          <SkeletonBlock className="h-6 w-20 rounded-full" />
+          <SkeletonBlock className="h-6 w-22 rounded-full" />
+          <SkeletonBlock className="h-6 w-28 rounded-full" />
+        </div>
+        <div className="mt-4 flex items-center justify-center gap-2">
+          <SkeletonBlock className="h-3 w-3 rounded" />
+          <SkeletonLine width="w-48" className="h-2.5" />
+        </div>
+      </div>
+
+      {/* ── Committee picker ── */}
+      <div className="gc-card p-4 opacity-0 animate-fade-in" style={{ animationDelay: "0.08s", animationFillMode: "forwards" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <SkeletonBlock className="h-4 w-4 rounded" />
+          <SkeletonBlock className="h-4 w-28" />
+          <SkeletonLine width="w-6" className="h-3 ml-auto" />
+        </div>
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <SkeletonBlock className="h-6 w-20 rounded-full" />
+          <SkeletonBlock className="h-6 w-24 rounded-full" />
+          <SkeletonBlock className="h-6 w-28 rounded-full" />
+        </div>
+        <SkeletonBlock className="h-9 w-full rounded" />
+      </div>
+
+      {/* ── My contributions ── */}
+      <div className="gc-card p-4 opacity-0 animate-fade-in" style={{ animationDelay: "0.16s", animationFillMode: "forwards" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <SkeletonBlock className="h-4 w-4 rounded" />
+          <SkeletonBlock className="h-4 w-32" />
+          <SkeletonLine width="w-4" className="h-3 ml-auto" />
+        </div>
+        <SkeletonLine width="w-40 mx-auto" className="h-2.5 mb-3" />
+        <SkeletonBlock className="h-9 w-full rounded" />
+      </div>
+
+      {/* ── Appearance ── */}
+      <div className="gc-card p-4 opacity-0 animate-fade-in" style={{ animationDelay: "0.24s", animationFillMode: "forwards" }}>
+        <div className="flex items-center gap-2 mb-3">
+          <SkeletonBlock className="h-4 w-4 rounded" />
+          <SkeletonBlock className="h-4 w-24" />
+        </div>
+        <div className="flex rounded border border-gc-steel/40 overflow-hidden">
+          <SkeletonBlock className="flex-1 h-10 rounded-none" />
+          <SkeletonBlock className="flex-1 h-10 rounded-none" />
+          <SkeletonBlock className="flex-1 h-10 rounded-none" />
+        </div>
+        <SkeletonLine width="w-36 mx-auto" className="h-2 mt-2" />
+      </div>
+
+      {/* ── Incident notification toggle ── */}
+      <div className="gc-card p-4 opacity-0 animate-fade-in" style={{ animationDelay: "0.32s", animationFillMode: "forwards" }}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <SkeletonBlock className="h-9 w-9 rounded-md" />
+            <div className="space-y-1.5">
+              <SkeletonLine width="w-24" className="h-3" />
+              <SkeletonLine width="w-36" className="h-2" />
+            </div>
+          </div>
+          <SkeletonBlock className="h-7 w-12 rounded-full" />
+        </div>
+      </div>
+
+      {/* ── Change password ── */}
+      <div className="gc-card p-4 opacity-0 animate-fade-in" style={{ animationDelay: "0.40s", animationFillMode: "forwards" }}>
+        <div className="flex items-center gap-2 mb-4">
+          <SkeletonBlock className="h-4 w-4 rounded" />
+          <SkeletonBlock className="h-4 w-32" />
+        </div>
+        <div className="space-y-3">
+          <SkeletonBlock className="h-10 w-full rounded" />
+          <SkeletonBlock className="h-10 w-full rounded" />
+          <SkeletonBlock className="h-10 w-full rounded" />
+          <SkeletonBlock className="h-10 w-full rounded" />
+        </div>
+      </div>
+
+      {/* ── Event info ── */}
+      <div className="gc-card p-4 opacity-0 animate-fade-in" style={{ animationDelay: "0.48s", animationFillMode: "forwards" }}>
+        <div className="flex items-center gap-2 mb-2">
+          <SkeletonBlock className="h-4 w-4 rounded" />
+          <SkeletonBlock className="h-4 w-20" />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-1.5">
+            <SkeletonBlock className="h-3.5 w-3.5 rounded shrink-0" />
+            <SkeletonLine width="w-56" className="h-2.5" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <SkeletonBlock className="h-3.5 w-3.5 rounded shrink-0" />
+            <SkeletonLine width="w-48" className="h-2.5" />
+          </div>
+          <div className="flex items-center gap-1.5">
+            <SkeletonBlock className="h-3.5 w-3.5 rounded shrink-0" />
+            <SkeletonLine width="w-32" className="h-2.5" />
+          </div>
+          <SkeletonLine width="w-28" className="h-2 mt-2" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Committee Card — list of committee cards with member tags */
 export function CommitteeCardSkeleton() {
   return (

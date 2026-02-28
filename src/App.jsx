@@ -12,7 +12,7 @@ import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
 import OfflineBanner from "./components/OfflineBanner";
 import ForegroundNotificationHandler from "./components/ForegroundNotificationHandler";
-import { AppSkeleton, RouteFallbackSkeleton } from "./components/Skeleton";
+import { AppSkeleton, RouteFallbackSkeleton, ProfilePanelSkeleton } from "./components/Skeleton";
 
 /* Lazy‑load heavy tab views */
 const Dashboard    = lazy(() => import("./components/Dashboard"));
@@ -86,8 +86,10 @@ function AppShell() {
   );
 }
 
-/* Fallback skeleton for lazy routes */
+/* Fallback skeleton for lazy routes — tab-aware */
 function RouteFallback() {
+  const { tab } = useTab();
+  if (tab === "me") return <ProfilePanelSkeleton />;
   return <RouteFallbackSkeleton />;
 }
 
