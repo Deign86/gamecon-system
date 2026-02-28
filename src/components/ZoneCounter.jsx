@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, TrendingUp, Maximize2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -11,11 +11,14 @@ import { getZoneIcon, cn } from "../lib/utils";
 const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
 
 export default function ZoneCounter() {
-  const { zones, incrementZone, decrementZone, loading } = useHeadcount();
+  const { zones, incrementZone, decrementZone, setZoneCount, loading } = useHeadcount();
   const { user, profile } = useAuth();
   const isViewer = profile?.role === "viewer";
   const navigate = useNavigate();
   const [pulsing, setPulsing] = useState(null);
+  const [editingZone, setEditingZone] = useState(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef(null);
 
   const openFullscreen = useCallback(() => {
     if (isTauri()) {
@@ -57,6 +60,48 @@ export default function ZoneCounter() {
       userName: profile?.name || "Unknown",
     });
     setTimeout(() => setPulsing(null), 400);
+  }
+
+  function startEditing(zoneId, currentCount) {
+    if (isViewer) return;
+    setEditingZone(zoneId);
+    setEditValue(String(currentCount || 0));
+    setTimeout(() => inputRef.current?.select(), 0);
+  }
+
+  async function commitEdit(zoneId) {
+    const parsed = parseInt(editValue, 10);
+    if (!isNaN(parsed)) {
+      const zone = zones.find(z => z.id === zoneId);
+      const oldCount = zone?.currentCount ?? 0;
+      const clamped = Math.max(0, parsed);
+      if (clamped !== oldCount) {
+        setPulsing(zoneId);
+        await setZoneCount(zoneId, clamped, user?.uid);
+        const zoneName = zone?.name || zoneId;
+        logActivity({
+          action: "headcount.set",
+          category: "headcount",
+          details: `Set ${zoneName} to ${clamped} (was ${oldCount})`,
+          meta: { zoneId, oldCount, newCount: clamped },
+          userId: user?.uid || "unknown",
+          userName: profile?.name || "Unknown",
+        });
+        setTimeout(() => setPulsing(null), 400);
+      }
+    }
+    setEditingZone(null);
+    setEditValue("");
+  }
+
+  function handleEditKeyDown(e, zoneId) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      commitEdit(zoneId);
+    } else if (e.key === "Escape") {
+      setEditingZone(null);
+      setEditValue("");
+    }
   }
 
   if (loading) {
@@ -134,13 +179,28 @@ export default function ZoneCounter() {
                   <Minus className="h-4 w-4" />
                 </button>
 
-                <motion.div
-                  className={cn("gc-counter min-w-[3rem] text-lg px-3", isPulsing && "animate-count-pop")}
-                  animate={isPulsing ? { scale: [1, 1.2, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                >
-                  {count}
-                </motion.div>
+                {editingZone === zone.id ? (
+                  <input
+                    ref={inputRef}
+                    type="number"
+                    min="0"
+                    value={editValue}
+                    onChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => commitEdit(zone.id)}
+                    onKeyDown={(e) => handleEditKeyDown(e, zone.id)}
+                    className="gc-counter min-w-[3rem] w-16 text-lg px-2 text-center bg-gc-iron border border-gc-crimson/60 rounded outline-none font-mono text-gc-white appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                ) : (
+                  <motion.div
+                    className={cn("gc-counter min-w-[3rem] text-lg px-3 cursor-text", isPulsing && "animate-count-pop")}
+                    animate={isPulsing ? { scale: [1, 1.2, 1] } : {}}
+                    transition={{ duration: 0.3 }}
+                    onClick={() => startEditing(zone.id, count)}
+                    title={isViewer ? undefined : "Click to edit"}
+                  >
+                    {count}
+                  </motion.div>
+                )}
 
                 <button
                   onClick={() => handleIncrement(zone.id)}

@@ -62,5 +62,23 @@ export function useHeadcount() {
     });
   }
 
-  return { zones, incrementZone, decrementZone, loading };
+  async function setZoneCount(zoneId, newCount, userId) {
+    const zone = zones.find((z) => z.id === zoneId);
+    const oldCount = zone?.currentCount ?? 0;
+    const clamped = Math.max(0, Math.round(newCount));
+    if (clamped === oldCount) return;
+    const ref = doc(db, "zones", zoneId);
+    await updateDoc(ref, {
+      currentCount: clamped,
+      lastUpdated: serverTimestamp(),
+    });
+    await addDoc(collection(db, "headcounts"), {
+      zoneId,
+      change: clamped - oldCount,
+      updatedBy: userId || "unknown",
+      timestamp: serverTimestamp(),
+    });
+  }
+
+  return { zones, incrementZone, decrementZone, setZoneCount, loading };
 }
