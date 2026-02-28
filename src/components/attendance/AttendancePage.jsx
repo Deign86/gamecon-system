@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ListChecks, BarChart3, UserX, Loader2 } from "lucide-react";
+import { AttendanceSkeleton } from "../Skeleton";
 import { ATTENDANCE_SESSIONS } from "../../lib/attendanceConfig";
 import {
   subscribeVolunteersForBlock,
@@ -141,10 +142,7 @@ export default function AttendancePage() {
 
       {/* ── Content ── */}
       {loadingVols ? (
-        <div className="flex flex-col items-center py-12 gap-3">
-          <Loader2 className="h-8 w-8 text-gc-crimson animate-spin" />
-          <p className="text-sm text-gc-mist font-body">Loading shift data…</p>
-        </div>
+        <AttendanceSkeleton />
       ) : volunteers.length === 0 ? (
         <div className="text-center py-10">
           <ListChecks className="mx-auto h-10 w-10 text-gc-faded mb-3" />

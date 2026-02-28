@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Plus, Pencil, Trash2, Shield, UserRound, ChevronRight, ClipboardList } from "lucide-react";
+import { ContributionListSkeleton } from "../Skeleton";
 import { useAuth } from "../../hooks/useAuth";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { subscribeRoleAssignments } from "../../lib/roleFirestore";
@@ -161,9 +162,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
         {/* User list */}
         <div className="flex-1 space-y-1 overflow-y-auto max-h-[55vh] sm:max-h-[calc(100vh-280px)] pr-0.5">
           {loadingPeople ? (
-            <div className="flex justify-center py-8">
-              <span className="h-5 w-5 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
-            </div>
+            <ContributionListSkeleton />
           ) : filteredPeople.length === 0 ? (
             <p className="text-center text-sm text-gc-hint py-6">
               {allPeople.length === 0 ? "No roster imported yet." : "No match."}

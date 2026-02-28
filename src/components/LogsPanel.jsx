@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { LogsPanelSkeleton } from "./Skeleton";
 import {
   ScrollText,
   TrendingUp,
@@ -145,9 +146,7 @@ export default function LogsPanel() {
       {/* ── Log entries ── */}
       <div className="space-y-2">
         {loading && (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
-          </div>
+          <LogsPanelSkeleton />
         )}
 
         {!loading && filtered.length === 0 && (

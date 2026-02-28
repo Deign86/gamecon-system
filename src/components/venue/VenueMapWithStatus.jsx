@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Map, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
+import { VenueMapSkeleton } from "../Skeleton";
 import { useVenueStatus } from "../../hooks/useVenueStatus";
 import { VENUE_ZONES, HALL_BOUNDS, BOOTH_GRID, getZonesForDay, getZoneTypeLegend } from "../../lib/venueZones";
 import ZoneOverlay from "./ZoneOverlay";
@@ -36,16 +37,7 @@ export default function VenueMapWithStatus({ onNavigate }) {
   const totalIncidents = Object.values(statuses).reduce((s, z) => s + (z.incidentsOpen || 0), 0);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 text-gc-crimson animate-spin" />
-          <span className="font-display text-sm tracking-[0.2em] text-gc-mist">
-            LOADING VENUE MAP…
-          </span>
-        </div>
-      </div>
-    );
+    return <VenueMapSkeleton />;
   }
 
   return (

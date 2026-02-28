@@ -20,6 +20,7 @@ import {
 import { cn, fmtDate, initials } from "../../lib/utils";
 import { COMMITTEE_NAMES } from "../../lib/roleConfig";
 import UserStatusBadge from "./UserStatusBadge";
+import { UserTableSkeleton } from "../Skeleton";
 
 const ROLES_FILTER = [
   { value: "",        label: "All Roles" },
@@ -178,9 +179,7 @@ export default function UserManagementTable({
       {/* ── Table ── */}
       <div className="overflow-x-auto rounded border border-gc-steel/40 bg-gc-slate/60">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-6 w-6 animate-spin text-gc-crimson" />
-          </div>
+          <UserTableSkeleton />
         ) : pageData.length === 0 ? (
           <div className="py-16 text-center text-sm text-gc-mist font-body">
             No users match the current filters.

@@ -236,6 +236,30 @@
     border-radius: 6px 6px 0 0;
   }
 
+  /* ── Skeleton loader — crimson shimmer sweep ── */
+  .gc-skeleton {
+    position: relative;
+    overflow: hidden;
+    background: var(--gc-card-bg);
+    border: 1px solid var(--gc-card-border);
+  }
+  .gc-skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(var(--gc-crimson) / 0.06) 44%,
+      rgb(var(--gc-crimson) / 0.10) 50%,
+      rgb(var(--gc-crimson) / 0.06) 56%,
+      transparent 70%
+    );
+    background-size: 250% 100%;
+    animation: skeletonSweep 1.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+
   /* ── Counter badge — angular ── */
   .gc-counter {
     @apply inline-flex items-center justify-center font-mono font-bold;
@@ -523,6 +547,22 @@ html.light .gc-card:hover {
     0 0 16px rgb(190 14 42 / 0.06),
     0 4px 16px rgba(0,0,0,0.08),
     inset 0 1px 0 var(--gc-inset-highlight) !important;
+}
+
+html.light .gc-skeleton {
+  background: var(--gc-card-bg);
+  border-color: var(--gc-card-border);
+}
+html.light .gc-skeleton::after {
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgb(190 14 42 / 0.04) 44%,
+    rgb(190 14 42 / 0.07) 50%,
+    rgb(190 14 42 / 0.04) 56%,
+    transparent 70%
+  );
+  background-size: 250% 100%;
 }
 
 html.light .text-shadow-red {

@@ -6,9 +6,11 @@ import {
   CheckCircle2,
   Loader2,
   ShieldAlert,
+  WifiOff,
   X,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { resetSystemData } from "../lib/resetSystemData";
 import { logActivity } from "../lib/auditLog";
 import { cn } from "../lib/utils";
@@ -21,6 +23,7 @@ const CONFIRMATION_PHRASE = "RESET GAMECON";
  */
 export default function AdminResetPanel() {
   const { profile } = useAuth();
+  const { isOnline } = useOnlineStatus();
   const isAdmin = profile?.role === "admin";
 
   const [open, setOpen]           = useState(false);
@@ -31,6 +34,16 @@ export default function AdminResetPanel() {
   const [error, setError]         = useState("");
 
   if (!isAdmin) return null;
+
+  /* System reset absolutely requires connectivity */
+  if (!isOnline) {
+    return (
+      <div className="flex items-center gap-2 rounded border border-gc-steel/30 bg-gc-iron/30 px-4 py-3 text-sm font-body text-gc-mist/60">
+        <WifiOff className="h-4 w-4 text-gc-mist/40 shrink-0" />
+        <span>System reset is unavailable offline</span>
+      </div>
+    );
+  }
 
   const confirmed = phrase.trim().toUpperCase() === CONFIRMATION_PHRASE;
 

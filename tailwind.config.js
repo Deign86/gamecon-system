@@ -99,6 +99,10 @@ export default {
           "0%, 100%": { opacity: "0.3" },
           "50%":      { opacity: "0.8" },
         },
+        skeletonSweep: {
+          "0%":   { backgroundPosition: "250% 0" },
+          "100%": { backgroundPosition: "-250% 0" },
+        },
       },
       backgroundImage: {
         "diagonal-stripe":

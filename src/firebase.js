@@ -1,6 +1,10 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
+} from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 
 const fallbackFirebaseConfig = {
@@ -23,7 +27,19 @@ const firebaseConfig = {
 
 const app  = initializeApp(firebaseConfig);
 export const auth      = getAuth(app);
-export const db        = getFirestore(app);
+
+/**
+ * Firestore with persistent local cache enabled.
+ * This allows reads from cache when offline and automatically queues
+ * direct Firestore writes (addDoc, setDoc, updateDoc) until connectivity
+ * is restored — crucial for weak-signal environments like COED Hall.
+ */
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentMultipleTabManager(),
+  }),
+});
+
 export const functions = getFunctions(app);
 
 export default app;

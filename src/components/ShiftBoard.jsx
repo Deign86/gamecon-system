@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
+import { ShiftBoardSkeleton } from "./Skeleton";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { SHIFT_BLOCKS, COMMITTEES } from "../lib/constants";
@@ -407,10 +408,7 @@ export default function ShiftBoard({ highlightCommittee }) {
 
       {/* ── Loading state ── */}
       {loadingShifts ? (
-        <div className="flex flex-col items-center py-12 gap-3">
-          <Loader2 className="h-8 w-8 text-gc-crimson animate-spin" />
-          <p className="text-sm text-gc-mist font-body">Loading shift data…</p>
-        </div>
+        <ShiftBoardSkeleton />
       ) : shifts.length === 0 ? (
         /* ── Empty state ── */
         <div className="text-center py-10">

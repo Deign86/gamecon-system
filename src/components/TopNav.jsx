@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { Clock, LogOut } from "lucide-react";
+import { Clock, LogOut, WifiOff } from "lucide-react";
 import { useAuth, signOut } from "../hooks/useAuth";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { cn } from "../lib/utils";
 import GCLogo from "./GCLogo";
 
 export default function TopNav() {
   const { profile } = useAuth();
+  const { isOnline, pendingCount } = useOnlineStatus();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -44,6 +46,21 @@ export default function TopNav() {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Connectivity indicator */}
+          {!isOnline && (
+            <div className="flex items-center gap-1.5 text-gc-danger border border-gc-danger/25 rounded px-2 py-1 bg-gc-danger/[0.08]" title={`Offline${pendingCount ? ` · ${pendingCount} queued` : ""}`}>
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gc-danger opacity-50" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gc-danger" />
+              </span>
+              <WifiOff className="h-3 w-3" />
+              <span className="hidden sm:inline font-mono text-[9px] tracking-[0.15em] uppercase">Offline</span>
+              {pendingCount > 0 && (
+                <span className="font-mono text-[8px] text-gc-danger/60 tabular-nums">{pendingCount}Q</span>
+              )}
+            </div>
+          )}
+
           {/* Live clock */}
           <div className="hidden sm:flex items-center gap-1.5 text-[11px] font-mono text-gc-mist border border-gc-steel/30 rounded px-2 py-1 bg-gc-void/50">
             <Clock className="h-3 w-3 text-gc-crimson/70" />

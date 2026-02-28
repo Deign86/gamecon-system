@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Plus, Filter, Calendar, Loader2, KanbanSquare } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { TaskBoardSkeleton } from "../Skeleton";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../Toast";
 import {
@@ -227,10 +228,7 @@ export default function TaskBoard() {
 
       {/* ── Loading state ── */}
       {loading ? (
-        <div className="flex flex-col items-center py-12 gap-3">
-          <Loader2 className="h-8 w-8 text-gc-crimson animate-spin" />
-          <p className="text-sm text-gc-mist font-body">Loading tasks…</p>
-        </div>
+        <TaskBoardSkeleton />
       ) : filteredTasks.length === 0 && !filterCommittee ? (
         /* ── Empty state ── */
         <div className="text-center py-10">

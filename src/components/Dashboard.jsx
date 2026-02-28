@@ -11,7 +11,9 @@ import {
   MapPin,
   Clock,
   KanbanSquare,
+  WifiOff,
 } from "lucide-react";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import ZoneCounter from "./ZoneCounter";
 import ShiftBoard from "./ShiftBoard";
 import ContributionHub from "./contributions/ContributionHub";
@@ -45,6 +47,7 @@ const cardVariant = {
 };
 
 export default function Dashboard() {
+  const { isOnline } = useOnlineStatus();
   const [activeModal, setActiveModal] = useState(null);
   const [modalData, setModalData] = useState(null);
   const closeModal = useCallback(() => { setActiveModal(null); setModalData(null); }, []);
@@ -85,8 +88,21 @@ export default function Dashboard() {
         <div className="relative z-10">
           {/* Status line */}
           <div className="mb-3 flex items-center gap-2 text-[9px] font-mono text-gc-hint uppercase tracking-[0.2em]">
-            <span className="h-1.5 w-1.5 rounded-full bg-gc-success animate-pulse" />
-            COMMAND CENTER — LIVE
+            {isOnline ? (
+              <>
+                <span className="h-1.5 w-1.5 rounded-full bg-gc-success animate-pulse" />
+                COMMAND CENTER — LIVE
+              </>
+            ) : (
+              <>
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gc-danger opacity-50" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-gc-danger" />
+                </span>
+                <span className="text-gc-danger/80">COMMAND CENTER — CACHED</span>
+                <WifiOff className="h-2.5 w-2.5 text-gc-danger/50" />
+              </>
+            )}
           </div>
 
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-wider text-gc-white">

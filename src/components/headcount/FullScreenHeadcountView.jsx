@@ -5,6 +5,7 @@ import { useTotalHeadcount } from "../../hooks/useTotalHeadcount";
 import { AuthProvider, useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { ShieldAlert } from "lucide-react";
+import { HeadcountFullSkeleton } from "../Skeleton";
 
 /* ── Eye SVG icon ── */
 function EyeIcon({ className }) {
@@ -141,11 +142,7 @@ function HeadcountInner() {
   }
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gc-void">
-        <div className="h-12 w-12 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
-      </div>
-    );
+    return <HeadcountFullSkeleton />;
   }
 
   /* Format number with locale separator */

@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, WifiOff } from "lucide-react";
 import { changePassword } from "../lib/changePassword";
 import { logActivity } from "../lib/auditLog";
 import { useAuth } from "../hooks/useAuth";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { cn } from "../lib/utils";
 
 /**
@@ -12,6 +13,7 @@ import { cn } from "../lib/utils";
  */
 export default function ChangePasswordForm() {
   const { user, profile } = useAuth();
+  const { isOnline } = useOnlineStatus();
   const [current, setCurrent]   = useState("");
   const [next, setNext]         = useState("");
   const [confirm, setConfirm]   = useState("");
@@ -23,7 +25,7 @@ export default function ChangePasswordForm() {
   /* ── validation ── */
   const tooShort  = next.length > 0 && next.length < 8;
   const mismatch  = confirm.length > 0 && next !== confirm;
-  const canSubmit = current.length > 0 && next.length >= 8 && next === confirm && status !== "loading";
+  const canSubmit = isOnline && current.length > 0 && next.length >= 8 && next === confirm && status !== "loading";
 
   /* ── submit ── */
   const handleSubmit = async (e) => {
@@ -67,6 +69,14 @@ export default function ChangePasswordForm() {
           CHANGE PASSWORD
         </h3>
       </div>
+
+      {/* Offline notice */}
+      {!isOnline && (
+        <div className="flex items-center gap-2 rounded border border-gc-steel/30 bg-gc-iron/30 px-3 py-2.5 text-[11px] font-body text-gc-mist/60">
+          <WifiOff className="h-3.5 w-3.5 text-gc-mist/40 shrink-0" />
+          <span>Password change requires an active connection</span>
+        </div>
+      )}
 
       <AnimatePresence mode="wait">
         {/* ── Success state ── */}

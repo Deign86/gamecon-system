@@ -4,11 +4,15 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ToastProvider } from "./components/Toast";
+import { OnlineStatusProvider } from "./hooks/useOnlineStatus";
 import ErrorBoundary from "./components/ErrorBoundary";
+import OfflineGuard from "./components/OfflineGuard";
 import AuthGate from "./components/AuthGate";
 import TopNav from "./components/TopNav";
 import BottomNav from "./components/BottomNav";
+import OfflineBanner from "./components/OfflineBanner";
 import ForegroundNotificationHandler from "./components/ForegroundNotificationHandler";
+import { AppSkeleton, RouteFallbackSkeleton } from "./components/Skeleton";
 
 /* Lazy‑load heavy tab views */
 const Dashboard    = lazy(() => import("./components/Dashboard"));
@@ -40,23 +44,7 @@ function AppShell() {
   }, [user?.uid]);
 
   if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center gc-diag-bg gc-noise">
-        {/* Corner brackets */}
-        <div className="fixed top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-gc-crimson/20 pointer-events-none" />
-        <div className="fixed bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-gc-crimson/20 pointer-events-none" />
-        <div className="flex flex-col items-center gap-4">
-          <div className="relative">
-            <div className="h-12 w-12 rounded border-2 border-gc-crimson border-t-transparent animate-spin" />
-            <div className="absolute inset-0 h-12 w-12 rounded border-2 border-transparent border-b-gc-crimson/30 animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }} />
-          </div>
-          <span className="font-display text-xl tracking-[0.2em] text-gc-crimson text-shadow-red">
-            INITIALIZING…
-          </span>
-          <span className="text-[10px] font-mono text-gc-hint tracking-widest uppercase">PlayVerse Ops v2.0</span>
-        </div>
-      </div>
-    );
+    return <AppSkeleton />;
   }
 
   if (!user) return <AuthGate />;
@@ -65,6 +53,7 @@ function AppShell() {
     <TabCtx.Provider value={{ tab, setTab }}>
       <div className="flex min-h-screen flex-col gc-diag-bg gc-noise">
         <TopNav />
+        <OfflineBanner />
         <ForegroundNotificationHandler />
         <main className="flex-1 overflow-y-auto px-3 pb-24 pt-4 sm:px-6">
           <Suspense fallback={<RouteFallback />}>
@@ -79,7 +68,11 @@ function AppShell() {
                 >
                   {tab === "dashboard"     && <Dashboard />}
                   {tab === "roles"        && <RoleTasking />}
-                  {tab === "users"        && <AdminUsersPage />}
+                  {tab === "users"        && (
+                    <OfflineGuard requires="network" label="User Management" variant="modal">
+                      <AdminUsersPage />
+                    </OfflineGuard>
+                  )}
                   {tab === "me"           && <ProfilePanel />}
                   {tab === "logs" && profile?.role === "admin" && <LogsPanel />}
                 </motion.div>
@@ -93,20 +86,9 @@ function AppShell() {
   );
 }
 
-/* Fallback spinner for lazy routes */
+/* Fallback skeleton for lazy routes */
 function RouteFallback() {
-  return (
-    <div className="flex h-screen items-center justify-center bg-gc-void">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative">
-          <div className="h-10 w-10 rounded border-2 border-gc-crimson border-t-transparent animate-spin" />
-        </div>
-        <span className="font-display text-lg tracking-[0.2em] text-gc-crimson text-shadow-red">
-          LOADING…
-        </span>
-      </div>
-    </div>
-  );
+  return <RouteFallbackSkeleton />;
 }
 
 export default function App() {
@@ -140,9 +122,11 @@ export default function App() {
           path="*"
           element={
             <AuthProvider>
-              <ToastProvider>
-                <AppShell />
-              </ToastProvider>
+              <OnlineStatusProvider>
+                <ToastProvider>
+                  <AppShell />
+                </ToastProvider>
+              </OnlineStatusProvider>
             </AuthProvider>
           }
         />

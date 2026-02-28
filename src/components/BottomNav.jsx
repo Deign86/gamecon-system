@@ -1,6 +1,7 @@
 import { LayoutDashboard, ClipboardList, User, ScrollText, UsersRound } from "lucide-react";
 import { useTab } from "../App";
 import { useAuth } from "../hooks/useAuth";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { cn } from "../lib/utils";
 
 const BASE_TABS = [
@@ -21,9 +22,13 @@ const ADMIN_TABS = [
   { key: "logs",       label: "Logs",      Icon: ScrollText },
 ];
 
+/* Tabs that require network connectivity for full functionality */
+const NETWORK_REQUIRED_TABS = new Set(["users"]);
+
 export default function BottomNav() {
   const { tab, setTab } = useTab();
   const { profile } = useAuth();
+  const { isOnline } = useOnlineStatus();
   const role  = profile?.role;
   const tabs  = role === "admin"
     ? ADMIN_TABS
@@ -39,6 +44,7 @@ export default function BottomNav() {
       <div className="mx-auto flex h-16 max-w-md items-stretch justify-around px-1">
         {tabs.map(({ key, label, Icon }) => {
           const active = tab === key;
+          const offlineLimited = !isOnline && NETWORK_REQUIRED_TABS.has(key);
           return (
             <button
               key={key}
@@ -47,7 +53,9 @@ export default function BottomNav() {
                 "relative flex flex-1 flex-col items-center justify-center gap-0.5 transition-all duration-200",
                 active
                   ? "text-gc-crimson"
-                  : "text-gc-mist hover:text-gc-cloud"
+                  : offlineLimited
+                    ? "text-gc-mist/40"
+                    : "text-gc-mist hover:text-gc-cloud"
               )}
             >
               {/* Active background container */}
@@ -57,6 +65,10 @@ export default function BottomNav() {
 
               <div className="relative z-10">
                 <Icon className="h-5 w-5" strokeWidth={active ? 2.2 : 1.6} />
+                {/* Offline dot */}
+                {offlineLimited && (
+                  <span className="absolute -top-0.5 -right-1 h-1.5 w-1.5 rounded-full bg-gc-danger ring-1 ring-gc-void" />
+                )}
               </div>
               <span
                 className={cn(

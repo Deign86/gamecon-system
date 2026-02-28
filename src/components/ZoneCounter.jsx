@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, TrendingUp, Maximize2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useHeadcount } from "../hooks/useHeadcount";
+import { ZoneCounterSkeleton } from "./Skeleton";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { getZoneIcon, cn } from "../lib/utils";
@@ -105,11 +106,7 @@ export default function ZoneCounter() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
-      </div>
-    );
+    return <ZoneCounterSkeleton />;
   }
 
   if (zones.length === 0) {
