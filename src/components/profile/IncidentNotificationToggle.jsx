@@ -3,13 +3,13 @@
  * ──────────────────────────
  * Toggle to enable / disable push notifications for incident reports.
  * Detects the current platform and shows the appropriate label.
- * Stores the preference in `users/{uid}.notificationsEnabled`.
+ *
+ * **Per-device**: preference is stored in localStorage (keyed by uid),
+ * so toggling on one device does NOT affect other devices.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Bell, BellOff, Loader2, Smartphone, Monitor, Globe } from "lucide-react";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "../../firebase";
 import { useAuth } from "../../hooks/useAuth";
 import {
   requestNotificationPermission,
@@ -19,6 +19,24 @@ import {
 } from "../../lib/messaging";
 import { cn } from "../../lib/utils";
 
+/* ── Per-device localStorage helpers ── */
+const STORAGE_KEY_PREFIX = "gc_notif_enabled_";
+
+export function getDeviceNotifEnabled(uid) {
+  if (!uid) return null; // unknown
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + uid);
+    if (raw === null) return null; // never set on this device
+    return raw === "1";
+  } catch { return null; }
+}
+
+function setDeviceNotifEnabled(uid, value) {
+  try {
+    localStorage.setItem(STORAGE_KEY_PREFIX + uid, value ? "1" : "0");
+  } catch { /* quota / private mode */ }
+}
+
 function getPlatformInfo() {
   if (isCapacitor()) return { label: "Android", Icon: Smartphone };
   if (isTauri()) return { label: "Desktop", Icon: Monitor };
@@ -26,11 +44,24 @@ function getPlatformInfo() {
 }
 
 export default function IncidentNotificationToggle() {
-  const { user, profile, setProfile } = useAuth();
+  const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [permStatus, setPermStatus] = useState("idle"); // idle | granted | denied | unsupported
+  const [enabled, setEnabled] = useState(false);
 
-  const enabled = profile?.notificationsEnabled !== false; // default true
+  /* Derive initial state from localStorage + browser permission */
+  useEffect(() => {
+    if (!user) return;
+    const stored = getDeviceNotifEnabled(user.uid);
+    if (stored !== null) {
+      setEnabled(stored);
+    } else {
+      // Never set on this device — default to true only if permission already granted
+      const granted = "Notification" in window && Notification.permission === "granted";
+      setEnabled(granted);
+    }
+  }, [user?.uid]);
+
   const { label: platformLabel, Icon: PlatformIcon } = getPlatformInfo();
 
   /* Check browser/system notification permission on mount */
@@ -54,10 +85,14 @@ export default function IncidentNotificationToggle() {
         const token = await requestNotificationPermission(user.uid);
 
         if (token || isTauri()) {
-          await updateDoc(doc(db, "users", user.uid), {
-            notificationsEnabled: true,
-          });
-          setProfile((prev) => ({ ...prev, notificationsEnabled: true }));
+          setDeviceNotifEnabled(user.uid, true);
+          setEnabled(true);
+          setPermStatus("granted");
+        } else if ("Notification" in window && Notification.permission === "granted") {
+          // Permission granted but FCM token failed — still enable
+          // because the Firestore fallback listener will provide in-app toasts
+          setDeviceNotifEnabled(user.uid, true);
+          setEnabled(true);
           setPermStatus("granted");
         } else {
           // Permission was denied by the browser / OS
@@ -66,10 +101,8 @@ export default function IncidentNotificationToggle() {
       } else {
         /* ── Disable ── */
         await removeAllUserTokens(user.uid);
-        await updateDoc(doc(db, "users", user.uid), {
-          notificationsEnabled: false,
-        });
-        setProfile((prev) => ({ ...prev, notificationsEnabled: false }));
+        setDeviceNotifEnabled(user.uid, false);
+        setEnabled(false);
         setPermStatus("idle");
       }
     } catch (err) {

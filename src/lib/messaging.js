@@ -36,6 +36,9 @@ export const isWeb = () => !isCapacitor() && !isTauri();
 /* VAPID key — required for web push. Set in .env as VITE_FIREBASE_VAPID_KEY */
 const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || null;
 
+/* Guard against concurrent/duplicate registration (React StrictMode) */
+let _registrationInProgress = null;
+
 /* ────────────────────────────────────────────
  *  Public API
  * ──────────────────────────────────────────── */
@@ -48,14 +51,23 @@ const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || null;
 export async function requestNotificationPermission(userId) {
   if (!userId) return null;
 
-  try {
-    if (isCapacitor()) return await registerCapacitorPush(userId);
-    if (isTauri()) return await registerTauriNotifications(userId);
-    return await registerWebPush(userId);
-  } catch (err) {
-    console.warn("[Messaging] Failed to register notifications:", err);
-    return null;
-  }
+  // Prevent concurrent duplicate registration (React StrictMode double-mount)
+  if (_registrationInProgress) return _registrationInProgress;
+
+  _registrationInProgress = (async () => {
+    try {
+      if (isCapacitor()) return await registerCapacitorPush(userId);
+      if (isTauri()) return await registerTauriNotifications(userId);
+      return await registerWebPush(userId);
+    } catch (err) {
+      console.warn("[Messaging] Failed to register notifications:", err);
+      return null;
+    } finally {
+      _registrationInProgress = null;
+    }
+  })();
+
+  return _registrationInProgress;
 }
 
 /**
@@ -232,25 +244,72 @@ async function registerWebPush(userId) {
     console.warn(
       "[Messaging] VAPID key not configured — set VITE_FIREBASE_VAPID_KEY in .env"
     );
-    // Still return a marker so Firestore-based fallback works
     return null;
   }
 
   const { getMessaging, getToken } = await import("firebase/messaging");
   const messaging = getMessaging(app);
 
-  // Register the FCM service worker
+  // Register (or reuse) the Firebase messaging service worker.
   const swRegistration = await navigator.serviceWorker.register(
-    "/firebase-messaging-sw.js"
+    "/firebase-messaging-sw.js",
+    { scope: "/" }
   );
 
+  // Wait for the service worker to be active (handles installing/waiting states)
+  await new Promise((resolve) => {
+    if (swRegistration.active) {
+      resolve();
+    } else {
+      const sw = swRegistration.installing || swRegistration.waiting;
+      if (sw) {
+        sw.addEventListener("statechange", function handler(e) {
+          if (e.target.state === "activated") {
+            sw.removeEventListener("statechange", handler);
+            resolve();
+          }
+        });
+      } else {
+        resolve();
+      }
+    }
+  });
+
+  // If the current push subscription used a different VAPID key (e.g. leftover
+  // from experimenting with a custom key), clear it so getToken() can recreate.
+  // We use the default Firebase VAPID key (no vapidKey param to getToken).
+  try {
+    const DEFAULT_VAPID_B64 =
+      "BDOU99+h67HcA6JeFXHbSNMu7e2yNNu3RzoMj8TM4W88jITfq7ZmPvIM1Iv+4/l2LxQcYwhqby2xGpWwzjfAnG4=";
+    const existingSub = await swRegistration.pushManager.getSubscription();
+    if (existingSub) {
+      const currentKey = existingSub.options.applicationServerKey;
+      if (currentKey) {
+        const keyBytes = new Uint8Array(currentKey);
+        const defaultBinary = atob(DEFAULT_VAPID_B64);
+        const defaultBytes = new Uint8Array([...defaultBinary].map((c) => c.charCodeAt(0)));
+        const keysMatch =
+          keyBytes.length === defaultBytes.length &&
+          keyBytes.every((b, i) => b === defaultBytes[i]);
+        if (!keysMatch) {
+          await existingSub.unsubscribe();
+          console.log("[Messaging] Cleared stale push subscription (VAPID key mismatch)");
+        }
+      }
+    }
+  } catch (subErr) {
+    console.warn("[Messaging] Could not check push subscription:", subErr);
+  }
+
   const token = await getToken(messaging, {
-    vapidKey: VAPID_KEY,
     serviceWorkerRegistration: swRegistration,
   });
 
   if (token) {
+    // Clean up any previous tokens for this user (prevents stale accumulation)
+    await removeAllUserTokens(userId);
     await saveFcmToken(userId, token, "web");
+    console.log("[Messaging] FCM token registered successfully");
   }
 
   return token;
