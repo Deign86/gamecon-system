@@ -50,8 +50,14 @@ const COMMITTEE_ROLE_MAP = {
   voting:          "Voting",
   "guest-relations": "Guest Relations Officers",
   technical:       "Technical Committee",
-  esports:         "E-Sport Organizers",
+  esports:         ["E-Sport Organizers", "Esports Technical", "Shoutcaster"],
 };
+
+/* Helper: check if a committee name matches the map entry (string or array) */
+function matchesRoleNames(scheduleCommittee, roleNames) {
+  if (Array.isArray(roleNames)) return roleNames.includes(scheduleCommittee);
+  return scheduleCommittee === roleNames;
+}
 
 /* ── Stagger variants ── */
 const stagger = {
@@ -151,7 +157,7 @@ export default function ShiftBoard({ highlightCommittee }) {
           for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
         }
       } else {
-        const matchingSchedules = schedules.filter((s) => s.committee === roleName);
+        const matchingSchedules = schedules.filter((s) => matchesRoleNames(s.committee, roleName));
         for (const sched of matchingSchedules) {
           for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
         }
@@ -181,7 +187,7 @@ export default function ShiftBoard({ highlightCommittee }) {
         }
       } else {
         const matchingSchedules = schedules.filter(
-          (s) => s.committee === roleName && (s.day === dayLabel || s.day === "DAY1/2")
+          (s) => matchesRoleNames(s.committee, roleName) && (s.day === dayLabel || s.day === "DAY1/2")
         );
         for (const sched of matchingSchedules) {
           for (const name of sched.members || []) if (name.trim()) nameSet.add(name.trim());
