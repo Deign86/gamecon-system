@@ -76,20 +76,6 @@ function HeadcountInner() {
   const repeatRef = useRef(null);
   const warningTimer = useRef(null);
 
-  /* Force dark theme on this standalone route — the ThemeProvider is not
-     present here so we lock the <html> to dark to prevent a white screen
-     when the user's saved preference is "light". */
-  useEffect(() => {
-    const html = document.documentElement;
-    const prev = Array.from(html.classList).find((c) => c === "light" || c === "dark");
-    html.classList.remove("light", "dark");
-    html.classList.add("dark");
-    return () => {
-      html.classList.remove("dark");
-      if (prev) html.classList.add(prev);
-    };
-  }, []);
-
   const triggerRipple = useCallback(() => setRipple((r) => r + 1), []);
 
   /* Show staff floor warning for 3 seconds then auto-dismiss */
