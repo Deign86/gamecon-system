@@ -9,7 +9,6 @@ import { getFunctions } from "firebase/functions";
 import {
   initializeAppCheck,
   ReCaptchaEnterpriseProvider,
-  CustomProvider,
 } from "firebase/app-check";
 
 const requiredEnvVars = [
@@ -80,38 +79,24 @@ const isNativeApp =
   (typeof window !== "undefined" &&
     window.__TAURI_INTERNALS__ !== undefined);
 
-const recaptchaKey     = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY;
-const nativeDebugToken = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN;
+const recaptchaKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY;
 
-if (import.meta.env.DEV && !nativeDebugToken) {
-  /* ─── Development without a registered debug token ───
-   * Skip App Check entirely so unregistered debug-token exchanges
-   * don't cause 403 errors that cascade into auth failures.
-   * Cloud Functions should also have ENFORCE_APP_CHECK=false in dev. */
-  if (import.meta.env.DEV) {
-    console.info(
-      "[App Check] Skipped in development. Set VITE_APPCHECK_DEBUG_TOKEN " +
-      "in .env to enable (register the token in Firebase Console first)."
-    );
-  }
-} else if (isNativeApp || nativeDebugToken) {
-  /* ─── Native (Capacitor / Tauri) or explicit debug token ───
-   * reCAPTCHA cannot run inside WebViews. Use a pre-registered
-   * debug token from Firebase Console → App Check → Manage debug tokens.
-   *
-   * When FIREBASE_APPCHECK_DEBUG_TOKEN is set, the SDK bypasses the
-   * provider and exchanges the debug token directly. */
-  // eslint-disable-next-line no-restricted-globals
-  self.FIREBASE_APPCHECK_DEBUG_TOKEN = nativeDebugToken;
-  initializeAppCheck(app, {
-    provider: new CustomProvider({
-      getToken: () =>
-        Promise.resolve({ token: "N/A", expireTimeMillis: 0 }),
-    }),
-    isTokenAutoRefreshEnabled: true,
-  });
+if (isNativeApp) {
+  /* ─── Native (Capacitor / Tauri) ───
+   * reCAPTCHA cannot run inside WebViews and debug tokens require
+   * manual Console registration. Skip App Check entirely for native
+   * builds — Cloud Functions have enforcement disabled so requests
+   * without App Check tokens are still accepted. */
+  console.info("[App Check] Skipped on native platform (Capacitor/Tauri).");
+} else if (import.meta.env.DEV) {
+  /* ─── Development ───
+   * Skip App Check so unregistered debug-token exchanges don't
+   * cause 403 errors that cascade into auth failures. */
+  console.info("[App Check] Skipped in development.");
 } else if (recaptchaKey) {
-  /* ─── Production browser ─── */
+  /* ─── Production browser ───
+   * ReCaptchaEnterpriseProvider runs an invisible challenge to
+   * attest that requests come from a genuine browser client. */
   initializeAppCheck(app, {
     provider: new ReCaptchaEnterpriseProvider(recaptchaKey),
     isTokenAutoRefreshEnabled: true,

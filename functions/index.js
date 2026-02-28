@@ -120,16 +120,19 @@ async function assertAdmin(request) {
 }
 
 /* ── Shared options for all callable functions ──
- * Cloud Functions enforce App Check by default in production.
- * Requests without a valid App Check token are rejected.
+ * App Check enforcement is DISABLED by default because native clients
+ * (Capacitor Android / Tauri desktop) cannot provide App Check tokens
+ * — reCAPTCHA does not run inside WebViews.
  *
- * During development / CI testing, set ENFORCE_APP_CHECK=false
- * to bypass. In production, the default is TRUE (secure by default).
+ * Browser clients still initialise reCAPTCHA Enterprise and send
+ * App Check tokens, but the server simply does not reject requests
+ * that lack one. To re-enable strict enforcement (browser-only deploy),
+ * set ENFORCE_APP_CHECK=true in the Functions environment.
  *
  *   firebase functions:config:set appcheck.enforce="true"
  *   — or set ENFORCE_APP_CHECK in .env.local —
  */
-const enforceAppCheck = process.env.ENFORCE_APP_CHECK !== "false";
+const enforceAppCheck = process.env.ENFORCE_APP_CHECK === "true";
 const callOpts = {
   cors: true,
   enforceAppCheck,
