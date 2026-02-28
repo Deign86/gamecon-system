@@ -74,6 +74,7 @@ export default function AuthGate() {
         }`}
       >
         <source src="/login-bg.mp4" type="video/mp4" />
+        <source src="/login-bg.webm" type="video/webm" />
       </video>
 
       {/* ── Dark gradient overlay for readability ── */}
