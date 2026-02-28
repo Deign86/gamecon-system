@@ -1,0 +1,36 @@
+# Android / Capacitor build artifacts
+android/
+capacitor.config.json
+
+# Tauri / Rust build artifacts
+src-tauri/
+*.rs
+Cargo.toml
+Cargo.lock
+
+# Python virtual env
+.venv/
+
+# Node dependencies (Vercel installs these itself)
+node_modules/
+functions/node_modules/
+
+# Firebase / local tooling
+.firebase/
+.firebaserc
+firebase.json
+firestore.rules
+firestore.indexes.json
+
+# Local build output (Vercel builds fresh)
+dist/
+
+# Misc
+.git/
+.github/
+.claude/
+.skills/
+.vscode/
+*.xlsx
+# Root-level design assets (not served — public/logo.png is kept)
+gamecon 2026 logo.png
