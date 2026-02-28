@@ -99,15 +99,15 @@ if ($Android) {
     npx cap sync android 2>&1 | ForEach-Object { Write-Info $_ }
     Assert-ExitCode "cap sync android"
     Write-OK "Capacitor sync done"
-    Write-Step "Building Android APK (assembleDebug)..."
+    Write-Step "Building Android APK (assembleRelease)..."
     $gradlew = "$ProjectRoot\android\gradlew.bat"
-    & $gradlew -p "$ProjectRoot\android" assembleDebug 2>&1 | ForEach-Object { Write-Info $_ }
-    Assert-ExitCode "gradlew assembleDebug"
+    & $gradlew -p "$ProjectRoot\android" assembleRelease 2>&1 | ForEach-Object { Write-Info $_ }
+    Assert-ExitCode "gradlew assembleRelease"
     $apk = Get-ChildItem -Path "$ProjectRoot\android" -Recurse -Filter "*.apk" |
-           Where-Object { $_.FullName -notmatch "capacitor-cordova" } |
+           Where-Object { $_.FullName -notmatch "capacitor-cordova" -and $_.FullName -match "release" } |
            Sort-Object LastWriteTime -Descending | Select-Object -First 1
     if ($apk) {
-        $dest = "$Downloads\$AppName-android-$Timestamp.apk"
+        $dest = "$Downloads\$AppName-android-release-$Timestamp.apk"
         Copy-Item $apk.FullName -Destination $dest -Force
         $elapsed = [math]::Round(((Get-Date) - $t).TotalSeconds, 1)
         Write-OK "Android build done in ${elapsed}s  ->  $(Split-Path $dest -Leaf)"
