@@ -137,7 +137,7 @@ vi.mock("lucide-react", () => {
     "ChevronDown", "ChevronUp", "ChevronLeft", "ChevronRight", "ArrowLeft",
     "ArrowRight", "Menu", "Settings", "User", "Users", "Trash2", "Edit",
     "Download", "Upload", "Clock", "Calendar", "MapPin", "Gamepad2", "Ticket",
-    "Shield", "Bell", "BellOff", "Copy", "ExternalLink", "RotateCcw",
+    "Shield", "ShieldCheck", "Bell", "BellOff", "Copy", "ExternalLink", "RotateCcw",
     "MoreVertical", "MoreHorizontal", "Filter", "RefreshCw", "Save",
     "Loader2", "Wifi", "WifiOff", "Sun", "Moon", "Monitor",
   ];
