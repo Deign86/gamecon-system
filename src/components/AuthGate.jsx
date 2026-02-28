@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { LogIn, AlertCircle, Info, Eye, EyeOff } from "lucide-react";
 import { signIn } from "../hooks/useAuth";
@@ -32,6 +32,19 @@ export default function AuthGate() {
   const [error, setError]       = useState("");
   const [busy, setBusy]         = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const videoRef = useRef(null);
+  const [videoReady, setVideoReady] = useState(false);
+
+  /* Ensure the video stays in sync after tab/visibility changes */
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const play = () => v.play().catch(() => {});
+    const onVisible = () => { if (!document.hidden) play(); };
+    document.addEventListener("visibilitychange", onVisible);
+    play();
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -47,12 +60,38 @@ export default function AuthGate() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center gc-diag-bg gc-noise px-4">
-      {/* Corner brackets */}
-      <div className="fixed top-4 left-4 w-14 h-14 border-t-2 border-l-2 border-gc-crimson/15 pointer-events-none" />
-      <div className="fixed bottom-4 right-4 w-14 h-14 border-b-2 border-r-2 border-gc-crimson/15 pointer-events-none" />
-      <div className="fixed top-4 right-4 w-14 h-14 border-t-2 border-r-2 border-gc-steel/10 pointer-events-none" />
-      <div className="fixed bottom-4 left-4 w-14 h-14 border-b-2 border-l-2 border-gc-steel/10 pointer-events-none" />
+    <div className="relative min-h-screen overflow-hidden bg-gc-void">
+      {/* ── Video background layer ── */}
+      <video
+        ref={videoRef}
+        autoPlay
+        loop
+        muted
+        playsInline
+        onCanPlayThrough={() => setVideoReady(true)}
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+          videoReady ? "opacity-40" : "opacity-0"
+        }`}
+      >
+        <source src="/login-bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* ── Dark gradient overlay for readability ── */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, rgba(8,8,8,0.55) 0%, rgba(8,8,8,0.85) 70%, rgba(8,8,8,0.95) 100%)",
+        }}
+      />
+
+      {/* ── Content layer (gc-noise grain sits on top via ::before z-9999) ── */}
+      <div className="relative z-[1] flex min-h-screen items-center justify-center gc-noise px-4">
+        {/* Corner brackets */}
+        <div className="fixed top-4 left-4 w-14 h-14 border-t-2 border-l-2 border-gc-crimson/15 pointer-events-none" />
+        <div className="fixed bottom-4 right-4 w-14 h-14 border-b-2 border-r-2 border-gc-crimson/15 pointer-events-none" />
+        <div className="fixed top-4 right-4 w-14 h-14 border-t-2 border-r-2 border-gc-steel/10 pointer-events-none" />
+        <div className="fixed bottom-4 left-4 w-14 h-14 border-b-2 border-l-2 border-gc-steel/10 pointer-events-none" />
 
       {/* Grid overlay */}
       <div
@@ -201,6 +240,7 @@ export default function AuthGate() {
           v2.0 — PLAYVERSE OPS
         </p>
       </motion.div>
+      </div>
     </div>
   );
 }
