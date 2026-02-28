@@ -260,44 +260,60 @@ export function TaskBoardSkeleton() {
   );
 }
 
-/** Role Tasking — header + tab switcher + search + person rows */
+/** Role Tasking — header + tab pills + search + person rows */
 export function RoleTaskingSkeleton() {
   return (
-    <div className="space-y-4 py-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <SkeletonBlock className="h-7 w-40" />
-        <div className="flex items-center gap-2">
-          <SkeletonBlock className="h-8 w-24 rounded" />
+    <div className="mx-auto max-w-5xl">
+      {/* ── Header row: title+subtitle | action buttons ── */}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1.5">
+          <SkeletonBlock className="h-8 w-52" />
+          <SkeletonLine width="w-40" className="h-2.5" />
+        </div>
+        <div className="flex gap-2 self-start">
           <SkeletonBlock className="h-8 w-28 rounded" />
+          <SkeletonBlock className="h-8 w-32 rounded" />
         </div>
       </div>
-      {/* Tab switcher: 2 pills */}
-      <div className="flex gap-1 rounded border border-gc-steel/20 bg-gc-iron/30 p-1 w-fit">
-        <SkeletonBlock className="h-8 w-28 rounded" />
-        <SkeletonBlock className="h-8 w-32 rounded" />
+
+      {/* ── Tab pills: standalone, no container border ── */}
+      <div className="mb-4 flex gap-1.5">
+        <SkeletonBlock className="h-9 w-28 rounded" />
+        <SkeletonBlock className="h-9 w-32 rounded" />
       </div>
-      {/* Search input */}
-      <SkeletonBlock className="h-10 w-full rounded" />
-      {/* Result count */}
-      <SkeletonLine width="w-24" className="h-2.5" />
-      {/* Person rows */}
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="gc-card p-4 flex items-center gap-3 opacity-0 animate-fade-in"
-          style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "forwards" }}
-        >
-          <SkeletonCircle size="h-9 w-9" />
-          <div className="flex-1 space-y-1.5">
-            <SkeletonLine width="w-1/3" className="h-3.5" />
-            <SkeletonLine width="w-1/4" className="h-2" />
-          </div>
-          <SkeletonBlock className="h-5 w-10 rounded" />
-          <SkeletonBlock className="h-5 w-16 rounded" />
-          <SkeletonBlock className="h-4 w-4 rounded" />
+
+      <div className="space-y-3">
+        {/* Search input */}
+        <SkeletonBlock className="h-10 w-full rounded" />
+
+        {/* Result count */}
+        <SkeletonLine width="w-28" className="h-2.5" />
+
+        {/* Person cards */}
+        <div className="space-y-2">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div
+              key={i}
+              className="gc-card overflow-hidden opacity-0 animate-fade-in"
+              style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
+            >
+              <div className="flex w-full items-center gap-3 px-4 py-3">
+                {/* Avatar */}
+                <SkeletonCircle size="h-9 w-9" />
+                {/* Name + assignment count */}
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <SkeletonLine width="w-1/3" className="h-3.5" />
+                  <SkeletonLine width="w-16" className="h-2" />
+                </div>
+                {/* Edit button */}
+                <SkeletonBlock className="h-7 w-7 rounded shrink-0" />
+                {/* Chevron */}
+                <SkeletonBlock className="h-4 w-4 rounded shrink-0" />
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
