@@ -10,6 +10,8 @@ import { normalizeCommitteeName } from "../lib/roleConfig";
 import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";
 import IncidentNotificationToggle from "./profile/IncidentNotificationToggle";
+import Modal from "./Modal";
+import ContributionHub from "./contributions/ContributionHub";
 
 /**
  * Build a lookup: canonical committee name → seed COMMITTEES entry.
@@ -19,7 +21,6 @@ const SEED_BY_CANONICAL = Object.fromEntries(
   COMMITTEES.map((c) => [normalizeCommitteeName(c.id), c])
 );
 import AdminResetPanel from "./AdminResetPanel";
-import { useTab } from "../App";
 import { useTheme } from "../hooks/useTheme";
 
 const fadeUp = {
@@ -28,6 +29,7 @@ const fadeUp = {
 };
 
 export default function ProfilePanel() {
+  const [contribOpen, setContribOpen] = useState(false);
   const { user, profile, setProfile } = useAuth();
   const { setTab } = useTab();
   const { mode, setTheme } = useTheme();
@@ -264,7 +266,7 @@ export default function ProfilePanel() {
 
         <button
           type="button"
-          onClick={() => setTab("contributions")}
+          onClick={() => setContribOpen(true)}
           className="w-full flex items-center justify-center gap-2 rounded border border-gc-steel/60 bg-gc-iron px-3 py-2 text-xs font-semibold text-gc-mist transition-colors hover:border-gc-steel hover:text-gc-cloud"
         >
           Open Contributions Tracker
@@ -345,6 +347,11 @@ export default function ProfilePanel() {
           <AdminResetPanel />
         </motion.div>
       )}
+
+      {/* Contributions modal */}
+      <Modal open={contribOpen} onClose={() => setContribOpen(false)} title="CONTRIBUTIONS" wide>
+        <ContributionHub />
+      </Modal>
     </motion.div>
   );
 }
