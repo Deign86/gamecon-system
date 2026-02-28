@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { ChevronDown, BarChart3, FileSpreadsheet } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";

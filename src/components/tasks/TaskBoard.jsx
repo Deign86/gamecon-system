@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Plus, Filter, Calendar, Loader2, KanbanSquare } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { TaskBoardSkeleton } from "../Skeleton";

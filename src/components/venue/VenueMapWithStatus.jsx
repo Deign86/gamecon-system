@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Map, Loader2, AlertTriangle, ArrowLeft } from "lucide-react";
 import { VenueMapSkeleton } from "../Skeleton";
 import { useVenueStatus } from "../../hooks/useVenueStatus";

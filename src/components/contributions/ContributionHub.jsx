@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck } from "lucide-react";
 import { useCollection } from "../../hooks/useFirestore";
 import { useAuth } from "../../hooks/useAuth";

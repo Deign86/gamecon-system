@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
+import { useNavigate } from "react-router";
 import { useTotalHeadcount } from "../../hooks/useTotalHeadcount";
 import { AuthProvider, useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";

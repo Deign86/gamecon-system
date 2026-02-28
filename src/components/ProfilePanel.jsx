@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, ChevronRight, Sun, Moon, Monitor } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";

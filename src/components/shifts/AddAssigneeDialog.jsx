@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Search, UserPlus, X, Users, Star } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
 

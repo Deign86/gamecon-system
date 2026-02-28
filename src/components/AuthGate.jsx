@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { LogIn, AlertCircle, Info, Eye, EyeOff } from "lucide-react";
 import { signIn } from "../hooks/useAuth";
 import GCLogo from "./GCLogo";

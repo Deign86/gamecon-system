@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Users, Check, Clock, ShieldCheck, X, Download, FileSpreadsheet } from "lucide-react";
 import { ATTENDANCE_STATUSES, STATUS_META } from "../../lib/attendanceConfig";
 import { exportAttendance } from "../../lib/exportExcel";

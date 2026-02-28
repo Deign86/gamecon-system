@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { getZoneTypeColor } from "../../lib/venueZones";
 
 const overlayVariant = {

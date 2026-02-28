@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext, lazy, Suspense } from "react";
-import { Routes, Route } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { Routes, Route } from "react-router";
+import { AnimatePresence, motion } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ToastProvider } from "./components/Toast";

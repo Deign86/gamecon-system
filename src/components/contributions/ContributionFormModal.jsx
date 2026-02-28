@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, Send, CheckCircle } from "lucide-react";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { createContribution, updateContribution } from "../../lib/contributionsFirestore";

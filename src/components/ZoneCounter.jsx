@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Plus, Minus, TrendingUp, Maximize2 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useHeadcount } from "../hooks/useHeadcount";
 import { ZoneCounterSkeleton } from "./Skeleton";
 import { useAuth } from "../hooks/useAuth";

@@ -13,7 +13,7 @@
  * If `requires` is "cache" (default), children render normally even offline.
  */
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { WifiOff, ShieldOff, CloudOff } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 

@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { Clock, Flag, MapPin, Users } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
 

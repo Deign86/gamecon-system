@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Search, Plus, Pencil, Trash2, Shield, UserRound, ChevronRight, ClipboardList } from "lucide-react";
 import { ContributionListSkeleton } from "../Skeleton";
 import { useAuth } from "../../hooks/useAuth";

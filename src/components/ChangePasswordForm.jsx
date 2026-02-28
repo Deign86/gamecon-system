@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, WifiOff } from "lucide-react";
 import { changePassword } from "../lib/changePassword";
 import { logActivity } from "../lib/auditLog";

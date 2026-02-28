@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { Check, Clock, ShieldCheck, X, Search, Filter } from "lucide-react";
 import { markAttendance } from "../../lib/attendanceFirestore";
 import { logActivity } from "../../lib/auditLog";

@@ -1,4 +1,4 @@
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { Plus, KanbanSquare } from "lucide-react";
 import { cn } from "../../lib/utils";
 import TaskCard from "./TaskCard";

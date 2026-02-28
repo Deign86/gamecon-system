@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { X, Plus, ChevronDown, Save, Loader2, Pencil } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { COMMITTEE_NAMES, DAY_SLOTS } from "../../lib/roleConfig";

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { ListChecks, BarChart3, UserX, Loader2 } from "lucide-react";
 import { AttendanceSkeleton } from "../Skeleton";
 import { ATTENDANCE_SESSIONS } from "../../lib/attendanceConfig";

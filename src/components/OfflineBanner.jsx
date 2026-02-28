@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   WifiOff,
   RefreshCw,
