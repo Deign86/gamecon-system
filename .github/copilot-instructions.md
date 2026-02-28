@@ -6,6 +6,15 @@ This file governs all development in this workspace: frontend design, component 
 
 ## 0 · Auto-Invoked Skills
 
+**Context7 Documentation — ALWAYS AUTO-INVOKE.**
+Before writing or modifying ANY code that uses a project dependency, you MUST fetch up-to-date documentation via Context7:
+
+1. **Resolve** the library ID by calling `resolve-library-id` with the package name (e.g., `react`, `motion`, `firebase`, `tailwindcss`).
+2. **Fetch** relevant docs by calling `get-library-docs` with the resolved ID and a topic matching your task (e.g., `hooks`, `AnimatePresence`, `firestore queries`).
+3. **Apply** the latest API patterns from the returned docs — do not rely on training-data assumptions about library APIs.
+
+This applies to every prompt that touches project dependencies — no exceptions. When a task involves multiple libraries, resolve and fetch docs for each one.
+
 **Frontend Design Skill — ALWAYS AUTO-INVOKE.**
 Before writing or modifying ANY UI component, you MUST read and follow the frontend design skill:
 

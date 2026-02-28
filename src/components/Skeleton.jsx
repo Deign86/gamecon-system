@@ -28,76 +28,113 @@ export function SkeletonLine({ className, width = "w-full" }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   DASHBOARD HERO BANNER SKELETON (shared by App & Route)
+   ═══════════════════════════════════════════════════════════ */
+
+function HeroBannerSkeleton() {
+  return (
+    <div className="relative mb-6 overflow-hidden rounded-md border border-gc-steel/30 bg-gc-slate p-5 sm:p-7">
+      {/* Corner brackets */}
+      <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-gc-crimson/20 pointer-events-none" />
+      <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-gc-crimson/20 pointer-events-none" />
+      {/* Status line */}
+      <SkeletonLine width="w-40" className="h-2 mb-3" />
+      {/* PLAY VERSE heading */}
+      <SkeletonBlock className="h-9 w-56 sm:w-64 mb-2" />
+      {/* Subtitle */}
+      <SkeletonLine width="w-52" className="h-3 mb-3" />
+      {/* Info chips */}
+      <div className="flex flex-wrap gap-2">
+        <SkeletonBlock className="h-6 w-40 rounded" />
+        <SkeletonBlock className="h-6 w-28 rounded" />
+        <SkeletonBlock className="h-6 w-32 rounded" />
+      </div>
+    </div>
+  );
+}
+
+/** Dashboard card placeholder — icon circle + label + dot */
+function DashboardCardSkeleton({ delay = 0 }) {
+  return (
+    <div
+      className="gc-card flex flex-col items-center gap-3 p-5 sm:p-6 text-center opacity-0 animate-fade-in"
+      style={{ animationDelay: `${delay}s`, animationFillMode: "forwards" }}
+    >
+      {/* Module ID tag */}
+      <div className="absolute top-2 right-2">
+        <SkeletonLine width="w-6" className="h-1.5" />
+      </div>
+      {/* Icon */}
+      <SkeletonBlock className="h-12 w-12 rounded" />
+      {/* Label */}
+      <SkeletonLine width="w-24" className="h-4" />
+      {/* Dot indicator */}
+      <SkeletonCircle size="h-1 w-1" />
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
    APP-LEVEL SKELETON (auth loading / route fallback)
    ═══════════════════════════════════════════════════════════ */
 
 export function AppSkeleton() {
   return (
     <div className="flex h-screen flex-col gc-diag-bg gc-noise">
-      {/* Corner brackets */}
-      <div className="fixed top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-gc-crimson/20 pointer-events-none" />
-      <div className="fixed bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-gc-crimson/20 pointer-events-none" />
-
-      {/* Top nav skeleton */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gc-steel/20">
-        <SkeletonBlock className="h-8 w-28" />
-        <div className="flex items-center gap-3">
-          <SkeletonBlock className="h-6 w-20" />
-          <SkeletonCircle size="h-8 w-8" />
+      {/* Top nav skeleton — matches TopNav: logo + title | clock + exit btn */}
+      <header className="sticky top-0 z-40 border-b border-gc-steel/40 backdrop-blur-xl bg-gc-void/90">
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-gc-crimson/20 to-transparent" />
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+          <div className="flex items-center gap-3">
+            <SkeletonBlock className="h-9 w-9 rounded" />
+            <div className="space-y-1">
+              <SkeletonBlock className="h-4 w-28" />
+              <SkeletonLine width="w-20" className="h-2" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <SkeletonBlock className="h-6 w-20 rounded hidden sm:block" />
+            <SkeletonBlock className="h-8 w-16 rounded" />
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Content area */}
-      <div className="flex-1 px-4 pt-6 space-y-5 max-w-5xl mx-auto w-full">
-        {/* Title bar */}
-        <div className="flex items-center gap-3">
-          <SkeletonBlock className="h-7 w-48" />
+      {/* Content area — matches Dashboard: hero banner + 3×3 card grid */}
+      <main className="flex-1 overflow-y-auto px-3 pb-24 pt-4 sm:px-6">
+        <div className="mx-auto max-w-5xl">
+          <HeroBannerSkeleton />
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <DashboardCardSkeleton key={i} delay={i * 0.04} />
+            ))}
+          </div>
         </div>
+      </main>
 
-        {/* Card grid skeleton (dashboard cards) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {Array.from({ length: 9 }).map((_, i) => (
-            <div
-              key={i}
-              className="gc-skeleton rounded-md h-24 opacity-0 animate-fade-in"
-              style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Bottom nav skeleton */}
-      <div className="fixed bottom-0 inset-x-0 border-t border-gc-steel/20 bg-gc-void/90 backdrop-blur-sm px-6 py-3">
-        <div className="flex items-center justify-around max-w-md mx-auto">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-1.5">
+      {/* Bottom nav skeleton — matches BottomNav */}
+      <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-gc-steel/30 backdrop-blur-xl bg-gc-void/90">
+        <div className="h-px bg-gradient-to-r from-transparent via-gc-crimson/40 to-transparent" />
+        <div className="mx-auto flex h-16 max-w-md items-stretch justify-around px-1">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex flex-1 flex-col items-center justify-center gap-0.5">
               <SkeletonBlock className="h-5 w-5 rounded" />
-              <SkeletonBlock className="h-2 w-10" />
+              <SkeletonLine width="w-10" className="h-2" />
             </div>
           ))}
         </div>
-      </div>
+      </nav>
     </div>
   );
 }
 
-/** Route-level fallback — lighter than AppSkeleton */
+/** Route-level fallback — mirrors Dashboard layout (hero + card grid) */
 export function RouteFallbackSkeleton() {
   return (
-    <div className="space-y-5 pt-2">
-      {/* Title bar */}
-      <div className="flex items-center gap-3">
-        <SkeletonBlock className="h-7 w-44" />
-        <SkeletonBlock className="h-7 w-24 ml-auto" />
-      </div>
-      {/* Content rows */}
-      <div className="space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <SkeletonBlock
-            key={i}
-            className="h-16 rounded-md opacity-0 animate-fade-in"
-            style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "forwards" }}
-          />
+    <div className="mx-auto max-w-5xl">
+      <HeroBannerSkeleton />
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <DashboardCardSkeleton key={i} delay={i * 0.04} />
         ))}
       </div>
     </div>
@@ -108,28 +145,38 @@ export function RouteFallbackSkeleton() {
    CONTEXTUAL SKELETONS — one per major view
    ═══════════════════════════════════════════════════════════ */
 
-/** Zone Counter / headcount grid skeleton */
+/** Zone Counter / headcount — total banner + 2-col zone card grid */
 export function ZoneCounterSkeleton() {
   return (
-    <div className="space-y-4">
-      {/* Header bar */}
-      <div className="flex items-center justify-between">
-        <SkeletonBlock className="h-5 w-32" />
-        <SkeletonBlock className="h-8 w-20 rounded" />
+    <div className="space-y-5">
+      {/* Total banner */}
+      <div className="flex items-center justify-between rounded bg-gc-crimson/10 border border-gc-crimson/25 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <SkeletonBlock className="h-5 w-5 rounded" />
+          <SkeletonLine width="w-20" className="h-3" />
+        </div>
+        <div className="flex items-center gap-3">
+          <SkeletonBlock className="h-7 w-14 rounded" />
+          <SkeletonBlock className="h-8 w-8 rounded" />
+        </div>
       </div>
-      {/* Zone cards grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {Array.from({ length: 6 }).map((_, i) => (
+      {/* Zone cards grid — 2 columns on sm+ */}
+      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="gc-card p-4 space-y-3 opacity-0 animate-fade-in"
-            style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "forwards" }}
+            className="gc-card flex items-center gap-3 p-3 sm:p-4 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
           >
-            <SkeletonLine width="w-3/4" />
-            <SkeletonBlock className="h-10 w-16 rounded mx-auto" />
-            <div className="flex justify-center gap-2">
-              <SkeletonBlock className="h-8 w-8 rounded" />
-              <SkeletonBlock className="h-8 w-8 rounded" />
+            {/* Icon box */}
+            <SkeletonBlock className="h-9 w-9 rounded shrink-0" />
+            {/* Zone name */}
+            <SkeletonLine width="w-24" className="h-3 flex-1" />
+            {/* Counter controls: - / count / + */}
+            <div className="flex items-center gap-2 ml-auto">
+              <SkeletonBlock className="h-9 w-9 rounded shrink-0" />
+              <SkeletonBlock className="h-8 w-12 rounded" />
+              <SkeletonBlock className="h-9 w-9 rounded shrink-0" />
             </div>
           </div>
         ))}
@@ -138,24 +185,24 @@ export function ZoneCounterSkeleton() {
   );
 }
 
-/** Shift Board skeleton */
+/** Shift Board — block tabs + summary bar + committee rows */
 export function ShiftBoardSkeleton() {
   return (
     <div className="space-y-3">
-      {Array.from({ length: 4 }).map((_, i) => (
+      {/* Committee rows (collapsed) */}
+      {Array.from({ length: 8 }).map((_, i) => (
         <div
           key={i}
-          className="gc-card p-4 space-y-3 opacity-0 animate-fade-in"
-          style={{ animationDelay: `${i * 0.06}s`, animationFillMode: "forwards" }}
+          className="rounded border border-gc-steel/40 overflow-hidden opacity-0 animate-fade-in"
+          style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
         >
-          <div className="flex items-center justify-between">
-            <SkeletonBlock className="h-5 w-40" />
-            <SkeletonBlock className="h-4 w-12 rounded" />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {Array.from({ length: 3 }).map((_, j) => (
-              <SkeletonBlock key={j} className="h-7 w-20 rounded-full" />
-            ))}
+          {/* Row header: dot + name + count + status chip + chevron */}
+          <div className="flex items-center gap-3 px-4 py-3">
+            <SkeletonCircle size="h-2.5 w-2.5" />
+            <SkeletonLine width="w-36" className="h-4" />
+            <SkeletonLine width="w-10" className="h-3 ml-1" />
+            <SkeletonBlock className="h-5 w-16 rounded ml-auto" />
+            <SkeletonBlock className="h-4 w-4 rounded" />
           </div>
         </div>
       ))}
@@ -163,117 +210,166 @@ export function ShiftBoardSkeleton() {
   );
 }
 
-/** Task Board kanban skeleton */
+/** Task Board kanban — day tabs + summary + 3-column grid */
 export function TaskBoardSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {Array.from({ length: 3 }).map((_, col) => (
-        <div
-          key={col}
-          className="space-y-3 opacity-0 animate-fade-in"
-          style={{ animationDelay: `${col * 0.07}s`, animationFillMode: "forwards" }}
-        >
-          {/* Column header */}
-          <SkeletonBlock className="h-6 w-24 rounded" />
-          {/* Task cards */}
-          {Array.from({ length: col === 0 ? 3 : 2 }).map((_, j) => (
-            <div key={j} className="gc-card p-3 space-y-2">
-              <SkeletonLine width="w-4/5" />
-              <SkeletonLine width="w-2/3" className="h-2" />
-              <div className="flex items-center gap-2 pt-1">
-                <SkeletonCircle size="h-5 w-5" />
-                <SkeletonLine width="w-16" className="h-2" />
-              </div>
+    <div className="space-y-4">
+      {/* Kanban columns */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {["todo", "in_progress", "done"].map((col, colIdx) => (
+          <div
+            key={col}
+            className="flex flex-col min-w-0 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${colIdx * 0.06}s`, animationFillMode: "forwards" }}
+          >
+            {/* Column header: dot + title + count */}
+            <div className="flex items-center gap-2 mb-3">
+              <SkeletonCircle size="h-2.5 w-2.5" />
+              <SkeletonBlock className="h-5 w-20 rounded" />
+              <SkeletonBlock className="h-4 w-6 rounded" />
             </div>
-          ))}
-        </div>
-      ))}
+            {/* Task cards */}
+            <div className="flex-1 space-y-2.5">
+              {Array.from({ length: colIdx === 0 ? 3 : 2 }).map((_, j) => (
+                <div key={j} className="gc-card gc-slash p-3 space-y-2">
+                  {/* Title */}
+                  <SkeletonLine width="w-4/5" className="h-3.5" />
+                  {/* Description */}
+                  <SkeletonLine width="w-2/3" className="h-2.5" />
+                  {/* Badge row */}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    <SkeletonBlock className="h-5 w-12 rounded-full" />
+                    <SkeletonBlock className="h-5 w-16 rounded-full" />
+                  </div>
+                  {/* Footer: assignee avatars + time */}
+                  <div className="flex items-center justify-between mt-2.5">
+                    <div className="flex -space-x-1.5">
+                      {Array.from({ length: 2 }).map((_, k) => (
+                        <SkeletonCircle key={k} size="h-5 w-5" />
+                      ))}
+                    </div>
+                    <SkeletonLine width="w-10" className="h-2" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-/** Role Tasking skeleton */
+/** Role Tasking — header + tab switcher + search + person rows */
 export function RoleTaskingSkeleton() {
   return (
     <div className="space-y-4 py-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <SkeletonBlock className="h-7 w-48" />
+        <SkeletonBlock className="h-7 w-40" />
+        <div className="flex items-center gap-2">
+          <SkeletonBlock className="h-8 w-24 rounded" />
+          <SkeletonBlock className="h-8 w-28 rounded" />
+        </div>
+      </div>
+      {/* Tab switcher: 2 pills */}
+      <div className="flex gap-1 rounded border border-gc-steel/20 bg-gc-iron/30 p-1 w-fit">
         <SkeletonBlock className="h-8 w-28 rounded" />
+        <SkeletonBlock className="h-8 w-32 rounded" />
       </div>
-      {/* Toolbar */}
-      <div className="flex gap-2">
-        <SkeletonBlock className="h-9 w-32 rounded" />
-        <SkeletonBlock className="h-9 w-32 rounded" />
-        <SkeletonBlock className="h-9 w-24 rounded ml-auto" />
-      </div>
+      {/* Search input */}
+      <SkeletonBlock className="h-10 w-full rounded" />
+      {/* Result count */}
+      <SkeletonLine width="w-24" className="h-2.5" />
       {/* Person rows */}
       {Array.from({ length: 5 }).map((_, i) => (
         <div
           key={i}
-          className="gc-card p-4 flex items-center gap-4 opacity-0 animate-fade-in"
+          className="gc-card p-4 flex items-center gap-3 opacity-0 animate-fade-in"
           style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "forwards" }}
         >
           <SkeletonCircle size="h-9 w-9" />
-          <div className="flex-1 space-y-2">
-            <SkeletonLine width="w-1/3" />
-            <SkeletonLine width="w-1/2" className="h-2" />
-          </div>
-          <SkeletonBlock className="h-6 w-16 rounded" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** Logs Panel skeleton */
-export function LogsPanelSkeleton() {
-  return (
-    <div className="space-y-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
-          key={i}
-          className="gc-card p-3 flex items-start gap-3 opacity-0 animate-fade-in"
-          style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
-        >
-          <SkeletonCircle size="h-7 w-7" />
-          <div className="flex-1 space-y-2">
-            <SkeletonLine width="w-2/3" />
-            <SkeletonLine width="w-full" className="h-2" />
+          <div className="flex-1 space-y-1.5">
+            <SkeletonLine width="w-1/3" className="h-3.5" />
             <SkeletonLine width="w-1/4" className="h-2" />
           </div>
-          <SkeletonBlock className="h-4 w-14" />
+          <SkeletonBlock className="h-5 w-10 rounded" />
+          <SkeletonBlock className="h-5 w-16 rounded" />
+          <SkeletonBlock className="h-4 w-4 rounded" />
         </div>
       ))}
     </div>
   );
 }
 
-/** Venue Map skeleton */
-export function VenueMapSkeleton() {
+/** Logs Panel — header block + filter pills + log entries */
+export function LogsPanelSkeleton() {
   return (
-    <div className="space-y-4 py-2">
-      {/* Day toggle + stats bar */}
-      <div className="flex items-center justify-between">
-        <SkeletonBlock className="h-9 w-48 rounded" />
-        <div className="flex gap-2">
-          <SkeletonBlock className="h-6 w-16 rounded" />
-          <SkeletonBlock className="h-6 w-16 rounded" />
-        </div>
+    <div className="space-y-4">
+      {/* Header block */}
+      <div className="space-y-2">
+        <SkeletonLine width="w-36" className="h-2" />
+        <SkeletonBlock className="h-7 w-40" />
+        <SkeletonLine width="w-60" className="h-2.5" />
       </div>
-      {/* Map placeholder */}
-      <SkeletonBlock className="h-64 sm:h-80 rounded-md w-full" />
-      {/* Legend */}
-      <div className="flex gap-3 justify-center">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <SkeletonBlock key={i} className="h-4 w-16 rounded" />
+      {/* Category filter pills */}
+      <div className="flex gap-1.5 overflow-x-auto">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <SkeletonBlock key={i} className="h-7 w-16 rounded-full shrink-0" />
+        ))}
+      </div>
+      {/* Log entries */}
+      <div className="space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="gc-card flex items-center gap-3 p-3 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
+          >
+            {/* Category icon box */}
+            <SkeletonBlock className="h-9 w-9 rounded shrink-0" />
+            {/* Text lines */}
+            <div className="flex-1 space-y-1.5">
+              <SkeletonLine width="w-3/4" className="h-3" />
+              <SkeletonLine width="w-1/2" className="h-2" />
+            </div>
+            {/* Category badge */}
+            <SkeletonBlock className="h-5 w-14 rounded shrink-0" />
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
-/** User Management Table skeleton */
+/** Venue Map — day toggle + map title + map container + legend */
+export function VenueMapSkeleton() {
+  return (
+    <div className="space-y-4 py-2">
+      {/* Day toggle + badges */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex rounded border border-gc-steel/40 bg-gc-iron/50 p-1 gap-1">
+          <SkeletonBlock className="h-8 w-28 rounded" />
+          <SkeletonBlock className="h-8 w-28 rounded" />
+        </div>
+        <SkeletonBlock className="h-6 w-20 rounded" />
+      </div>
+      {/* Map title */}
+      <SkeletonLine width="w-56 mx-auto" className="h-3" />
+      {/* Map container */}
+      <div className="relative rounded-md border border-gc-steel/40 bg-gc-slate overflow-hidden">
+        {/* Corner brackets */}
+        <div className="absolute top-2 left-2 w-4 h-4 border-t border-l border-gc-crimson/15 pointer-events-none" />
+        <div className="absolute top-2 right-2 w-4 h-4 border-t border-r border-gc-crimson/15 pointer-events-none" />
+        <div className="absolute bottom-2 left-2 w-4 h-4 border-b border-l border-gc-crimson/15 pointer-events-none" />
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-gc-crimson/15 pointer-events-none" />
+        <SkeletonBlock className="h-64 sm:h-80 w-full rounded-none" />
+      </div>
+    </div>
+  );
+}
+
+/** User Management Table — header + data rows */
 export function UserTableSkeleton() {
   return (
     <div className="overflow-hidden rounded border border-gc-steel/40 bg-gc-slate/60">
@@ -311,33 +407,54 @@ export function UserTableSkeleton() {
   );
 }
 
-/** Full-screen headcount skeleton */
+/** Full-screen headcount skeleton — standalone page with atmospheric details */
 export function HeadcountFullSkeleton() {
   return (
-    <div className="flex h-screen flex-col items-center justify-center bg-gc-void">
-      <SkeletonBlock className="h-32 w-48 rounded-md mb-6" />
-      <SkeletonBlock className="h-5 w-32 mb-2" />
-      <div className="flex gap-6 mt-8">
-        <SkeletonBlock className="h-16 w-16 rounded-full" />
-        <SkeletonBlock className="h-16 w-16 rounded-full" />
+    <div className="relative flex h-screen flex-col items-center justify-center bg-gc-void select-none overflow-hidden gc-diag-bg">
+      {/* Live indicator — top left */}
+      <div className="absolute top-5 left-5 flex items-center gap-2">
+        <SkeletonCircle size="h-2 w-2" />
+        <SkeletonBlock className="h-3 w-8 rounded" />
+      </div>
+      {/* Back button — top right */}
+      <div className="absolute top-5 right-5">
+        <SkeletonBlock className="h-9 w-28 rounded border border-gc-steel/40" />
+      </div>
+      {/* Eye icon */}
+      <SkeletonBlock className="h-14 w-14 sm:h-20 sm:w-20 rounded mb-4" />
+      {/* Giant counter */}
+      <SkeletonBlock className="h-32 w-48 sm:h-48 sm:w-64 rounded-md mb-2" />
+      {/* Label */}
+      <SkeletonBlock className="h-3 w-24 rounded" />
+      {/* +/− control buttons — bottom */}
+      <div className="absolute bottom-10 sm:bottom-14 flex gap-6">
+        <SkeletonBlock className="h-16 w-16 sm:h-20 sm:w-20 rounded-md" />
+        <SkeletonBlock className="h-16 w-16 sm:h-20 sm:w-20 rounded-md" />
+      </div>
+      {/* Keyboard hint */}
+      <div className="absolute bottom-3 sm:bottom-5 flex items-center gap-2">
+        <SkeletonBlock className="h-5 w-6 rounded" />
+        <SkeletonBlock className="h-3 w-16 rounded" />
+        <SkeletonBlock className="h-5 w-6 rounded" />
       </div>
     </div>
   );
 }
 
-/** Attendance page skeleton */
+/** Attendance page — volunteer list (block tabs & sub-tabs render above) */
 export function AttendanceSkeleton() {
   return (
     <div className="space-y-3">
+      {/* Volunteer rows */}
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
           className="gc-card p-3 flex items-center gap-3 opacity-0 animate-fade-in"
-          style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "forwards" }}
+          style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
         >
           <SkeletonCircle size="h-8 w-8" />
           <div className="flex-1 space-y-1.5">
-            <SkeletonLine width="w-1/3" />
+            <SkeletonLine width="w-1/3" className="h-3" />
             <SkeletonLine width="w-1/4" className="h-2" />
           </div>
           <SkeletonBlock className="h-7 w-20 rounded" />
@@ -347,22 +464,159 @@ export function AttendanceSkeleton() {
   );
 }
 
-/** Contribution person list skeleton */
+/** Contribution hub — tab bar + content form/list */
 export function ContributionListSkeleton() {
   return (
-    <div className="space-y-1">
+    <div className="space-y-4">
+      {/* Tab bar */}
+      <div className="flex gap-1 rounded border border-gc-steel/20 bg-gc-iron/30 p-1">
+        <SkeletonBlock className="h-8 flex-1 rounded" />
+        <SkeletonBlock className="h-8 flex-1 rounded" />
+        <SkeletonBlock className="h-8 flex-1 rounded" />
+      </div>
+      {/* Form area */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <SkeletonBlock className="h-10 w-full rounded" />
+          <SkeletonBlock className="h-10 w-full rounded" />
+        </div>
+        <SkeletonBlock className="h-20 w-full rounded" />
+        <SkeletonBlock className="h-9 w-36 rounded" />
+      </div>
+      {/* Recent heading */}
+      <SkeletonBlock className="h-5 w-28" />
+      {/* Contribution items */}
+      <div className="space-y-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-start gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
+          >
+            <SkeletonCircle size="h-2 w-2" className="mt-1.5 shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <SkeletonLine width="w-1/2" className="h-3" />
+              <SkeletonLine width="w-3/4" className="h-2.5" />
+              <SkeletonLine width="w-1/3" className="h-2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Expense tracker — summary banner + expense list */
+export function ExpenseTrackerSkeleton() {
+  return (
+    <div className="space-y-5">
+      {/* Summary banner */}
+      <div className="flex items-center justify-between rounded bg-gc-warning/8 border border-gc-warning/20 px-4 py-3">
+        <div className="flex items-center gap-2">
+          <SkeletonBlock className="h-5 w-5 rounded" />
+          <SkeletonLine width="w-20" className="h-3" />
+        </div>
+        <SkeletonBlock className="h-7 w-20 rounded" />
+      </div>
+      {/* Add button */}
+      <SkeletonBlock className="h-9 w-full rounded" />
+      {/* Expense rows */}
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
+          >
+            <SkeletonCircle size="h-2 w-2" className="shrink-0" />
+            <div className="flex-1 space-y-1.5">
+              <SkeletonLine width="w-1/3" className="h-3" />
+              <SkeletonLine width="w-1/2" className="h-2" />
+            </div>
+            <SkeletonBlock className="h-5 w-16 rounded ml-auto" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Incident log — report form + incident list */
+export function IncidentLogSkeleton() {
+  return (
+    <div className="space-y-5">
+      {/* Quick report form */}
+      <div className="space-y-3 rounded bg-gc-danger/5 border border-gc-danger/15 p-4">
+        <div className="flex items-center gap-2">
+          <SkeletonBlock className="h-5 w-5 rounded" />
+          <SkeletonBlock className="h-4 w-24" />
+        </div>
+        <SkeletonBlock className="h-10 w-full rounded" />
+        <div className="grid grid-cols-2 gap-3">
+          <SkeletonBlock className="h-10 w-full rounded" />
+          <SkeletonBlock className="h-10 w-full rounded" />
+        </div>
+        <SkeletonBlock className="h-20 w-full rounded" />
+        <SkeletonBlock className="h-9 w-32 rounded" />
+      </div>
+      {/* Recent heading + export */}
+      <div className="flex items-center justify-between">
+        <SkeletonBlock className="h-4 w-36" />
+        <SkeletonBlock className="h-7 w-20 rounded" />
+      </div>
+      {/* Incident cards */}
+      <div className="space-y-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="gc-card p-3 space-y-2 opacity-0 animate-fade-in"
+            style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "forwards" }}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1 space-y-1.5">
+                <SkeletonLine width="w-2/3" className="h-3.5" />
+                <SkeletonLine width="w-full" className="h-2.5" />
+                <SkeletonLine width="w-1/2" className="h-2" />
+              </div>
+              <SkeletonBlock className="h-5 w-14 rounded shrink-0 ml-3" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Committee Card — list of committee cards with member tags */
+export function CommitteeCardSkeleton() {
+  return (
+    <div className="space-y-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-3 px-3 py-2.5 rounded opacity-0 animate-fade-in"
+          className="gc-card overflow-hidden opacity-0 animate-fade-in"
           style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "forwards" }}
         >
-          <SkeletonCircle size="h-7 w-7" />
-          <div className="flex-1 space-y-1.5">
-            <SkeletonLine width="w-1/2" />
-            <SkeletonLine width="w-1/3" className="h-2" />
+          {/* Color accent bar */}
+          <div className="h-1 gc-skeleton" />
+          {/* Body */}
+          <div className="p-4 space-y-3">
+            {/* Header: icon + name + count */}
+            <div className="flex items-center gap-3">
+              <SkeletonBlock className="h-8 w-8 rounded shrink-0" />
+              <SkeletonLine width="w-40" className="h-4" />
+              <SkeletonBlock className="h-4 w-8 rounded ml-auto" />
+            </div>
+            {/* Member tags */}
+            <div className="flex flex-wrap gap-1.5">
+              {Array.from({ length: 3 }).map((_, j) => (
+                <div key={j} className="flex items-center gap-1.5">
+                  <SkeletonCircle size="h-4 w-4" />
+                  <SkeletonLine width="w-14" className="h-2.5" />
+                </div>
+              ))}
+            </div>
           </div>
-          <SkeletonBlock className="h-5 w-8 rounded" />
         </div>
       ))}
     </div>
