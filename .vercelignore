@@ -32,5 +32,3 @@ dist/
 .skills/
 .vscode/
 *.xlsx
-# Root-level design assets (not served — public/logo.png is kept)
-gamecon 2026 logo.png

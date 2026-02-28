@@ -21,9 +21,11 @@ ui-debug.log
 # Service worker with embedded Firebase config â€" generated at build time
 public/firebase-messaging-sw.js
 
-# Service account keys — NEVER commit
+# Service account keys and signing keystores — NEVER commit
 *-service-account*.json
 serviceAccountKey*.json
+*.keystore
+*.jks
 
 # Editor / OS files
 .DS_Store
@@ -36,6 +38,10 @@ Thumbs.db
 *.log
 .vercel
 .env*.local
+
+# Python virtual environments
+.venv/
+venv/
 
 # AI assistant config
 .claude/
