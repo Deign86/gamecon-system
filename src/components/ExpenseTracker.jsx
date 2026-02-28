@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Plus, Receipt, TrendingDown } from "lucide-react";
+import { Plus, Receipt, TrendingDown, FileSpreadsheet } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { ROLE_COMMITTEES as COMMITTEES, EXPENSE_CATEGORIES } from "../lib/constants";
 import { peso, fmtDate, cn } from "../lib/utils";
+import { exportExpenses } from "../lib/exportExcel";
 
 export default function ExpenseTracker() {
   const { user, profile }     = useAuth();
+  const isViewer = profile?.role === "viewer";
   const { docs: expenses, add } = useCollection("expenses");
   const [showForm, setShowForm] = useState(false);
   const [item, setItem]       = useState("");
@@ -57,13 +59,25 @@ export default function ExpenseTracker() {
           <TrendingDown className="h-4 w-4 text-gc-warning" />
           <span className="text-sm font-semibold text-gc-cloud">Total Spent</span>
         </div>
-        <span className="font-mono text-2xl font-bold text-gc-warning">
-          {peso(total)}
-        </span>
+        <div className="flex items-center gap-3">
+          {expenses.length > 0 && (
+            <button
+              onClick={() => exportExpenses(expenses)}
+              className="flex items-center gap-1.5 rounded border border-gc-success/30 bg-gc-success/8 px-3 py-1.5 text-[11px] font-display tracking-wider text-gc-success hover:bg-gc-success/15 hover:border-gc-success/50 transition-colors"
+              title="Export expenses to Excel"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              Export
+            </button>
+          )}
+          <span className="font-mono text-2xl font-bold text-gc-warning">
+            {peso(total)}
+          </span>
+        </div>
       </div>
 
       {/* Add button */}
-      {!showForm && (
+      {!isViewer && !showForm && (
         <button
           onClick={() => setShowForm(true)}
           className="gc-btn-ghost w-full"
@@ -73,7 +87,7 @@ export default function ExpenseTracker() {
       )}
 
       {/* Form */}
-      {showForm && (
+      {!isViewer && showForm && (
         <form onSubmit={handleSubmit} className="space-y-3 rounded bg-gc-iron border border-gc-steel/50 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

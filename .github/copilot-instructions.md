@@ -4,18 +4,33 @@ This file governs all development in this workspace: frontend design, component 
 
 ---
 
+## 0 · Auto-Invoked Skills
+
+**Frontend Design Skill — ALWAYS AUTO-INVOKE.**
+Before writing or modifying ANY UI component, you MUST read and follow the frontend design skill:
+
+1. **Load** `.skills/anthropic-skills/skills/frontend-design/SKILL.md` using `read_file`.
+2. **Apply** its Design Thinking process (Purpose → Tone → Differentiation) within this project's established aesthetic (dark industrial / sports-broadcast).
+3. **Follow** its typography, color, motion, and spatial composition guidelines — layered on top of this project's design tokens (§4).
+
+This applies to every prompt that touches `.jsx` files, CSS, layout, or any visual output — no exceptions.
+
+---
+
 ## 1 · Project Overview
 
-**PlayVerse Ops** is the internal operations dashboard for **IT GameCon 2026** (COED Building — Assembly Hall, March 5–6 2026). It is a mobile-first PWA used by event staff (admins, proctors, committee heads, viewers) to manage headcounts, shifts, volunteer roles, contributions, incidents, and user accounts in real time.
+**PlayVerse Ops** is the internal operations dashboard for **IT GameCon 2026** (COED Building — Assembly Hall, March 5–6 2026). It is a mobile-first PWA used by event staff (admins, proctors, committee heads, viewers) to manage headcounts, shifts, volunteer roles, contributions, attendance, tasks, venue status, incidents, and user accounts in real time.
 
 - **Framework**: React 18 + Vite 6
 - **Styling**: Tailwind CSS 3 (custom design tokens — see §4) + `src/index.css` component classes
 - **Animation**: Framer Motion 11 (`motion`, `AnimatePresence`)
-- **Routing**: React Router v7 (single `<Routes>` tree in `src/App.jsx`; navigation is tab-based via `TabCtx`, not URL-based, except for the `/headcount` full-screen standalone route)
+- **Routing**: React Router v7 (single `<Routes>` tree in `src/App.jsx`; navigation is tab-based via `TabCtx`, not URL-based, except for standalone routes)
 - **Backend**: Firebase 10 — Firestore, Auth, Cloud Functions (v2), Cloud Messaging (FCM)
 - **Deployment**: Vercel (project: `playverse-ops`); Firebase Functions deployed separately via `firebase deploy --only functions`
+- **Native wrapper**: Capacitor (Android) + Tauri (desktop) — config in `capacitor.config.json` and `src-tauri/tauri.conf.json`
 - **Icons**: `lucide-react`
 - **Utilities**: `clsx`, `date-fns`, `xlsx` (role-sheet import)
+- **Analytics**: `@vercel/analytics` (imported in `App.jsx`)
 
 ---
 
@@ -27,9 +42,16 @@ This file governs all development in this workspace: frontend design, component 
 - Roles: `admin > proctor > head > viewer`. Role-gated UI is checked inline against `profile.role`.
 - `signIn` / `signOut` are named exports from `useAuth.jsx`.
 
+### Theme System
+- `src/hooks/useTheme.jsx` — `ThemeProvider` exposes `{ mode, effective, setTheme }`.
+- Supports `"system" | "light" | "dark"` modes; resolves via OS media query.
+- Applies class to `<html>` and updates `theme-color` meta tag.
+- Persisted to `localStorage` key `gc-theme-pref`.
+
 ### Tab System
 - `src/App.jsx` exports `TabCtx`; components call `useTab()` to read/set the current tab.
-- Tab keys: `dashboard`, `roles`, `users`, `contributions`, `me`, `logs`.
+- Tab keys: `dashboard`, `roles`, `users`, `me`, `logs`.
+- `contributions` tab has been consolidated into the Dashboard via `ContributionHub`.
 - Tab resets to `dashboard` on user change.
 - All tab views are **lazy-loaded** via `React.lazy`.
 
@@ -40,9 +62,13 @@ All privileged mutations go through callable Cloud Functions that verify the cal
 |---|---|
 | `createUserAccount` | Creates Firebase Auth user + Firestore doc; returns `{ uid, password }` |
 | `updateUserRoleAndCommittee` | Updates role, committee, and/or active status |
+| `setUserRole` | Standalone role update (admin-only) |
 | `setUserActiveStatus` | Enable/disable a user |
+| `resetSystemData` | Wipes all event-data collections + resets headcounts |
 | `deleteUser` | Deletes Auth record + Firestore doc |
-| `onNewIncident` (Firestore trigger) | Fires `sendIncidentNotifications` when an incident document is created |
+| `scheduledCleanupOldLogs` | Scheduled (daily 02:00 Asia/Manila) — deletes logs > 7 days old |
+| `validateCommitteeShiftLimits` | Firestore trigger on `committeeShifts/{docId}` — enforces max assignees, rolls back violations |
+| `onNewIncident` | Firestore trigger on `incidents/{docId}` create — sends FCM push to all registered devices |
 
 Client-side wrappers live in `src/lib/adminApi.js`. `sendPasswordReset` uses the Firebase Auth client SDK directly (no Cloud Function needed).
 
@@ -50,14 +76,19 @@ Client-side wrappers live in `src/lib/adminApi.js`. `sendPasswordReset` uses the
 | Collection | Purpose |
 |---|---|
 | `users` | Staff profiles (name, email, role, committee, active) |
-| `shifts` | Shift block assignments per committee |
+| `committeeShifts` | Per-committee shift assignments per day-block (replaces old `shifts`) |
 | `roleAssignments` | Per-person committee role slots by day |
 | `committeeSchedules` | Per-committee schedule metadata |
 | `contributions` | Volunteer contribution log entries |
 | `expenses` | Budget/expense line items |
 | `incidents` | Incident reports (triggers FCM on create) |
-| `headcount` | Per-zone live counters |
-| `logs` | Admin audit/activity log |
+| `zones` | Per-zone live headcounts (currentCount, peakCount, lastUpdated) |
+| `counters` | Standalone aggregate counters (e.g. `counters/headcount`) |
+| `tasks` | Kanban task board items (title, status, assignees, priority, day) |
+| `attendanceRecords` | Staff attendance check-in records per block per person |
+| `logs` | Client-side audit/activity log (via `auditLog.js`) |
+| `auditLogs` | Server-side audit log (written by Cloud Functions) |
+| `fcmTokens` | Push notification device tokens |
 
 ---
 
@@ -66,7 +97,7 @@ Client-side wrappers live in `src/lib/adminApi.js`. `sendPasswordReset` uses the
 ### Top-level layout (`src/App.jsx`)
 - `AuthGate` — login screen (shown when `!user`)
 - `TopNav` — app header with logo, user name, sign-out
-- `BottomNav` — tab bar (mobile-first)
+- `BottomNav` — tab bar (mobile-first); shows role-appropriate tabs
 - `ForegroundNotificationHandler` — listens for FCM messages and shows toasts
 
 ### Tab views (lazy-loaded)
@@ -75,23 +106,38 @@ Client-side wrappers live in `src/lib/adminApi.js`. `sendPasswordReset` uses the
 | `dashboard` | `Dashboard.jsx` | All authenticated |
 | `roles` | `RoleTasking.jsx` | Admin only |
 | `users` | `admin/AdminUsersPage.jsx` | Admin only |
-| `contributions` | `contributions/ContributionTabs.jsx` | All authenticated |
 | `me` | `ProfilePanel.jsx` | All authenticated |
-| `logs` | `LogsPanel.jsx` | Admin/proctor |
+| `logs` | `LogsPanel.jsx` | Admin only |
 
-### Dashboard cards (via `Modal.jsx`)
-`ZoneCounter`, `ShiftBoard`, `ContributionForm`, `ExpenseTracker`, `IncidentLog`, `CommitteeCard`
+### Standalone routes
+| Route | Component | Notes |
+|---|---|---|
+| `/headcount/fullscreen` | `headcount/FullScreenHeadcountView.jsx` | Full-screen tap counter, standalone |
+| `/admin/users` | `admin/AdminUsersPage.jsx` | Standalone admin users page (own `AuthProvider`) |
 
-### Standalone route
-`/headcount` → `headcount/FullScreenHeadcountView.jsx` — full-screen tap counter with its own `AuthProvider`; uses `useTotalHeadcount` hook.
+### Dashboard cards (9 cards, opened via `Modal.jsx`)
+| Card Key | Component | ID |
+|---|---|---|
+| `headcount` | `ZoneCounter` | M-01 |
+| `shifts` | `ShiftBoard` | M-02 |
+| `attendance` | `AttendancePage` | M-03 |
+| `contributions` | `ContributionHub` | M-04 |
+| `budget` | `ExpenseTracker` | M-05 |
+| `incidents` | `IncidentLog` | M-06 |
+| `committees` | `CommitteeCard` | M-07 |
+| `venuemap` | `VenueMapWithStatus` | M-08 |
+| `tasks` | `TaskBoard` | M-09 |
 
 ### Sub-components
-- `contributions/` — `PersonContributionView`, `CommitteeContributionView`, `ContributionFormModal`
+- `contributions/` — `ContributionHub`, `PersonContributionView`, `CommitteeContributionView`, `ContributionFormModal`
 - `headcount/` — `ZoneCounterCard`
 - `roles/` — `PersonRolesEditor`, `CommitteeScheduleEditor`, `AddPersonDialog`
 - `shifts/` — `ShiftCommitteeRow`, `AddAssigneeDialog`
-- `admin/` — `UserManagementTable`, `EditUserDrawer`, `CreateUserForm`, `UserStatusBadge`
+- `admin/` — `AdminUsersPage`, `UserManagementTable`, `EditUserDrawer`, `CreateUserForm`, `UserStatusBadge`
 - `profile/` — `IncidentNotificationToggle`
+- `tasks/` — `TaskBoard`, `TaskCard`, `TaskColumn`, `TaskFormDrawer`
+- `venue/` — `VenueMapWithStatus`, `ZoneOverlay`, `ZoneDetailDrawer`
+- `attendance/` — `AttendancePage`, `AttendanceList`, `AttendanceSummary`
 
 ### Shared primitives
 `Modal`, `Toast` (+ `useToast` hook from `Toast.jsx`), `ErrorBoundary`, `GCLogo`, `AdminResetPanel`, `ChangePasswordForm`, `ImportRoleSheet`
@@ -146,29 +192,73 @@ Client-side wrappers live in `src/lib/adminApi.js`. `sendPasswordReset` uses the
 | File | Purpose |
 |---|---|
 | `src/lib/roleConfig.js` | `COMMITTEE_MAP`, `COMMITTEE_NAMES`, `DAY_SLOTS`, `APP_ROLES`, `VALID_ROLES` |
+| `src/lib/constants.js` | `ZONES`, `COMMITTEES`, `ROLE_COMMITTEES`, `COMMITTEE_REQUIRED_STAFF`, `EXPENSE_CATEGORIES`, `SHIFT_BLOCKS` |
 | `src/lib/roleFirestore.js` | `subscribeRoleAssignments`, `subscribeCommitteeSchedules` |
 | `src/lib/shiftFirestore.js` | `subscribeShiftsForBlock`, `addAssigneeToShift`, `removeAssigneeFromShift`, `initialiseBlockShifts` |
+| `src/lib/shiftLimitsConfig.js` | `DEFAULT_SHIFT_LIMITS`, `DAY_BLOCK_OVERRIDES`, `getShiftLimits`, `limitKeyForCommittee` |
 | `src/lib/contributionsFirestore.js` | Contribution CRUD + subscriptions |
+| `src/lib/tasksFirestore.js` | Task Board (Kanban) CRUD + `subscribeTasks` real-time subscription |
+| `src/lib/attendanceFirestore.js` | Staff attendance check-in — volunteers from `committeeShifts`, records in `attendanceRecords` |
+| `src/lib/attendanceConfig.js` | `ATTENDANCE_SESSIONS` (derived from `SHIFT_BLOCKS`), `ATTENDANCE_STATUSES`, `STATUS_META`, `attendanceDocId` |
+| `src/lib/venueZones.js` | `VENUE_ZONES`, `HALL_BOUNDS`, `BOOTH_GRID`, `getZonesForDay`, `getZoneTypeLegend`, `ZONE_TYPE_COLORS` — floor plan zone definitions |
+| `src/lib/assigneePicker.js` | `getAssignablePeople` — fetches from `roleAssignments` for task assignee selectors |
 | `src/lib/adminApi.js` | Client wrappers for all admin Cloud Functions |
 | `src/lib/rolesEditor.js` | Mutation helpers for role assignments |
 | `src/lib/parseRoleSheet.js` | `xlsx` parser — reads Excel role sheets against `COMMITTEE_MAP` |
-| `src/lib/resetSystemData.js` | Admin system reset (wipes shifts/roles/contributions) |
+| `src/lib/resetSystemData.js` | Client-side admin system reset helper |
+| `src/lib/auditLog.js` | `logActivity` — structured audit logging to `logs` collection |
 | `src/lib/messaging.js` | FCM token registration helpers |
-| `src/lib/logger.js` | Firestore activity logger |
+| `src/lib/logger.js` | Console-level error/info logging utility |
 | `src/lib/changePassword.js` | Client-side password change |
-| `src/lib/utils.js` | `cn()` (clsx wrapper) and misc helpers |
+| `src/lib/utils.js` | `cn()` (clsx wrapper), `fmtDate`, and misc helpers |
+
+### Hooks
+| Hook | Purpose |
+|---|---|
+| `useAuth` | Auth context — `{ user, profile, loading, setProfile }` |
+| `useCollection` | Generic real-time Firestore collection subscription |
+| `useHeadcount` | Per-zone headcount subscription |
+| `useTotalHeadcount` | Aggregate headcount counter |
+| `useTheme` | Theme context — `{ mode, effective, setTheme }` |
+| `useVenueStatus` | Real-time venue map status — headcounts, incidents, staff per zone |
 
 ---
 
-## 6 · Committees
+## 6 · Committees & Event Config
 
-Defined in `src/lib/roleConfig.js` (`COMMITTEE_MAP`). Committee names used throughout the app:
+### Committees
+Defined in `src/lib/roleConfig.js` (`COMMITTEE_MAP`) and `src/lib/constants.js` (`COMMITTEES`).
 
-`Proctors`, `Marketing`, `Creatives`, `Awards & Prizes`, `Documentation/Photographers`, `Exhibitors`, `Venue Designer & Management`, `Ticketing`, `Voting`, `Guest Relations Officers`, `Technical Committee`, `E-Sport Organizers`
+Canonical names: `Proctors`, `Marketing`, `Creatives`, `Awards & Prizes`, `Documentation/Photographers`, `Exhibitors`, `Venue Designer & Management`, `Ticketing`, `Voting`, `Guest Relations Officers`, `Technical Committee`, `E-Sport Organizers`, `Esports Technical`, `Shoutcaster`
+
+Seed committee IDs: `proctors`, `marketing`, `creatives`, `awards-prizes`, `documentation`, `exhibitors`, `venue-design`, `ticketing`, `voting`, `guest-relations`, `technical`, `esports`
+
+Special: `crowd-control` (shift-only, excluded from `ROLE_COMMITTEES` picker).
 
 Day slots: `DAY 1`, `DAY 2`, `DAY1/2` (combined)
 
-Seed committee IDs (used in `ShiftBoard`): `proctors`, `marketing`, `creatives`, `awards-prizes`, `documentation`, `exhibitors`, `venue-design`, `ticketing`, `voting`, `guest-relations`, `technical`, `esports`
+### Shift Blocks
+Defined in `src/lib/constants.js` (`SHIFT_BLOCKS`), also used for attendance sessions:
+
+| ID | Label | Date | Time |
+|---|---|---|---|
+| `d1-morning` | Day 1 — Morning | 2026-03-05 | 09:00–12:00 |
+| `d1-afternoon` | Day 1 — Afternoon | 2026-03-05 | 13:00–17:00 |
+| `d2-morning` | Day 2 — Morning | 2026-03-06 | 09:00–12:00 |
+| `d2-afternoon` | Day 2 — Afternoon | 2026-03-06 | 13:00–17:00 |
+
+### Venue Zones
+Defined in `src/lib/venueZones.js`. The floor plan is the COED Building Assembly Hall (16 m × 21 m). Zones include:
+- E-Sport Areas (1–3, Day 2 drops ES-3)
+- Exhibitor Area with per-booth grid (Day 1: 4×4, Day 2: 5×3)
+- Holding Area, Voting Area, Ticketing (outside hall), Photo Backdrop, TTRPG, Play w/ Prof, RCY, Committee Area
+- One-way entry policy: Entrance (bottom-right) → Exit (bottom-left), no re-entry
+
+### Attendance Statuses
+`present`, `late`, `excused`, `absent` — defined in `src/lib/attendanceConfig.js`
+
+### Task Statuses (Kanban)
+`todo`, `in_progress`, `done` — tasks belong to a day and optionally a zone/committee
 
 ---
 
@@ -226,7 +316,8 @@ Before coding any UI, commit to a BOLD aesthetic direction:
 - Toast notifications use `useToast()` from `src/components/Toast.jsx`
 - Auth-gated sections check `profile?.role === "admin"` (or relevant role) — never trust client-side role alone for mutations (Cloud Functions re-verify)
 - `cn()` from `src/lib/utils.js` is the standard class merging utility (wraps `clsx`)
-- Data seeding scripts live in `src/data/` and are run with `npm run seed` (`seedFirestore.mjs`)
+- Audit logging uses `logActivity()` from `src/lib/auditLog.js` — fire-and-forget, does not throw on failure
+- Data seeding scripts live in `scripts/` (`seedFirestore.mjs`, `seedUsers.mjs`, `updateShiftCounts.mjs`)
 
 ---
 

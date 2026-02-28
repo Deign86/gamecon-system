@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, BarChart3 } from "lucide-react";
+import { ChevronDown, BarChart3, FileSpreadsheet } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { fmtDate, cn } from "../../lib/utils";
 import { subscribeAllContributions } from "../../lib/contributionsFirestore";
+import { exportContributions } from "../../lib/exportExcel";
 
 export default function CommitteeContributionView({ myEntriesOnly }) {
   const { user } = useAuth();
@@ -76,6 +77,14 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
           {total} {total === 1 ? "entry" : "entries"}
         </span>
         <span className="text-xs text-gc-hint">across {grouped.length} committee{grouped.length !== 1 ? "s" : ""}</span>
+        <button
+          onClick={() => exportContributions(displayContribs)}
+          className="ml-auto flex items-center gap-1.5 rounded border border-gc-success/30 bg-gc-success/8 px-3 py-1.5 text-[11px] font-display tracking-wider text-gc-success hover:bg-gc-success/15 hover:border-gc-success/50 transition-colors"
+          title="Export to Excel"
+        >
+          <FileSpreadsheet className="h-3.5 w-3.5" />
+          Export
+        </button>
         {/* Mini bar chart — colored segments proportional to counts */}
         <div className="ml-auto flex h-2 min-w-[80px] max-w-[140px] flex-1 overflow-hidden rounded bg-gc-steel/20">
           {grouped.map(([id, items]) => {

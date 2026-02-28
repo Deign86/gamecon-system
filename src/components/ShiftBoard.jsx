@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Loader2,
+  FileSpreadsheet,
 } from "lucide-react";
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
@@ -28,6 +29,7 @@ import ShiftCommitteeRow from "./shifts/ShiftCommitteeRow";
 import AddAssigneeDialog from "./shifts/AddAssigneeDialog";
 import { logActivity } from "../lib/auditLog";
 import { useToast } from "./Toast";
+import { exportShifts } from "../lib/exportExcel";
 
 /* ── Map shift-block IDs to role-schedule DAY labels ── */
 function blockToDay(blockId) {
@@ -378,17 +380,29 @@ export default function ShiftBoard({ highlightCommittee }) {
             {totalAssigned} assigned
           </span>
         </div>
-        {underStaffedCount > 0 ? (
-          <span className="flex items-center gap-1 text-[10px] font-bold text-gc-danger">
-            <AlertTriangle className="h-3 w-3" />
-            {underStaffedCount} need{underStaffedCount > 1 ? "" : "s"} staff
-          </span>
-        ) : (
-          <span className="flex items-center gap-1 text-[10px] font-bold text-gc-success">
-            <CheckCircle2 className="h-3 w-3" />
-            All committees staffed
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {shifts.length > 0 && (
+            <button
+              onClick={() => exportShifts(shifts, displayBlock, SHIFT_BLOCKS.find((b) => b.id === displayBlock)?.label)}
+              className="flex items-center gap-1.5 rounded border border-gc-success/30 bg-gc-success/8 px-3 py-1 text-[10px] font-display tracking-wider text-gc-success hover:bg-gc-success/15 hover:border-gc-success/50 transition-colors"
+              title="Export shifts to Excel"
+            >
+              <FileSpreadsheet className="h-3 w-3" />
+              Export
+            </button>
+          )}
+          {underStaffedCount > 0 ? (
+            <span className="flex items-center gap-1 text-[10px] font-bold text-gc-danger">
+              <AlertTriangle className="h-3 w-3" />
+              {underStaffedCount} need{underStaffedCount > 1 ? "" : "s"} staff
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-[10px] font-bold text-gc-success">
+              <CheckCircle2 className="h-3 w-3" />
+              All committees staffed
+            </span>
+          )}
+        </div>
       </div>
 
       {/* ── Loading state ── */}

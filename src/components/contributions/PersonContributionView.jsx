@@ -11,6 +11,7 @@ import {
 } from "../../lib/contributionsFirestore";
 import { logActivity } from "../../lib/auditLog";
 import ContributionFormModal from "./ContributionFormModal";
+import ConfirmDialog from "../ConfirmDialog";
 
 const CAN_WRITE_ROLES = ["admin", "proctor", "head", "committee-head"];
 
@@ -87,6 +88,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
   /* ── Modal state ────────────────────────────────────── */
   const [modalOpen, setModalOpen]     = useState(false);
   const [editing, setEditing]         = useState(null); // existing doc or null
+  const [deleteTarget, setDeleteTarget] = useState(null); // contribution to delete
 
   function openAdd() {
     setEditing(null);
@@ -98,7 +100,13 @@ export default function PersonContributionView({ myEntriesOnly }) {
   }
 
   async function handleDelete(c) {
-    if (!window.confirm(`Delete "${c.task}"? This cannot be undone.`)) return;
+    setDeleteTarget(c);
+  }
+
+  async function confirmDelete() {
+    if (!deleteTarget) return;
+    const c = deleteTarget;
+    setDeleteTarget(null);
     await deleteContribution(c.id);
     logActivity({
       action: "contribution.delete",
@@ -360,6 +368,17 @@ export default function PersonContributionView({ myEntriesOnly }) {
         onClose={() => setModalOpen(false)}
         targetUser={selectedUser}
         existing={editing}
+      />
+
+      {/* Delete confirmation */}
+      <ConfirmDialog
+        open={!!deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={confirmDelete}
+        title="Delete Contribution"
+        message={`Delete "${deleteTarget?.task}"? This cannot be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
       />
     </div>
   );

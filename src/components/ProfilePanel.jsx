@@ -32,6 +32,7 @@ const fadeUp = {
 export default function ProfilePanel() {
   const [contribOpen, setContribOpen] = useState(false);
   const { user, profile, setProfile } = useAuth();
+  const isViewer = profile?.role === "viewer";
   const { setTab } = useTab();
   const { mode, setTheme } = useTheme();
   const { docs: myContribs } = useCollection("contributions");
@@ -56,7 +57,7 @@ export default function ProfilePanel() {
   const MAX_COMMITTEES = 3;
 
   async function handleCommitteeToggle(canonicalName) {
-    if (!user || saving) return;
+    if (isViewer || !user || saving) return;
     const isActive = myCommitteeNames.includes(canonicalName);
     if (!isActive && myCommitteeNames.length >= MAX_COMMITTEES) return;
     setSaving(true);
@@ -169,7 +170,8 @@ export default function ProfilePanel() {
           </div>
         )}
 
-        {/* Toggle picker */}
+        {/* Toggle picker — hidden for viewer role */}
+        {!isViewer && (
             <button
           type="button"
           onClick={() => setShowPicker((p) => !p)}
@@ -185,6 +187,7 @@ export default function ProfilePanel() {
           )}
           {showPicker ? "Close" : "Edit committees"}
         </button>
+        )}
 
         {/* Multi-select grid */}
         <AnimatePresence>
@@ -231,7 +234,8 @@ export default function ProfilePanel() {
         </AnimatePresence>
       </motion.div>
 
-      {/* My contributions — compact summary, links to full Contributions tab */}
+      {/* My contributions — hidden for viewer role */}
+      {!isViewer && (
       <motion.div variants={fadeUp} className="gc-card p-4">
         <div className="flex items-center gap-2 mb-3">
           <ClipboardCheck className="h-4 w-4 text-gc-success" />
@@ -274,6 +278,7 @@ export default function ProfilePanel() {
           <ChevronRight className="h-3.5 w-3.5" />
         </button>
       </motion.div>
+      )}
 
       {/* Appearance / theme toggle */}
       <motion.div variants={fadeUp} className="gc-card p-4">

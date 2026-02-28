@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw } from "lucide-react";
+import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw, FileSpreadsheet } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { ZONES } from "../lib/constants";
 import { fmtDate, cn } from "../lib/utils";
+import { exportIncidents } from "../lib/exportExcel";
 
 const SEVERITY = [
   { value: "low",    label: "Low",    color: "gc-chip-green" },
@@ -140,9 +141,21 @@ export default function IncidentLog() {
 
       {/* Incident list */}
       <div>
-        <h3 className="mb-3 font-display text-base font-bold tracking-wider text-gc-mist">
-          RECENT INCIDENTS
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-display text-base font-bold tracking-wider text-gc-mist">
+            RECENT INCIDENTS
+          </h3>
+          {incidents.length > 0 && (
+            <button
+              onClick={() => exportIncidents(incidents)}
+              className="flex items-center gap-1.5 rounded border border-gc-success/30 bg-gc-success/8 px-3 py-1.5 text-[11px] font-display tracking-wider text-gc-success hover:bg-gc-success/15 hover:border-gc-success/50 transition-colors"
+              title="Export incidents to Excel"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              Export
+            </button>
+          )}
+        </div>
         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
           {incidents.length === 0 && (
             <div className="text-center py-8">

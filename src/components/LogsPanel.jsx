@@ -14,10 +14,12 @@ import {
   Settings,
   KanbanSquare,
   Filter,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { fmtDate, cn } from "../lib/utils";
+import { exportLogs } from "../lib/exportExcel";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -110,6 +112,16 @@ export default function LogsPanel() {
         <p className="text-xs text-gc-mist mt-0.5 font-mono">
           Complete audit trail of all system events — admin only. Logs auto-purge after 7 days.
         </p>
+        {filtered.length > 0 && (
+          <button
+            onClick={() => exportLogs(filtered)}
+            className="mt-2 flex items-center gap-1.5 rounded border border-gc-success/30 bg-gc-success/8 px-3 py-1.5 text-[11px] font-display tracking-wider text-gc-success hover:bg-gc-success/15 hover:border-gc-success/50 transition-colors"
+            title="Export logs to Excel"
+          >
+            <FileSpreadsheet className="h-3.5 w-3.5" />
+            Export Logs
+          </button>
+        )}
       </motion.div>
 
       {/* ── Category filter pills ── */}

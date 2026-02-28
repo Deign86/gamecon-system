@@ -86,6 +86,7 @@ export default function ContributionHub() {
 /* ── My Log sub-view (personal contribution form + recent list) ── */
 function MyLogView() {
   const { user, profile } = useAuth();
+  const isViewer = profile?.role === "viewer";
   const { docs: contributions, add } = useCollection("contributions");
   const [task, setTask]     = useState("");
   const [desc, setDesc]     = useState("");
@@ -103,7 +104,7 @@ function MyLogView() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!task.trim()) return;
+    if (isViewer || !task.trim()) return;
     setBusy(true);
     try {
       await add({
@@ -132,7 +133,8 @@ function MyLogView() {
 
   return (
     <div className="space-y-5">
-      {/* Add form */}
+      {/* Add form — hidden for viewer role */}
+      {!isViewer && (
       <form onSubmit={handleSubmit} className="space-y-3">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -194,6 +196,7 @@ function MyLogView() {
           )}
         </button>
       </form>
+      )}
 
       {/* Recent contributions (my own) */}
       <div>

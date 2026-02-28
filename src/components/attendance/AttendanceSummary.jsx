@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Users, Check, Clock, ShieldCheck, X, Download } from "lucide-react";
+import { Users, Check, Clock, ShieldCheck, X, Download, FileSpreadsheet } from "lucide-react";
 import { ATTENDANCE_STATUSES, STATUS_META } from "../../lib/attendanceConfig";
+import { exportAttendance } from "../../lib/exportExcel";
 import { cn } from "../../lib/utils";
 
 const STAT_ICONS = { present: Check, late: Clock, excused: ShieldCheck, absent: X };
@@ -174,7 +175,14 @@ export default function AttendanceSummary({ volunteers, records, blockId, blockL
       )}
 
       {/* ── Export buttons ── */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
+        <button
+          onClick={() => exportAttendance(volunteers, records, blockId, blockLabel)}
+          className="flex items-center gap-2 rounded border border-gc-success/30 bg-gc-success/8 px-4 py-2 text-sm font-display tracking-wider text-gc-success hover:bg-gc-success/15 hover:border-gc-success/50 transition-colors"
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          Export Excel
+        </button>
         <button
           onClick={exportCSV}
           className="flex items-center gap-2 rounded border border-gc-steel/40 bg-gc-iron/60 px-4 py-2 text-sm font-display tracking-wider text-gc-cloud hover:border-gc-crimson/40 hover:text-gc-crimson transition-colors"
