@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { LogIn, AlertCircle, Info } from "lucide-react";
+import { LogIn, AlertCircle, Info, Eye, EyeOff } from "lucide-react";
 import { signIn } from "../hooks/useAuth";
 import GCLogo from "./GCLogo";
 
@@ -27,10 +27,11 @@ function getFriendlyAuthError(err) {
 }
 
 export default function AuthGate() {
-  const [email, setEmail]   = useState("");
-  const [pass, setPass]     = useState("");
-  const [error, setError]   = useState("");
-  const [busy, setBusy]     = useState(false);
+  const [email, setEmail]       = useState("");
+  const [pass, setPass]         = useState("");
+  const [error, setError]       = useState("");
+  const [busy, setBusy]         = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -140,18 +141,33 @@ export default function AuthGate() {
               >
                 Password
               </label>
-              <input
-                id="login-password"
-                name="password"
-                type="password"
-                value={pass}
-                onChange={(e) => setPass(e.target.value)}
-                className="gc-input"
-                placeholder="••••••••"
-                autoComplete="current-password"
-                required
-                minLength={6}
-              />
+              <div className="relative">
+                <input
+                  id="login-password"
+                  name="password"
+                  type={showPass ? "text" : "password"}
+                  value={pass}
+                  onChange={(e) => setPass(e.target.value)}
+                  className="gc-input pr-10"
+                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  required
+                  minLength={6}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gc-mist hover:text-gc-cloud transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPass ? "Hide password" : "Show password"}
+                >
+                  {showPass ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {error && (
