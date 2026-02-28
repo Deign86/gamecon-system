@@ -1,15 +1,30 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, TrendingUp, Maximize2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useHeadcount } from "../hooks/useHeadcount";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { getZoneIcon, cn } from "../lib/utils";
 
+/** True when running inside the Tauri desktop shell (v2). */
+const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
 export default function ZoneCounter() {
   const { zones, incrementZone, decrementZone, loading } = useHeadcount();
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [pulsing, setPulsing] = useState(null);
+
+  const openFullscreen = useCallback(() => {
+    if (isTauri()) {
+      // Inside Tauri: navigate in-place — same window, React Router handles it
+      navigate("/headcount/fullscreen");
+    } else {
+      // Web browser: open in a new tab as before
+      window.open("/headcount/fullscreen", "_blank", "noopener,noreferrer");
+    }
+  }, [navigate]);
 
   async function handleIncrement(zoneId) {
     setPulsing(zoneId);
@@ -72,16 +87,14 @@ export default function ZoneCounter() {
           <span className="font-mono text-2xl font-bold text-gc-crimson">
             {totalCount}
           </span>
-          <a
-            href="/headcount/fullscreen"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={openFullscreen}
             className="flex items-center gap-1.5 rounded bg-gc-iron border border-gc-steel px-2.5 py-1.5 text-[11px] font-semibold text-gc-mist hover:text-gc-cloud hover:border-gc-crimson/50 transition-all"
             title="Open fullscreen display"
           >
             <Maximize2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Fullscreen</span>
-          </a>
+          </button>
         </div>
       </div>
 

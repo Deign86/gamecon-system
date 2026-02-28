@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTotalHeadcount } from "../../hooks/useTotalHeadcount";
 import { AuthProvider } from "../../hooks/useAuth";
+import { useTheme } from "../../hooks/useTheme";
 import { ShieldAlert } from "lucide-react";
 
 /* ── Eye SVG icon ── */
@@ -75,6 +76,8 @@ function HeadcountInner() {
   const holdRef = useRef(null);
   const repeatRef = useRef(null);
   const warningTimer = useRef(null);
+  const { effective: theme } = useTheme();
+  const isLight = theme === "light";
 
   const triggerRipple = useCallback(() => setRipple((r) => r + 1), []);
 
@@ -150,17 +153,20 @@ function HeadcountInner() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background:
-            "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(200,16,46,0.06) 0%, transparent 70%)",
+          background: isLight
+            ? "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(190,14,42,0.07) 0%, transparent 70%)"
+            : "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(200,16,46,0.06) 0%, transparent 70%)",
         }}
       />
 
       {/* Subtle grid pattern */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.03]"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(200,16,46,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(200,16,46,0.3) 1px, transparent 1px)",
+          opacity: isLight ? 0.07 : 0.03,
+          backgroundImage: isLight
+            ? "linear-gradient(rgba(52,47,42,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(52,47,42,0.4) 1px, transparent 1px)"
+            : "linear-gradient(rgba(200,16,46,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(200,16,46,0.3) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
@@ -218,8 +224,12 @@ function HeadcountInner() {
             className={`font-display text-[8rem] sm:text-[12rem] lg:text-[16rem] leading-none tracking-tight ${atStaffFloor ? "text-gc-warning" : "text-gc-cloud"}`}
             style={{
               textShadow: atStaffFloor
-                ? "0 0 60px rgba(234,179,8,0.2), 0 4px 12px rgba(0,0,0,0.5)"
-                : "0 0 60px rgba(200,16,46,0.15), 0 4px 12px rgba(0,0,0,0.5)",
+                ? isLight
+                  ? "0 0 40px rgba(180,120,4,0.18), 0 2px 8px rgba(0,0,0,0.12)"
+                  : "0 0 60px rgba(234,179,8,0.2), 0 4px 12px rgba(0,0,0,0.5)"
+                : isLight
+                  ? "0 0 40px rgba(190,14,42,0.12), 0 2px 8px rgba(0,0,0,0.10)"
+                  : "0 0 60px rgba(200,16,46,0.15), 0 4px 12px rgba(0,0,0,0.5)",
             }}
           >
             {displayCount}
