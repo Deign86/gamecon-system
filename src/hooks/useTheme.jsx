@@ -55,6 +55,19 @@ export function ThemeProvider({ children }) {
     }
   }, [mode]);
 
+  /* Cross-tab / cross-window sync — fires in OTHER tabs when localStorage
+     changes (e.g. fullscreen tab opened in browser while user changes theme
+     in the main tab, or vice-versa). Updates this instance reactively. */
+  useEffect(() => {
+    function onStorage(e) {
+      if (e.key !== STORAGE_KEY || e.newValue === null) return;
+      const next = e.newValue;
+      setMode(next);
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
   const setTheme = useCallback((next) => {
     setMode(next);
     try {
