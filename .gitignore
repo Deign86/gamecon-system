@@ -34,7 +34,6 @@ Thumbs.db
 *.swo
 *~
 .idea/
-.vscode/settings.json
 *.log
 .vercel
 .env*.local
