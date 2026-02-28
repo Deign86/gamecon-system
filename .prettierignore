@@ -1,0 +1,6 @@
+dist/
+android/
+src-tauri/target/
+functions/node_modules/
+node_modules/
+*.min.js

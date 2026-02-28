@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, lazy, Suspense } from "react";
 import { motion } from "motion/react";
 import {
   Users,
@@ -14,16 +14,18 @@ import {
   WifiOff,
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
-import ZoneCounter from "./ZoneCounter";
-import ShiftBoard from "./ShiftBoard";
-import ContributionHub from "./contributions/ContributionHub";
-import ExpenseTracker from "./ExpenseTracker";
-import IncidentLog from "./IncidentLog";
-import CommitteeCard from "./CommitteeCard";
-import VenueMapWithStatus from "./venue/VenueMapWithStatus";
-import AttendancePage from "./attendance/AttendancePage";
-import TaskBoard from "./tasks/TaskBoard";
 import Modal from "./Modal";
+
+/* Lazy-load modal content — only loaded when the modal is opened */
+const ZoneCounter     = lazy(() => import("./ZoneCounter"));
+const ShiftBoard      = lazy(() => import("./ShiftBoard"));
+const ContributionHub = lazy(() => import("./contributions/ContributionHub"));
+const ExpenseTracker  = lazy(() => import("./ExpenseTracker"));
+const IncidentLog     = lazy(() => import("./IncidentLog"));
+const CommitteeCard   = lazy(() => import("./CommitteeCard"));
+const VenueMapWithStatus = lazy(() => import("./venue/VenueMapWithStatus"));
+const AttendancePage  = lazy(() => import("./attendance/AttendancePage"));
+const TaskBoard       = lazy(() => import("./tasks/TaskBoard"));
 
 const CARDS = [
   { key: "headcount",     label: "Live Headcount",   Icon: Users,          accent: "#C8102E", id: "M-01" },
@@ -45,6 +47,14 @@ const cardVariant = {
   hidden: { opacity: 0, y: 16 },
   show:   { opacity: 1, y: 0, transition: { type: "spring", damping: 24, stiffness: 280 } },
 };
+
+function ModalFallback() {
+  return (
+    <div className="flex items-center justify-center py-20">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-gc-crimson border-t-transparent" />
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const { isOnline } = useOnlineStatus();
@@ -135,12 +145,13 @@ export default function Dashboard() {
             key={key}
             variants={cardVariant}
             onClick={() => openModal(key)}
+            aria-label={`Open ${label}`}
             className="gc-card group relative flex flex-col items-center gap-3 p-5 sm:p-6 text-center cursor-pointer"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
           >
             {/* Module ID tag */}
-            <span className="absolute top-2 right-2 text-[8px] font-mono text-gc-hint/60 tracking-wider">
+            <span aria-hidden="true" className="absolute top-2 right-2 text-[8px] font-mono text-gc-hint/60 tracking-wider">
               {id}
             </span>
 
@@ -159,6 +170,7 @@ export default function Dashboard() {
 
             {/* Dot indicator with glow */}
             <span
+              aria-hidden="true"
               className="h-1 w-1 rounded-full"
               style={{ backgroundColor: accent, boxShadow: `0 0 6px ${accent}80` }}
             />
@@ -166,87 +178,60 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* Modals */}
-      <Modal
-        open={activeModal === "headcount"}
-        onClose={closeModal}
-        title="LIVE HEADCOUNT"
-        wide
-      >
-        <ZoneCounter />
-      </Modal>
+      {/* Modals — content lazy-loaded on first open */}
+      {activeModal === "headcount" && (
+        <Modal open onClose={closeModal} title="LIVE HEADCOUNT" wide>
+          <Suspense fallback={<ModalFallback />}><ZoneCounter /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "shifts"}
-        onClose={closeModal}
-        title="SHIFT BOARD"
-        wide
-      >
-        <ShiftBoard highlightCommittee={modalData?.committeeId} />
-      </Modal>
+      {activeModal === "shifts" && (
+        <Modal open onClose={closeModal} title="SHIFT BOARD" wide>
+          <Suspense fallback={<ModalFallback />}><ShiftBoard highlightCommittee={modalData?.committeeId} /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "attendance"}
-        onClose={closeModal}
-        title="STAFF ATTENDANCE"
-        wide
-      >
-        <AttendancePage />
-      </Modal>
+      {activeModal === "attendance" && (
+        <Modal open onClose={closeModal} title="STAFF ATTENDANCE" wide>
+          <Suspense fallback={<ModalFallback />}><AttendancePage /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "contributions"}
-        onClose={closeModal}
-        title="CONTRIBUTIONS"
-        wide
-      >
-        <ContributionHub />
-      </Modal>
+      {activeModal === "contributions" && (
+        <Modal open onClose={closeModal} title="CONTRIBUTIONS" wide>
+          <Suspense fallback={<ModalFallback />}><ContributionHub /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "budget"}
-        onClose={closeModal}
-        title="BUDGET MONITOR"
-        wide
-      >
-        <ExpenseTracker />
-      </Modal>
+      {activeModal === "budget" && (
+        <Modal open onClose={closeModal} title="BUDGET MONITOR" wide>
+          <Suspense fallback={<ModalFallback />}><ExpenseTracker /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "incidents"}
-        onClose={closeModal}
-        title="INCIDENTS"
-        wide
-      >
-        <IncidentLog />
-      </Modal>
+      {activeModal === "incidents" && (
+        <Modal open onClose={closeModal} title="INCIDENTS" wide>
+          <Suspense fallback={<ModalFallback />}><IncidentLog /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "committees"}
-        onClose={closeModal}
-        title="COMMITTEES"
-        wide
-      >
-        <CommitteeCard />
-      </Modal>
+      {activeModal === "committees" && (
+        <Modal open onClose={closeModal} title="COMMITTEES" wide>
+          <Suspense fallback={<ModalFallback />}><CommitteeCard /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "venuemap"}
-        onClose={closeModal}
-        title="VENUE MAP"
-        wide
-      >
-        <VenueMapWithStatus onNavigate={(key, data) => { closeModal(); setTimeout(() => openModal(key, data), 150); }} />
-      </Modal>
+      {activeModal === "venuemap" && (
+        <Modal open onClose={closeModal} title="VENUE MAP" wide>
+          <Suspense fallback={<ModalFallback />}><VenueMapWithStatus onNavigate={(key, data) => { closeModal(); setTimeout(() => openModal(key, data), 150); }} /></Suspense>
+        </Modal>
+      )}
 
-      <Modal
-        open={activeModal === "tasks"}
-        onClose={closeModal}
-        title="TASK BOARD"
-        wide
-      >
-        <TaskBoard />
-      </Modal>
+      {activeModal === "tasks" && (
+        <Modal open onClose={closeModal} title="TASK BOARD" wide>
+          <Suspense fallback={<ModalFallback />}><TaskBoard /></Suspense>
+        </Modal>
+      )}
     </motion.div>
   );
 }

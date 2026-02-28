@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   collection,
   onSnapshot,
@@ -22,8 +22,10 @@ import { db } from "../firebase";
 export function useCollection(path, sortField = "timestamp", maxItems = 100) {
   const [docs, setDocs]       = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
 
   useEffect(() => {
+    setError(null);
     const q = query(
       collection(db, path),
       orderBy(sortField, "desc"),
@@ -36,27 +38,28 @@ export function useCollection(path, sortField = "timestamp", maxItems = 100) {
         setLoading(false);
       },
       (err) => {
-        console.error(`[useCollection] ${path}:`, err);
+        if (import.meta.env.DEV) console.error(`[useCollection] ${path}:`, err);
+        setError(err);
         setLoading(false);
       }
     );
     return unsub;
   }, [path, sortField, maxItems]);
 
-  async function add(data) {
+  const add = useCallback(async (data) => {
     return addDoc(collection(db, path), {
       ...data,
       timestamp: serverTimestamp(),
     });
-  }
+  }, [path]);
 
-  async function update(id, data) {
+  const update = useCallback(async (id, data) => {
     return updateDoc(doc(db, path, id), data);
-  }
+  }, [path]);
 
-  async function remove(id) {
+  const remove = useCallback(async (id) => {
     return deleteDoc(doc(db, path, id));
-  }
+  }, [path]);
 
-  return { docs, loading, add, update, remove };
+  return { docs, loading, error, add, update, remove };
 }

@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -5,6 +6,21 @@ export default defineConfig({
   plugins: [react()],
   base: "/",
   server: { port: 3000, open: true },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./src/__tests__/setup.js"],
+    include: ["src/**/*.{test,spec}.{js,jsx}"],
+    pool: "forks",
+    testTimeout: 15000,
+    css: false,
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "lcov"],
+      include: ["src/**/*.{js,jsx}"],
+      exclude: ["src/__tests__/**", "src/main.jsx"],
+    },
+  },
   build: {
     outDir: "dist",
     sourcemap: false,
@@ -13,7 +29,7 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules/firebase")) return "firebase";
           if (id.includes("node_modules/motion")) return "motion";
-          if (id.includes("node_modules/xlsx")) return "xlsx";
+          // xlsx is dynamically imported — Vite auto-splits it into its own chunk
           if (
             id.includes("node_modules/react") ||
             id.includes("node_modules/react-dom") ||

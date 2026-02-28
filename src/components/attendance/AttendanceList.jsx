@@ -64,7 +64,7 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
         userName: user.displayName || "Unknown",
       });
     } catch (err) {
-      console.error("Failed to mark attendance", err);
+      if (import.meta.env.DEV) console.error("Failed to mark attendance", err);
     } finally {
       setBusy(null);
     }

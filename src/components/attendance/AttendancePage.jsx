@@ -59,30 +59,30 @@ export default function AttendancePage() {
     return unsub;
   }, [blockId]);
 
+  const unmarkedCount = volunteers.filter((p) => !records[p.id]).length;
+
   /* ── mark all remaining as absent ── */
   const handleMarkAbsent = useCallback(async () => {
     if (!user) return;
+    const count = volunteers.filter((p) => !records[p.id]).length;
     setMarkingAbsent(true);
     try {
       await markRemainingAbsent(blockId, volunteers, records, user.uid);
       logActivity({
         action: "attendance.bulk_absent",
         category: "attendance",
-        details: `Marked ${unmarkedCount} unmarked volunteers as absent (${blockId})`,
-        meta: { blockId, unmarkedCount },
+        details: `Marked ${count} unmarked volunteers as absent (${blockId})`,
+        meta: { blockId, unmarkedCount: count },
         userId: user.uid,
         userName: profile?.name || "Unknown",
       });
       toast("Unmarked volunteers set to absent", "success");
     } catch (err) {
-      console.error(err);
       toast("Failed to mark absent", "error");
     } finally {
       setMarkingAbsent(false);
     }
-  }, [blockId, volunteers, records, user, toast]);
-
-  const unmarkedCount = volunteers.filter((p) => !records[p.id]).length;
+  }, [blockId, volunteers, records, user, profile, toast]);
 
   return (
     <div className="space-y-4">

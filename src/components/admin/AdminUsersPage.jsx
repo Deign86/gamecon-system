@@ -3,9 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   ShieldAlert,
   ArrowLeft,
-  CheckCircle2,
   AlertCircle,
-  X,
 } from "lucide-react";
 import {
   collection,
@@ -15,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useAuth } from "../../hooks/useAuth";
+import { useToast } from "../Toast";
 import { setUserActiveStatus, sendPasswordReset, deleteUser } from "../../lib/adminApi";
 import { logActivity } from "../../lib/auditLog";
 import { cn } from "../../lib/utils";
@@ -30,6 +29,7 @@ import Modal from "../Modal";
 export default function AdminUsersPage({ standalone = false, onBack }) {
   const { user, profile } = useAuth();
   const isAdmin = profile?.role === "admin";
+  const toast = useToast();
 
   const [users, setUsers]             = useState([]);
   const [loading, setLoading]         = useState(true);
@@ -39,7 +39,6 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
   const [togglingUid, setTogglingUid]   = useState(null);
   const [resetingUid, setResetingUid]   = useState(null);
   const [deletingUid, setDeletingUid]   = useState(null);
-  const [toast, setToast]               = useState(null);
 
   /* ── Real-time Firestore subscription ── */
   useEffect(() => {
@@ -51,13 +50,6 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
     });
     return unsub;
   }, [isAdmin]);
-
-  /* ── Auto-dismiss toast ── */
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 4000);
-    return () => clearTimeout(t);
-  }, [toast]);
 
   /* ── Handlers ── */
   const handleEdit = useCallback((u) => setEditUser(u), []);
@@ -85,12 +77,9 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
         userId: profile?.uid || user?.uid,
         userName: profile?.name || "Admin",
       });
-      setToast({
-        type: "success",
-        msg: active ? "Account enabled." : "Account disabled.",
-      });
+      toast(active ? "Account enabled." : "Account disabled.", "success");
     } catch (err) {
-      setToast({ type: "error", msg: err.message || "Toggle failed." });
+      toast(err.message || "Toggle failed.", "error");
     } finally {
       setTogglingUid(null);
       setConfirmUser(null);
@@ -109,12 +98,9 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
         userId: profile?.uid || "admin",
         userName: profile?.name || "Admin",
       });
-      setToast({
-        type: "success",
-        msg: `Password reset sent to ${u.email}`,
-      });
+      toast(`Password reset sent to ${u.email}`, "success");
     } catch (err) {
-      setToast({ type: "error", msg: err.message || "Reset email failed." });
+      toast(err.message || "Reset email failed.", "error");
     } finally {
       setResetingUid(null);
     }
@@ -135,9 +121,9 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
         userId: profile?.uid || "admin",
         userName: profile?.name || "Admin",
       });
-      setToast({ type: "success", msg: "Account deleted." });
+      toast("Account deleted.", "success");
     } catch (err) {
-      setToast({ type: "error", msg: err.message || "Delete failed." });
+      toast(err.message || "Delete failed.", "error");
     } finally {
       setDeletingUid(null);
       setDeleteTarget(null);
@@ -145,9 +131,9 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
   };
 
   const handleDrawerSaved = useCallback((updatedUser) => {
-    setToast({ type: "success", msg: `${updatedUser.name} updated.` });
+    toast(`${updatedUser.name} updated.`, "success");
     // Firestore snapshot will auto-refresh the table
-  }, []);
+  }, [toast]);
 
   /* ── Guard ── */
   if (!isAdmin) {
@@ -200,7 +186,7 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
       {/* ── Create user form ── */}
       <CreateUserForm
         onCreated={() =>
-          setToast({ type: "success", msg: "New proctor account created." })
+          toast("New proctor account created.", "success")
         }
       />
 
@@ -308,38 +294,6 @@ export default function AdminUsersPage({ standalone = false, onBack }) {
           </div>
         </div>
       </Modal>
-
-      {/* ── Global toast ── */}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[60] pointer-events-none">
-        <AnimatePresence>
-          {toast && (
-            <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              className={cn(
-                "pointer-events-auto flex items-center gap-2 rounded px-5 py-3 text-sm font-body font-medium shadow-2xl shadow-black/40 border backdrop-blur-md",
-                toast.type === "success"
-                  ? "bg-gc-success/15 text-gc-success border-gc-success/25"
-                  : "bg-gc-danger/15 text-gc-danger border-gc-danger/25"
-              )}
-            >
-              {toast.type === "success" ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0" />
-              ) : (
-                <AlertCircle className="h-4 w-4 shrink-0" />
-              )}
-              {toast.msg}
-              <button
-                onClick={() => setToast(null)}
-                className="ml-2 text-gc-mist hover:text-gc-white transition-colors"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
     </motion.div>
   );
 }

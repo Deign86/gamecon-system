@@ -18,8 +18,15 @@ export function AuthProvider({ children }) {
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
       setUser(fbUser);
       if (fbUser) {
-        const snap = await getDoc(doc(db, "users", fbUser.uid));
-        setProfile(snap.exists() ? { id: snap.id, ...snap.data() } : null);
+        try {
+          const snap = await getDoc(doc(db, "users", fbUser.uid));
+          setProfile(snap.exists() ? { id: snap.id, ...snap.data() } : null);
+        } catch (err) {
+          // Profile fetch failed (offline / permission error)
+          // Set profile null so the app doesn't softlock on the loading screen
+          if (import.meta.env.DEV) console.error("[useAuth] profile fetch failed:", err);
+          setProfile(null);
+        }
       } else {
         setProfile(null);
       }

@@ -68,7 +68,7 @@ export function subscribeVolunteersForBlock(blockId, callback) {
       callback(list);
     },
     (err) => {
-      console.error("subscribeVolunteersForBlock error:", err);
+      if (import.meta.env.DEV) console.error("subscribeVolunteersForBlock error:", err);
       callback([]);
     }
   );
@@ -100,7 +100,7 @@ export function subscribeAttendanceForBlock(blockId, callback) {
       callback(map);
     },
     (err) => {
-      console.error("subscribeAttendanceForBlock error:", err);
+      if (import.meta.env.DEV) console.error("subscribeAttendanceForBlock error:", err);
       callback({});
     }
   );

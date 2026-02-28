@@ -66,7 +66,11 @@ export function ToastProvider({ children }) {
       {children}
 
       {/* Toast container — fixed bottom-center */}
-      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[9998] flex flex-col items-center gap-2 pointer-events-none w-full max-w-md px-4">
+      <div
+        aria-live="polite"
+        aria-atomic="false"
+        className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[9998] flex flex-col items-center gap-2 pointer-events-none w-full max-w-md px-4"
+      >
         <AnimatePresence>
           {toasts.map((t) => {
             const Icon = ICONS[t.type] || Info;
@@ -74,21 +78,23 @@ export function ToastProvider({ children }) {
             return (
               <motion.div
                 key={t.id}
+                role={t.type === "error" || t.type === "warning" ? "alert" : "status"}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
                 transition={{ type: "spring", damping: 25, stiffness: 350 }}
                 className={`pointer-events-auto flex items-center gap-3 rounded border ${color.bg} ${color.border} px-4 py-3 shadow-lg shadow-black/40 backdrop-blur-sm w-full`}
               >
-                <Icon className={`h-4.5 w-4.5 shrink-0 ${color.icon}`} />
+                <Icon className={`h-4.5 w-4.5 shrink-0 ${color.icon}`} aria-hidden="true" />
                 <span className={`text-sm font-body font-medium ${color.text} flex-1`}>
                   {t.message}
                 </span>
                 <button
                   onClick={() => dismiss(t.id)}
+                  aria-label="Dismiss notification"
                   className="shrink-0 rounded p-1 text-gc-mist hover:text-gc-white transition-colors"
                 >
-                  <X className="h-3.5 w-3.5" />
+                  <X className="h-3.5 w-3.5" aria-hidden="true" />
                 </button>
               </motion.div>
             );

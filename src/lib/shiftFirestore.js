@@ -11,21 +11,18 @@
 import {
   collection,
   doc,
-  getDoc,
   getDocs,
   setDoc,
-  updateDoc,
   onSnapshot,
   query,
   where,
   serverTimestamp,
   runTransaction,
-  arrayUnion,
-  arrayRemove,
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { COMMITTEE_REQUIRED_STAFF } from "./constants";
 import { getShiftLimits } from "./shiftLimitsConfig";
+import { error as logError } from "./logger";
 
 const COLLECTION = "committeeShifts";
 

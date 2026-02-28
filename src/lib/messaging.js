@@ -60,7 +60,7 @@ export async function requestNotificationPermission(userId) {
       if (isTauri()) return await registerTauriNotifications(userId);
       return await registerWebPush(userId);
     } catch (err) {
-      console.warn("[Messaging] Failed to register notifications:", err);
+      if (import.meta.env.DEV) console.warn("[Messaging] Failed to register notifications:", err);
       return null;
     } finally {
       _registrationInProgress = null;
@@ -108,7 +108,7 @@ export async function removeFcmToken(token) {
   try {
     await deleteDoc(doc(db, "fcmTokens", tokenDocId));
   } catch (err) {
-    console.warn("[Messaging] Failed to remove token:", err);
+    if (import.meta.env.DEV) console.warn("[Messaging] Failed to remove token:", err);
   }
 }
 
@@ -125,7 +125,7 @@ export async function removeAllUserTokens(userId) {
     const snap = await getDocs(q);
     await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
   } catch (err) {
-    console.warn("[Messaging] Failed to remove user tokens:", err);
+    if (import.meta.env.DEV) console.warn("[Messaging] Failed to remove user tokens:", err);
   }
 }
 
@@ -141,7 +141,7 @@ export async function onForegroundMessage(callback) {
     const messaging = getMessaging(app);
     return onMessage(messaging, callback);
   } catch (err) {
-    console.warn("[Messaging] Foreground listener failed:", err);
+    if (import.meta.env.DEV) console.warn("[Messaging] Foreground listener failed:", err);
     return () => {};
   }
 }
@@ -169,7 +169,7 @@ export async function onCapacitorForegroundNotification(callback) {
     );
     return () => listener.remove();
   } catch (err) {
-    console.warn("[Messaging] Capacitor foreground listener failed:", err);
+    if (import.meta.env.DEV) console.warn("[Messaging] Capacitor foreground listener failed:", err);
     return () => {};
   }
 }
@@ -219,7 +219,7 @@ export function showNativeNotification(title, body, options = {}) {
       ...options,
     });
   } catch (err) {
-    console.warn("[Messaging] Native notification failed:", err);
+    if (import.meta.env.DEV) console.warn("[Messaging] Native notification failed:", err);
   }
 }
 
@@ -230,18 +230,18 @@ export function showNativeNotification(title, body, options = {}) {
 /** Web — register FCM via firebase/messaging + service worker */
 async function registerWebPush(userId) {
   if (!("Notification" in window)) {
-    console.warn("[Messaging] Notifications not supported in this browser");
+    if (import.meta.env.DEV) console.warn("[Messaging] Notifications not supported in this browser");
     return null;
   }
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    console.warn("[Messaging] Notification permission denied");
+    if (import.meta.env.DEV) console.warn("[Messaging] Notification permission denied");
     return null;
   }
 
   if (!VAPID_KEY) {
-    console.warn(
+    if (import.meta.env.DEV) console.warn(
       "[Messaging] VAPID key not configured — set VITE_FIREBASE_VAPID_KEY in .env"
     );
     return null;
@@ -293,12 +293,12 @@ async function registerWebPush(userId) {
           keyBytes.every((b, i) => b === defaultBytes[i]);
         if (!keysMatch) {
           await existingSub.unsubscribe();
-          console.log("[Messaging] Cleared stale push subscription (VAPID key mismatch)");
+          if (import.meta.env.DEV) console.log("[Messaging] Cleared stale push subscription (VAPID key mismatch)");
         }
       }
     }
   } catch (subErr) {
-    console.warn("[Messaging] Could not check push subscription:", subErr);
+    if (import.meta.env.DEV) console.warn("[Messaging] Could not check push subscription:", subErr);
   }
 
   const token = await getToken(messaging, {
@@ -309,7 +309,7 @@ async function registerWebPush(userId) {
     // Clean up any previous tokens for this user (prevents stale accumulation)
     await removeAllUserTokens(userId);
     await saveFcmToken(userId, token, "web");
-    console.log("[Messaging] FCM token registered successfully");
+    if (import.meta.env.DEV) console.log("[Messaging] FCM token registered successfully");
   }
 
   return token;
@@ -325,7 +325,7 @@ async function registerCapacitorPush(userId) {
       permResult = await PushNotifications.requestPermissions();
     }
     if (permResult.receive !== "granted") {
-      console.warn("[Messaging] Push permission denied on Android");
+      if (import.meta.env.DEV) console.warn("[Messaging] Push permission denied on Android");
       return null;
     }
 
@@ -335,13 +335,13 @@ async function registerCapacitorPush(userId) {
         resolve(reg.value);
       });
       PushNotifications.addListener("registrationError", (err) => {
-        console.error("[Messaging] Capacitor registration error:", err);
+        if (import.meta.env.DEV) console.error("[Messaging] Capacitor registration error:", err);
         resolve(null);
       });
       PushNotifications.register();
     });
   } catch (err) {
-    console.warn("[Messaging] Capacitor push unavailable:", err);
+    if (import.meta.env.DEV) console.warn("[Messaging] Capacitor push unavailable:", err);
     return null;
   }
 }
@@ -349,13 +349,13 @@ async function registerCapacitorPush(userId) {
 /** Desktop (Tauri) — use Web Notification API; no FCM token needed */
 async function registerTauriNotifications(userId) {
   if (!("Notification" in window)) {
-    console.warn("[Messaging] Web Notification API not available in Tauri");
+    if (import.meta.env.DEV) console.warn("[Messaging] Web Notification API not available in Tauri");
     return null;
   }
 
   const permission = await Notification.requestPermission();
   if (permission !== "granted") {
-    console.warn("[Messaging] Notification permission denied");
+    if (import.meta.env.DEV) console.warn("[Messaging] Notification permission denied");
     return null;
   }
 

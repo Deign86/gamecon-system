@@ -71,7 +71,6 @@ All privileged mutations go through callable Cloud Functions that verify the cal
 |---|---|
 | `createUserAccount` | Creates Firebase Auth user + Firestore doc; returns `{ uid, password }` |
 | `updateUserRoleAndCommittee` | Updates role, committee, and/or active status |
-| `setUserRole` | Standalone role update (admin-only) |
 | `setUserActiveStatus` | Enable/disable a user |
 | `resetSystemData` | Wipes all event-data collections + resets headcounts |
 | `deleteUser` | Deletes Auth record + Firestore doc |

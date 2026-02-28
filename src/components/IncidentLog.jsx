@@ -47,6 +47,8 @@ export default function IncidentLog() {
         userId: user.uid,
         userName: profile?.name || "Unknown",
       });
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("[IncidentLog] resolve failed:", err);
     } finally {
       setResolving(null);
     }
@@ -78,6 +80,8 @@ export default function IncidentLog() {
       setZone("");
       setSeverity("low");
       setDetails("");
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("[IncidentLog] submit failed:", err);
     } finally {
       setBusy(false);
     }

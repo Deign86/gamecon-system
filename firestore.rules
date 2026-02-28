@@ -82,7 +82,10 @@ service cloud.firestore {
       allow create: if isAdmin();
 
       // Self-registration create (owner only)
-      allow create: if isSignedIn() && request.auth.uid == uid;
+      // Enforce default 'viewer' role to prevent privilege escalation
+      allow create: if isSignedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.role == 'viewer';
 
       // Admin: unrestricted updates
       allow update: if isAdmin();
@@ -132,7 +135,7 @@ service cloud.firestore {
      * ─────────────────────────────────── */
     match /expenses/{id} {
       allow read:   if isSignedIn();
-      allow create: if isSignedIn();
+      allow create: if isProctorOrAbove();
       allow update, delete: if isAdminOrHead();
     }
 

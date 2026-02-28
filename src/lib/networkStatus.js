@@ -51,7 +51,9 @@ async function createCapacitorMonitor(onChange) {
       handle?.remove?.();
     };
   } catch (err) {
-    console.warn("[networkStatus] Capacitor Network plugin unavailable, falling back to navigator.onLine:", err.message);
+    if (import.meta.env.DEV) {
+      console.warn("[networkStatus] Capacitor Network plugin unavailable, falling back to navigator.onLine:", err.message);
+    }
     return createBrowserMonitor(onChange);
   }
 }

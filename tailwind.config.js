@@ -33,7 +33,7 @@ export default {
         },
       },
       fontFamily: {
-        display: ['"Chakra Petch"', "sans-serif"],
+        display: ['"Teko"', "sans-serif"],
         body:    ['"Lexend"', "sans-serif"],
         mono:    ['"JetBrains Mono"', "monospace"],
       },

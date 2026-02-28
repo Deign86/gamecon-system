@@ -118,7 +118,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
       setDone(true);
       setTimeout(() => { onClose(); }, 900);
     } catch (err) {
-      console.error("ContributionFormModal error:", err);
+      if (import.meta.env.DEV) console.error("ContributionFormModal error:", err);
     } finally {
       setBusy(false);
     }

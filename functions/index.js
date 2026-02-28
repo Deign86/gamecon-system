@@ -119,8 +119,22 @@ async function assertAdmin(request) {
   }
 }
 
-/* ── Shared options for all callable functions ── */
-const callOpts = { cors: true };
+/* ── Shared options for all callable functions ──
+ * Cloud Functions enforce App Check by default in production.
+ * Requests without a valid App Check token are rejected.
+ *
+ * During development / CI testing, set ENFORCE_APP_CHECK=false
+ * to bypass. In production, the default is TRUE (secure by default).
+ *
+ *   firebase functions:config:set appcheck.enforce="true"
+ *   — or set ENFORCE_APP_CHECK in .env.local —
+ */
+const enforceAppCheck = process.env.ENFORCE_APP_CHECK !== "false";
+const callOpts = {
+  cors: true,
+  enforceAppCheck,
+  ...(enforceAppCheck && { consumeAppCheckToken: true }),
+};
 
 /* ─── Helper: generate a password that meets Firebase requirements ─── */
 function generatePassword(length = 16) {
@@ -256,42 +270,6 @@ exports.updateUserRoleAndCommittee = onCall(callOpts, async (request) => {
   if (typeof active === "boolean") {
     await getAuth().updateUser(uid, { disabled: !active });
   }
-
-  return { success: true };
-});
-
-/* ─── setUserRole (legacy, kept for backward compat) ─── */
-exports.setUserRole = onCall(callOpts, async (request) => {
-  await assertAdmin(request);
-
-  const { uid, role, committee } = request.data;
-  if (!uid || !role) {
-    throw new HttpsError("invalid-argument", "uid and role are required.");
-  }
-  if (!VALID_ROLES.includes(role)) {
-    throw new HttpsError("invalid-argument", `Invalid role: ${role}`);
-  }
-
-  // Prevent self-downgrade — admins can downgrade others but not themselves
-  const callerUid = request.auth.uid;
-  if (uid === callerUid) {
-    const targetDoc = await getFirestore().doc(`users/${uid}`).get();
-    if (targetDoc.exists) {
-      const currentRole = targetDoc.data().role || "proctor";
-      if ((ROLE_RANK[role] ?? 0) < (ROLE_RANK[currentRole] ?? 0)) {
-        throw new HttpsError("permission-denied", "You cannot downgrade your own role.");
-      }
-    }
-  }
-
-  const update = { role };
-  if (committee !== undefined) {
-    const normComm = committee ? normalizeCommitteeName(committee) : null;
-    update.committee = normComm;
-    update.committees = normComm ? [{ committee: normComm, day: "DAY1/2" }] : [];
-  }
-  await getFirestore().doc(`users/${uid}`).update(update);
-  await getAuth().setCustomUserClaims(uid, { role });
 
   return { success: true };
 });

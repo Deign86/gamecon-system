@@ -170,6 +170,15 @@ export async function replayQueue(functions) {
       continue;
     }
 
+    // Exponential backoff: skip item if not enough time has elapsed since last attempt
+    if (item.lastAttempt) {
+      const backoffMs = Math.min(item.retries * item.retries * 5000, 300000); // max 5 min
+      if (Date.now() - item.lastAttempt < backoffMs) {
+        skipped++;
+        continue;
+      }
+    }
+
     try {
       const fn = httpsCallable(functions, item.fnName);
       await fn(item.payload);

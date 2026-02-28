@@ -4,9 +4,18 @@
  * Uses the `xlsx` (SheetJS) library already in the project.
  * Each helper accepts an array of documents (or processed data) and
  * triggers a browser download of a styled workbook.
+ *
+ * xlsx (~880 KB) is dynamically imported on first export call to keep
+ * the main bundle lean.
  */
-import * as XLSX from "xlsx";
 import { COMMITTEES, EXPENSE_CATEGORIES, SHIFT_BLOCKS } from "./constants";
+
+/* Lazy-loaded xlsx module */
+let _XLSX = null;
+async function getXLSX() {
+  if (!_XLSX) _XLSX = await import("xlsx");
+  return _XLSX;
+}
 
 /* ────────────────────────────── helpers ────────────────────────────── */
 
@@ -22,7 +31,7 @@ function ts(val) {
 }
 
 /** Trigger .xlsx download from a workbook */
-function downloadWorkbook(wb, filename) {
+function downloadWorkbook(XLSX, wb, filename) {
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   const url = URL.createObjectURL(blob);
@@ -59,7 +68,8 @@ function committeeName(id) {
  * @param {string} blockId    - e.g. "d1-morning"
  * @param {string} blockLabel - e.g. "Day 1 — Morning"
  */
-export function exportAttendance(volunteers, records, blockId, blockLabel) {
+export async function exportAttendance(volunteers, records, blockId, blockLabel) {
+  const XLSX = await getXLSX();
   const headers = ["Name", "Committees", "Status", "Checked In At", "Marked By"];
   const rows = volunteers.map((p) => {
     const rec = records[p.id];
@@ -102,7 +112,7 @@ export function exportAttendance(volunteers, records, blockId, blockLabel) {
   autoWidth(wsSummary, summaryHeaders);
   XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
 
-  downloadWorkbook(wb, `Attendance_${blockId}_${new Date().toISOString().slice(0, 10)}`);
+  downloadWorkbook(XLSX, wb, `Attendance_${blockId}_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -114,7 +124,8 @@ export function exportAttendance(volunteers, records, blockId, blockLabel) {
  *
  * @param {Array} contributions - Firestore docs array
  */
-export function exportContributions(contributions) {
+export async function exportContributions(contributions) {
+  const XLSX = await getXLSX();
   const headers = ["Name", "Committee", "Task", "Description", "Logged At"];
   const rows = contributions.map((c) => [
     c.userName || "",
@@ -153,7 +164,7 @@ export function exportContributions(contributions) {
   autoWidth(wsPerson, personHeaders);
   XLSX.utils.book_append_sheet(wb, wsPerson, "By Person");
 
-  downloadWorkbook(wb, `Contributions_${new Date().toISOString().slice(0, 10)}`);
+  downloadWorkbook(XLSX, wb, `Contributions_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -167,7 +178,8 @@ export function exportContributions(contributions) {
  * @param {string} blockId   - e.g. "d1-morning"
  * @param {string} blockLabel
  */
-export function exportShifts(shifts, blockId, blockLabel) {
+export async function exportShifts(shifts, blockId, blockLabel) {
+  const XLSX = await getXLSX();
   const headers = ["Committee", "Assignee Name", "Filled / Required", "Block"];
   const rows = [];
 
@@ -214,7 +226,7 @@ export function exportShifts(shifts, blockId, blockLabel) {
   autoWidth(wsSumm, summHeaders);
   XLSX.utils.book_append_sheet(wb, wsSumm, "Coverage");
 
-  downloadWorkbook(wb, `Shifts_${blockId}_${new Date().toISOString().slice(0, 10)}`);
+  downloadWorkbook(XLSX, wb, `Shifts_${blockId}_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -226,7 +238,8 @@ export function exportShifts(shifts, blockId, blockLabel) {
  *
  * @param {Array} incidents - Firestore docs array
  */
-export function exportIncidents(incidents) {
+export async function exportIncidents(incidents) {
+  const XLSX = await getXLSX();
   const headers = ["Title", "Zone", "Severity", "Status", "Details", "Reported By", "Resolved By", "Reported At"];
   const rows = incidents.map((inc) => [
     inc.title || "",
@@ -266,7 +279,7 @@ export function exportIncidents(incidents) {
   autoWidth(wsSumm, summHeaders);
   XLSX.utils.book_append_sheet(wb, wsSumm, "Summary");
 
-  downloadWorkbook(wb, `Incidents_${new Date().toISOString().slice(0, 10)}`);
+  downloadWorkbook(XLSX, wb, `Incidents_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -278,7 +291,8 @@ export function exportIncidents(incidents) {
  *
  * @param {Array} expenses - Firestore docs array
  */
-export function exportExpenses(expenses) {
+export async function exportExpenses(expenses) {
+  const XLSX = await getXLSX();
   const headers = ["Item", "Amount (₱)", "Category", "Committee", "Status", "Submitted By", "Date"];
   const rows = expenses.map((exp) => [
     exp.item || "",
@@ -323,7 +337,7 @@ export function exportExpenses(expenses) {
   autoWidth(wsComm, commHeaders);
   XLSX.utils.book_append_sheet(wb, wsComm, "By Committee");
 
-  downloadWorkbook(wb, `Expenses_${new Date().toISOString().slice(0, 10)}`);
+  downloadWorkbook(XLSX, wb, `Expenses_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -335,7 +349,8 @@ export function exportExpenses(expenses) {
  *
  * @param {Array} logs - Firestore docs array
  */
-export function exportLogs(logs) {
+export async function exportLogs(logs) {
+  const XLSX = await getXLSX();
   const headers = ["Action", "Category", "Details", "User", "Timestamp"];
   const rows = logs.map((l) => [
     l.action || "",
@@ -350,5 +365,5 @@ export function exportLogs(logs) {
   autoWidth(ws, headers);
   XLSX.utils.book_append_sheet(wb, ws, "Audit Logs");
 
-  downloadWorkbook(wb, `AuditLogs_${new Date().toISOString().slice(0, 10)}`);
+  downloadWorkbook(XLSX, wb, `AuditLogs_${new Date().toISOString().slice(0, 10)}`);
 }

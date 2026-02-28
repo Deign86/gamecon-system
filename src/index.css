@@ -34,7 +34,7 @@
     --gc-danger:  239 68 68;
 
     /* Text layers — pre-mixed for alpha-free usage */
-    --gc-hint:  90 90 90;      /* tertiary — labels, timestamps */
+    --gc-hint:  119 119 119;    /* tertiary — labels, timestamps (WCAG AA ≥ 4.5:1 on #111) */
     --gc-faded: 62 62 62;      /* quaternary — decorative, footnotes */
 
     /* Component surface tokens */

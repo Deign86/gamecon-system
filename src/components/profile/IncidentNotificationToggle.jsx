@@ -106,7 +106,7 @@ export default function IncidentNotificationToggle() {
         setPermStatus("idle");
       }
     } catch (err) {
-      console.error("[Notifications] Toggle failed:", err);
+      if (import.meta.env.DEV) console.error("[Notifications] Toggle failed:", err);
     } finally {
       setBusy(false);
     }

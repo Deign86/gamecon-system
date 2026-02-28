@@ -46,6 +46,9 @@ export default function ExpenseTracker() {
       setAmount("");
       setCategory("");
       setShowForm(false);
+    } catch (err) {
+      // Silently handled — error will show via ErrorBoundary or toast if available
+      if (import.meta.env.DEV) console.error("[ExpenseTracker] submit failed:", err);
     } finally {
       setBusy(false);
     }

@@ -10,25 +10,30 @@
 
 /* eslint-env serviceworker */
 
-const CACHE_NAME = "pvops-shell-v2";
+const CACHE_NAME = "pvops-shell-v3";
+
+/** Max age (in ms) for non-hashed assets in the cache — 7 days */
+const MAX_CACHE_AGE = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Files to pre-cache on install.
  * The index.html is the entry-point for the SPA; Vite-hashed assets are
  * captured at runtime by the fetch handler below.
  */
-const PRE_CACHE = [
-  "/",
-  "/index.html",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png",
-];
+const PRE_CACHE_REQUIRED = ["/", "/index.html", "/manifest.json"];
+const PRE_CACHE_OPTIONAL = ["/icon-192.png", "/icon-512.png"];
 
 /* ── Install: cache the minimal app shell ── */
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRE_CACHE))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Required assets — fail install if missing
+      await cache.addAll(PRE_CACHE_REQUIRED);
+      // Optional assets — continue even if icons are absent
+      await Promise.allSettled(
+        PRE_CACHE_OPTIONAL.map((url) => cache.add(url).catch(() => {}))
+      );
+    })
   );
   // Activate immediately — don't wait for old tabs to close
   self.skipWaiting();
@@ -77,8 +82,12 @@ self.addEventListener("fetch", (event) => {
   }
 
   // For assets (/assets/*, fonts, images) — stale-while-revalidate
+  // Vite-hashed assets (contain a hash in path) are immutable, cache forever.
+  // Non-hashed assets expire after MAX_CACHE_AGE.
   event.respondWith(
     caches.match(request).then((cached) => {
+      const isHashed = /\/assets\/.+\.[a-f0-9]{8,}\./i.test(url.pathname);
+
       const networkFetch = fetch(request)
         .then((response) => {
           // Only cache successful, full responses (skip 206 partial — Cache API rejects them)
@@ -92,6 +101,21 @@ self.addEventListener("fetch", (event) => {
           // If network fails and we have nothing cached, return a basic offline fallback
           return cached || new Response("Offline", { status: 503, statusText: "Offline" });
         });
+
+      // For hashed assets, trust the cache indefinitely
+      if (cached && isHashed) return cached;
+
+      // For non-hashed assets, check cache freshness via the date header
+      if (cached && !isHashed) {
+        const dateHeader = cached.headers.get("date");
+        if (dateHeader) {
+          const cachedAge = Date.now() - new Date(dateHeader).getTime();
+          if (cachedAge > MAX_CACHE_AGE) {
+            // Cache is stale — prefer network, fall back to stale copy
+            return networkFetch;
+          }
+        }
+      }
 
       // Return cached version immediately, update in background
       return cached || networkFetch;

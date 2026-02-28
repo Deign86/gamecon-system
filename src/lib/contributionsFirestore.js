@@ -37,7 +37,7 @@ export function subscribeContributionsByUser(userId, callback) {
     q,
     (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     (err) => {
-      console.error("subscribeContributionsByUser error:", err);
+      if (import.meta.env.DEV) console.error("subscribeContributionsByUser error:", err);
       callback([]);
     }
   );
@@ -53,7 +53,7 @@ export function subscribeAllContributions(callback) {
     q,
     (snap) => callback(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
     (err) => {
-      console.error("subscribeAllContributions error:", err);
+      if (import.meta.env.DEV) console.error("subscribeAllContributions error:", err);
       callback([]);
     }
   );

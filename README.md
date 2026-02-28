@@ -139,7 +139,6 @@ All admin mutations are routed through callable Cloud Functions that verify `rol
 |---|---|---|
 | `createUserAccount` | Callable | Creates Auth user + Firestore doc with generated password; normalizes committee names |
 | `updateUserRoleAndCommittee` | Callable | Updates role, committee(s), and/or active status (with self-downgrade prevention) |
-| `setUserRole` | Callable | Standalone role update (legacy compat) |
 | `setUserActiveStatus` | Callable | Enables/disables a user account in Auth + Firestore |
 | `deleteUser` | Callable | Deletes Auth record + Firestore doc (cannot delete self) |
 | `resetSystemData` | Callable | Wipes all event-data collections and resets headcounts to zero |
