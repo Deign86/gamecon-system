@@ -22,6 +22,7 @@ const SEED_BY_CANONICAL = Object.fromEntries(
 );
 import AdminResetPanel from "./AdminResetPanel";
 import { useTheme } from "../hooks/useTheme";
+import { useTab } from "../App";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
