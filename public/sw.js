@@ -81,8 +81,8 @@ self.addEventListener("fetch", (event) => {
     caches.match(request).then((cached) => {
       const networkFetch = fetch(request)
         .then((response) => {
-          // Only cache successful responses
-          if (response.ok) {
+          // Only cache successful, full responses (skip 206 partial — Cache API rejects them)
+          if (response.ok && response.status !== 206) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }
