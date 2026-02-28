@@ -120,10 +120,7 @@ export default function AuthGate() {
 
         {/* Logo block */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex justify-center relative">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-24 w-24 rounded-full bg-gc-crimson/5 animate-pulse" />
-            </div>
+          <div className="mx-auto mb-4 flex justify-center">
             <GCLogo size={72} />
           </div>
           <h1 className="font-display text-4xl font-bold tracking-wider">
