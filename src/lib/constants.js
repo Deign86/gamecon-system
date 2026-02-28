@@ -1,4 +1,4 @@
-/* ── Seed data for IT GameCon 2026 ── */
+/* ── App-wide constants for IT GameCon 2026 ── */
 
 export const ZONES = [
   { id: "ticketing",    name: "Ticketing",          order: 1,  committee: "ticketing" },

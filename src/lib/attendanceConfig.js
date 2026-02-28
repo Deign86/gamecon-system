@@ -5,7 +5,7 @@
  * Sessions map 1-to-1 with SHIFT_BLOCKS from seed data.
  */
 
-import { SHIFT_BLOCKS } from "../data/seed";
+import { SHIFT_BLOCKS } from "./constants";
 
 /* ── Attendance statuses ── */
 export const ATTENDANCE_STATUSES = ["present", "late", "excused", "absent"];

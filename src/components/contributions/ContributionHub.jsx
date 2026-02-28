@@ -4,7 +4,7 @@ import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck } from "lucide-
 import { useCollection } from "../../hooks/useFirestore";
 import { useAuth } from "../../hooks/useAuth";
 import { logActivity } from "../../lib/auditLog";
-import { ROLE_COMMITTEES as COMMITTEES } from "../../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { fmtDate, cn } from "../../lib/utils";
 import PersonContributionView from "./PersonContributionView";
 import CommitteeContributionView from "./CommitteeContributionView";

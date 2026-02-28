@@ -3,7 +3,7 @@ import { Plus, Receipt, TrendingDown } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
-import { ROLE_COMMITTEES as COMMITTEES, EXPENSE_CATEGORIES } from "../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES, EXPENSE_CATEGORIES } from "../lib/constants";
 import { peso, fmtDate, cn } from "../lib/utils";
 
 export default function ExpenseTracker() {

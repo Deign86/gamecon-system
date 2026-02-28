@@ -24,7 +24,7 @@ import {
   arrayRemove,
 } from "firebase/firestore";
 import { db } from "../firebase";
-import { COMMITTEE_REQUIRED_STAFF } from "../data/seed";
+import { COMMITTEE_REQUIRED_STAFF } from "./constants";
 import { getShiftLimits } from "./shiftLimitsConfig";
 
 const COLLECTION = "committeeShifts";

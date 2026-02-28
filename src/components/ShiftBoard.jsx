@@ -11,7 +11,7 @@ import {
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
-import { SHIFT_BLOCKS, COMMITTEES } from "../data/seed";
+import { SHIFT_BLOCKS, COMMITTEES } from "../lib/constants";
 import { COMMITTEE_NAMES } from "../lib/roleConfig";
 import { cn } from "../lib/utils";
 import {

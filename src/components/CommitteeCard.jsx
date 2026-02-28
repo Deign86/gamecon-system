@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users } from "lucide-react";
-import { ROLE_COMMITTEES as COMMITTEES } from "../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../lib/constants";
 import { subscribeCommitteeSchedules } from "../lib/roleFirestore";
 
 /**

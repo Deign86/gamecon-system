@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, BarChart3 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { ROLE_COMMITTEES as COMMITTEES } from "../../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { fmtDate, cn } from "../../lib/utils";
 import { subscribeAllContributions } from "../../lib/contributionsFirestore";
 

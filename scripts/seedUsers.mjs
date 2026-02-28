@@ -1,6 +1,6 @@
 /**
  * Create test user accounts via Firebase Auth REST API + seed their Firestore profiles.
- * Usage: node src/data/seedUsers.mjs
+ * Usage: node scripts/seedUsers.mjs
  */
 
 import { initializeApp } from "firebase/app";
@@ -11,7 +11,7 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-const envPath = resolve(__dir, "../../.env");
+const envPath = resolve(__dir, "../.env");
 let envVars = {};
 try {
   const envContent = readFileSync(envPath, "utf-8");

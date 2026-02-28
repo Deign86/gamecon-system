@@ -4,7 +4,7 @@
  *
  * Signs in as the admin user so Firestore rules allow the write.
  *
- * Usage:  node src/data/updateShiftCounts.mjs
+ * Usage:  node scripts/updateShiftCounts.mjs
  */
 
 import { initializeApp } from "firebase/app";
@@ -25,7 +25,7 @@ import { fileURLToPath } from "url";
 
 // ── Load .env ──
 const __dir = dirname(fileURLToPath(import.meta.url));
-const envPath = resolve(__dir, "../../.env");
+const envPath = resolve(__dir, "../.env");
 let envVars = {};
 try {
   const envContent = readFileSync(envPath, "utf-8");

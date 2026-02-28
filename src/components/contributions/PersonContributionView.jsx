@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Plus, Pencil, Trash2, Shield, UserRound, ChevronRight, ClipboardList } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
-import { ROLE_COMMITTEES as COMMITTEES } from "../../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { subscribeRoleAssignments } from "../../lib/roleFirestore";
 import { fmtDate, initials, cn } from "../../lib/utils";
 import {

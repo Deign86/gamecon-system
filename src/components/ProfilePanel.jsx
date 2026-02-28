@@ -5,7 +5,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
 import { useCollection } from "../hooks/useFirestore";
-import { ROLE_COMMITTEES as COMMITTEES } from "../data/seed";
+import { ROLE_COMMITTEES as COMMITTEES } from "../lib/constants";
 import { normalizeCommitteeName } from "../lib/roleConfig";
 import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";

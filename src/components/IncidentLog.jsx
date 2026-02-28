@@ -3,7 +3,7 @@ import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw } fr
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
-import { ZONES } from "../data/seed";
+import { ZONES } from "../lib/constants";
 import { fmtDate, cn } from "../lib/utils";
 
 const SEVERITY = [
