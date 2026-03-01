@@ -52,18 +52,35 @@ async function downloadWorkbook(XLSX, wb, filename) {
   const plat = getPlatform();
 
   if (plat === "android") {
-    // Android (Capacitor WebView): anchor download is a no-op.
-    // Use Web Share API to open the native share/save sheet.
-    const file = new File([blob], fullName, { type: blob.type });
-    if (navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ files: [file], title: fullName });
-        return fullName;
-      } catch (err) {
-        // User cancelled share — not an error
-        if (err?.name === "AbortError") return fullName;
-        // Fall through to anchor download as last resort
-      }
+    // Android (Capacitor WebView): anchor download and Web Share File API are
+    // unreliable. Use @capacitor/filesystem to write the file to cache, then
+    // @capacitor/share to open the native share/save sheet.
+    try {
+      const { Filesystem, Directory } = await import("@capacitor/filesystem");
+      const { Share } = await import("@capacitor/share");
+
+      // Convert blob → base64 (FileReader is available in Capacitor WebView)
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result.split(",")[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      // Write to the app cache directory (no special permissions required)
+      const { uri } = await Filesystem.writeFile({
+        path: fullName,
+        data: base64,
+        directory: Directory.Cache,
+      });
+
+      // Open native share/save sheet with the written file URI
+      await Share.share({ title: fullName, files: [uri] });
+      return fullName;
+    } catch (err) {
+      if (err?.name === "AbortError") return fullName; // user cancelled — fine
+      console.error("[exportExcel] Android share failed:", err);
+      // Fall through to anchor attempt as absolute last resort
     }
   }
 
