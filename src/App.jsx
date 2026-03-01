@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router";
 import { motion } from "motion/react";
 import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
-import { ToastProvider } from "./components/Toast";
+import { ToastProvider, useToast } from "./components/Toast";
 import { OnlineStatusProvider } from "./hooks/useOnlineStatus";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflineGuard from "./components/OfflineGuard";
@@ -36,12 +36,21 @@ export const useTab = () => {
 function AppShell() {
   const { user, profile, loading } = useAuth();
   const [tab, setTab] = useState("dashboard");
+  const toast = useToast();
 
   /* Reset tab to dashboard whenever the signed-in user changes
      (prevents a proctor inheriting the admin's "users" tab after sign-out / sign-in) */
   useEffect(() => {
     setTab("dashboard");
   }, [user?.uid]);
+
+  /* Tauri: show a toast when an export finishes (silent download gives no feedback) */
+  useEffect(() => {
+    const handler = (e) =>
+      toast(`Saved to Downloads: ${e.detail.filename}`, "success", 5000);
+    window.addEventListener("gc-export-done", handler);
+    return () => window.removeEventListener("gc-export-done", handler);
+  }, [toast]);
 
   if (loading) {
     return <AppSkeleton />;

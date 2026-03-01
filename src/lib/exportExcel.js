@@ -17,6 +17,19 @@ async function getXLSX() {
   return _XLSX;
 }
 
+/**
+ * Detect the current runtime platform.
+ * @returns {"android"|"tauri"|"web"}
+ */
+function getPlatform() {
+  if (typeof window === "undefined") return "web";
+  // Capacitor Android
+  if (window.Capacitor?.getPlatform?.() === "android") return "android";
+  // Tauri v1 & v2
+  if ("__TAURI_INTERNALS__" in window || "__TAURI__" in window) return "tauri";
+  return "web";
+}
+
 /* ────────────────────────────── helpers ────────────────────────────── */
 
 /** Convert a Firestore Timestamp (or Date, or ISO string) to a readable string */
@@ -30,18 +43,46 @@ function ts(val) {
   });
 }
 
-/** Trigger .xlsx download from a workbook */
-function downloadWorkbook(XLSX, wb, filename) {
+/** Trigger .xlsx download from a workbook — platform-aware */
+async function downloadWorkbook(XLSX, wb, filename) {
+  const fullName = filename.endsWith(".xlsx") ? filename : `${filename}.xlsx`;
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+  const plat = getPlatform();
+
+  if (plat === "android") {
+    // Android (Capacitor WebView): anchor download is a no-op.
+    // Use Web Share API to open the native share/save sheet.
+    const file = new File([blob], fullName, { type: blob.type });
+    if (navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: fullName });
+        return fullName;
+      } catch (err) {
+        // User cancelled share — not an error
+        if (err?.name === "AbortError") return fullName;
+        // Fall through to anchor download as last resort
+      }
+    }
+  }
+
+  // Web browser & Tauri: standard anchor-click download
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = filename.endsWith(".xlsx") ? filename : `${filename}.xlsx`;
+  a.download = fullName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+
+  // Tauri: silent save gives no feedback — dispatch event so the app can toast
+  if (plat === "tauri") {
+    window.dispatchEvent(new CustomEvent("gc-export-done", { detail: { filename: fullName } }));
+  }
+
+  return fullName;
 }
 
 /** Set column widths on a worksheet from header array */
@@ -112,7 +153,7 @@ export async function exportAttendance(volunteers, records, blockId, blockLabel)
   autoWidth(wsSummary, summaryHeaders);
   XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
 
-  downloadWorkbook(XLSX, wb, `Attendance_${blockId}_${new Date().toISOString().slice(0, 10)}`);
+  await downloadWorkbook(XLSX, wb, `Attendance_${blockId}_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -164,7 +205,7 @@ export async function exportContributions(contributions) {
   autoWidth(wsPerson, personHeaders);
   XLSX.utils.book_append_sheet(wb, wsPerson, "By Person");
 
-  downloadWorkbook(XLSX, wb, `Contributions_${new Date().toISOString().slice(0, 10)}`);
+  await downloadWorkbook(XLSX, wb, `Contributions_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -226,7 +267,7 @@ export async function exportShifts(shifts, blockId, blockLabel) {
   autoWidth(wsSumm, summHeaders);
   XLSX.utils.book_append_sheet(wb, wsSumm, "Coverage");
 
-  downloadWorkbook(XLSX, wb, `Shifts_${blockId}_${new Date().toISOString().slice(0, 10)}`);
+  await downloadWorkbook(XLSX, wb, `Shifts_${blockId}_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -279,7 +320,7 @@ export async function exportIncidents(incidents) {
   autoWidth(wsSumm, summHeaders);
   XLSX.utils.book_append_sheet(wb, wsSumm, "Summary");
 
-  downloadWorkbook(XLSX, wb, `Incidents_${new Date().toISOString().slice(0, 10)}`);
+  await downloadWorkbook(XLSX, wb, `Incidents_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -337,7 +378,7 @@ export async function exportExpenses(expenses) {
   autoWidth(wsComm, commHeaders);
   XLSX.utils.book_append_sheet(wb, wsComm, "By Committee");
 
-  downloadWorkbook(XLSX, wb, `Expenses_${new Date().toISOString().slice(0, 10)}`);
+  await downloadWorkbook(XLSX, wb, `Expenses_${new Date().toISOString().slice(0, 10)}`);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -365,5 +406,5 @@ export async function exportLogs(logs) {
   autoWidth(ws, headers);
   XLSX.utils.book_append_sheet(wb, ws, "Audit Logs");
 
-  downloadWorkbook(XLSX, wb, `AuditLogs_${new Date().toISOString().slice(0, 10)}`);
+  await downloadWorkbook(XLSX, wb, `AuditLogs_${new Date().toISOString().slice(0, 10)}`);
 }
