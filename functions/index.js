@@ -183,6 +183,12 @@ exports.createUserAccount = onCall(callOpts, async (request) => {
     if (err.code === "auth/email-already-exists") {
       throw new HttpsError("already-exists", "An account with this email already exists.");
     }
+    console.error("[createUserAccount] Failed to create Auth user", {
+      email,
+      code: err.code,
+      message: err.message,
+      stack: err.stack,
+    });
     throw new HttpsError("internal", "Failed to create user account.");
   }
 
