@@ -79,7 +79,9 @@ export function useQueuedWrite() {
         setStatus("done");
         return { queued: false, result };
       } catch (err) {
-        if (isNetworkError(err)) {
+        // isNetworkError uses navigator.onLine which is unreliable in Capacitor WebView.
+        // Also check the context-level isOnline which uses the Capacitor Network plugin.
+        if (isNetworkError(err) || !isOnline) {
           // SDK still queued the write, but a network error surfaced — mark queued
           setStatus("queued");
           return { queued: true };

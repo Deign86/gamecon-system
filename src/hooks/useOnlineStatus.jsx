@@ -84,6 +84,20 @@ export function OnlineStatusProvider({ children }) {
     }
   }, []);
 
+  /* ── Replay on app foreground — catches pending items after backgrounding ── */
+  /* Fires on Android (Capacitor) app resume and on desktop tab-refocus.
+     If the queue has items and we are online, attempt replay immediately
+     rather than waiting for the next 30-second periodic tick. */
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible" && pendingCount > 0) {
+        replayNow();
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [pendingCount, replayNow]);
+
   /* ── Auto-replay when connectivity is restored ── */
   useEffect(() => {
     if (isOnline && pendingCount > 0) {

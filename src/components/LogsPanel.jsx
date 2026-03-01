@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { LogsPanelSkeleton } from "./Skeleton";
+import Modal from "./Modal";
 import {
   ScrollText,
   TrendingUp,
@@ -76,6 +77,7 @@ export default function LogsPanel() {
   const { profile } = useAuth();
   const isAdmin = profile?.role === "admin";
   const [filter, setFilter] = useState("all");
+  const [selectedLog, setSelectedLog] = useState(null);
 
   const { docs: logs, loading } = useCollection("logs", "timestamp", 200);
 
@@ -168,7 +170,8 @@ export default function LogsPanel() {
                 key={entry.id}
                 variants={fadeUp}
                 layout
-                className="gc-card flex items-center gap-3 p-3"
+                className="gc-card flex items-center gap-3 p-3 cursor-pointer hover:border-gc-steel transition-colors"
+                onClick={() => setSelectedLog(entry)}
               >
                 <div
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded"
@@ -197,6 +200,67 @@ export default function LogsPanel() {
           })}
         </AnimatePresence>
       </div>
+
+      {/* ── Log detail modal ── */}
+      <Modal
+        open={!!selectedLog}
+        onClose={() => setSelectedLog(null)}
+        title="LOG ENTRY DETAIL"
+      >
+        {selectedLog && (() => {
+          const { Icon, color, bg } = categoryConfig(selectedLog.category);
+          return (
+            <div className="space-y-4">
+              {/* Category badge + icon */}
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded"
+                  style={{ background: bg, border: `1px solid ${color}30` }}
+                >
+                  <Icon className="h-5 w-5" style={{ color }} />
+                </div>
+                <div>
+                  <span
+                    className="rounded px-2 py-0.5 text-[9px] font-bold font-mono uppercase tracking-wider"
+                    style={{ background: bg, color, border: `1px solid ${color}25` }}
+                  >
+                    {selectedLog.category}
+                  </span>
+                  <p className="text-[10px] text-gc-mist font-mono mt-1">
+                    {selectedLog.action}
+                  </p>
+                </div>
+              </div>
+
+              {/* Full details */}
+              <div className="rounded border border-gc-steel bg-gc-void p-3">
+                <p className="text-xs text-gc-mist font-mono uppercase tracking-wider mb-1.5">Details</p>
+                <p className="text-sm text-gc-cloud font-body leading-relaxed break-words">
+                  {selectedLog.details || selectedLog.action}
+                </p>
+              </div>
+
+              {/* Meta */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="rounded border border-gc-steel bg-gc-void p-2.5">
+                  <p className="text-[9px] text-gc-mist font-mono uppercase tracking-wider mb-0.5">User</p>
+                  <p className="text-xs text-gc-cloud font-mono">{selectedLog.userName || "system"}</p>
+                </div>
+                <div className="rounded border border-gc-steel bg-gc-void p-2.5">
+                  <p className="text-[9px] text-gc-mist font-mono uppercase tracking-wider mb-0.5">Timestamp</p>
+                  <p className="text-xs text-gc-cloud font-mono">{fmtDate(selectedLog.timestamp)}</p>
+                </div>
+                {selectedLog.uid && (
+                  <div className="col-span-2 rounded border border-gc-steel bg-gc-void p-2.5">
+                    <p className="text-[9px] text-gc-mist font-mono uppercase tracking-wider mb-0.5">UID</p>
+                    <p className="text-xs text-gc-cloud font-mono break-all">{selectedLog.uid}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+      </Modal>
     </motion.div>
   );
 }

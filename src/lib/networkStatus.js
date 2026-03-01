@@ -40,6 +40,23 @@ async function createCapacitorMonitor(onChange) {
     const { Network } = await import("@capacitor/network");
     const status = await Network.getStatus();
     let currentlyOnline = status.connected;
+
+    // On Android, the WebView's networking stack may not be fully initialised
+    // for 1-2 s after launch. `Network.getStatus()` can briefly return
+    // `connected: false` even when there is a valid WiFi/mobile connection.
+    // If the initial read says offline, re-check once after a short grace
+    // period before committing to false — this prevents a false offline flash
+    // that would block the login screen on first launch.
+    if (!currentlyOnline) {
+      await new Promise((res) => setTimeout(res, 2000));
+      try {
+        const recheck = await Network.getStatus();
+        currentlyOnline = recheck.connected;
+      } catch {
+        // ignore — use the value we already have
+      }
+    }
+
     onChange(currentlyOnline);
 
     const handle = await Network.addListener("networkStatusChange", (s) => {
@@ -47,8 +64,27 @@ async function createCapacitorMonitor(onChange) {
       onChange(currentlyOnline);
     });
 
+    // On Android, the Capacitor Network plugin only fires events while the app
+    // is in the foreground. If connectivity changed while the app was backgrounded,
+    // we need to re-check when the user returns to the app.
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === "visible") {
+        try {
+          const latest = await Network.getStatus();
+          if (latest.connected !== currentlyOnline) {
+            currentlyOnline = latest.connected;
+            onChange(currentlyOnline);
+          }
+        } catch {
+          // ignore — plugin may be momentarily unavailable during resume
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       handle?.remove?.();
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   } catch (err) {
     if (import.meta.env.DEV) {
@@ -81,9 +117,16 @@ function createBrowserMonitor(onChange) {
 function createTauriMonitor(onChange) {
   let current = navigator.onLine;
   let running = true;
-  onChange(current);
 
-  // Also listen to browser events as a quick signal
+  // navigator.onLine is unreliable in Tauri's webview (tends to report true even
+  // when there is no internet). Probe immediately to get a real answer, then
+  // keep probing every 10 s so the state stays accurate.
+  probeConnectivity().then((ok) => {
+    current = ok;
+    onChange(ok);
+  });
+
+  // Also listen to browser events as a fast-path signal (best-effort)
   const goOnline = () => { current = true; onChange(true); };
   const goOffline = () => { current = false; onChange(false); };
   window.addEventListener("online", goOnline);

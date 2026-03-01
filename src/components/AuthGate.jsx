@@ -2,7 +2,15 @@ import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { LogIn, AlertCircle, Info, Eye, EyeOff } from "lucide-react";
 import { signIn } from "../hooks/useAuth";
+import { isCapacitor, isTauri } from "../lib/messaging";
 import GCLogo from "./GCLogo";
+
+/**
+ * How long to wait before retrying after a network error on first launch.
+ * Native platforms (Android / desktop) need more time for the OS networking
+ * stack to finish initialising after the webview opens.
+ */
+const NETWORK_RETRY_DELAY_MS = isCapacitor() ? 2500 : isTauri() ? 2000 : 1500;
 
 const AUTH_ERROR_MESSAGES = {
   "auth/invalid-credential":    "Incorrect email or password. Please try again.",
@@ -31,6 +39,7 @@ export default function AuthGate() {
   const [pass, setPass]         = useState("");
   const [error, setError]       = useState("");
   const [busy, setBusy]         = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const videoRef = useRef(null);
   const [videoReady, setVideoReady] = useState(false);
@@ -53,7 +62,22 @@ export default function AuthGate() {
     try {
       await signIn(email, pass);
     } catch (err) {
-      setError(getFriendlyAuthError(err));
+      // On first launch in Tauri/Capacitor the network stack may not be ready
+      // yet. Retry once after a short delay before surfacing the error to the user.
+      if (err?.code === "auth/network-request-failed") {
+        try {
+          setRetrying(true);
+          await new Promise((res) => setTimeout(res, NETWORK_RETRY_DELAY_MS));
+          await signIn(email, pass);
+          return; // retry succeeded — AuthProvider will handle the rest
+        } catch (retryErr) {
+          setError(getFriendlyAuthError(retryErr));
+        } finally {
+          setRetrying(false);
+        }
+      } else {
+        setError(getFriendlyAuthError(err));
+      }
     } finally {
       setBusy(false);
     }
@@ -220,7 +244,10 @@ export default function AuthGate() {
               className="gc-btn-primary w-full disabled:opacity-50"
             >
               {busy ? (
-                <span className="h-4 w-4 rounded-sm border-2 border-white border-t-transparent animate-spin" />
+                <>
+                  <span className="h-4 w-4 rounded-sm border-2 border-white border-t-transparent animate-spin" />
+                  {retrying && <span className="text-xs font-body">Retrying…</span>}
+                </>
               ) : (
                 <>
                   <LogIn className="h-4 w-4" /> Access System
