@@ -149,7 +149,7 @@ export default function TaskBoard() {
             key={d}
             onClick={() => setDay(d)}
             className={cn(
-              "shrink-0 rounded px-3 py-2 text-xs font-semibold transition-all border",
+              "shrink-0 rounded px-3 py-2 font-display text-xs uppercase tracking-widest transition-all border",
               day === d
                 ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
                 : "bg-gc-iron border-gc-steel/60 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"
@@ -161,42 +161,47 @@ export default function TaskBoard() {
       </div>
 
       {/* ── Summary bar ── */}
-      <div className="flex items-center justify-between rounded border border-gc-steel/60 bg-gc-iron px-4 py-2.5">
-        <div className="flex items-center gap-4 text-xs font-body">
-          <span className="flex items-center gap-1.5 text-gc-cloud">
-            <Calendar className="h-3.5 w-3.5 text-gc-crimson" />
-            {day}
-          </span>
-          <span className="text-gc-mist">
-            {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
-          </span>
-        </div>
+      <div className="rounded border border-gc-steel/60 bg-gc-iron px-4 py-2.5">
+        {/* Mobile: stacked two-row layout */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          {/* Left — day label + task count */}
+          <div className="flex items-center gap-3 text-xs font-body">
+            <span className="flex items-center gap-1.5 text-gc-cloud">
+              <Calendar className="h-3.5 w-3.5 text-gc-crimson" />
+              <span className="font-display text-sm uppercase tracking-widest text-gc-cloud">{day}</span>
+            </span>
+            <span className="font-mono text-[11px] text-gc-mist">
+              {filteredTasks.length} task{filteredTasks.length !== 1 ? "s" : ""}
+            </span>
+          </div>
 
-        <div className="flex items-center gap-2">
-          {/* Filter toggle */}
-          <button
-            onClick={() => setShowFilters((v) => !v)}
-            className={cn(
-              "inline-flex items-center gap-1 rounded-md px-2 py-0.5",
-              "text-[10px] font-bold uppercase tracking-wider transition-colors",
-              showFilters || filterCommittee
-                ? "bg-gc-crimson/10 text-gc-crimson border border-gc-crimson/20"
-                : "bg-gc-iron text-gc-mist border border-gc-steel/40 hover:text-gc-cloud"
-            )}
-          >
-            <Filter className="h-3 w-3" />
-            Filter
-            {filterCommittee && (
-              <span className="ml-0.5 rounded bg-gc-crimson/20 px-1 py-px text-[8px]">1</span>
-            )}
-          </button>
-
-          {/* New task button */}
-          {canCreate && (
-            <button onClick={handleAddClick} className="gc-btn-primary !py-1 !px-3 !text-[10px] !gap-1">
-              <Plus className="h-3 w-3" /> New Task
+          {/* Right — controls row */}
+          <div className="flex items-center gap-2">
+            {/* Filter toggle */}
+            <button
+              onClick={() => setShowFilters((v) => !v)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1",
+                "text-[11px] font-display uppercase tracking-widest transition-colors border",
+                showFilters || filterCommittee
+                  ? "bg-gc-crimson/10 text-gc-crimson border-gc-crimson/20"
+                  : "bg-gc-iron text-gc-mist border-gc-steel/40 hover:text-gc-cloud"
+              )}
+            >
+              <Filter className="h-3 w-3" />
+              Filter
+              {filterCommittee && (
+                <span className="ml-0.5 rounded bg-gc-crimson/20 px-1 py-px text-[9px] font-mono">1</span>
+              )}
             </button>
-          )}
+
+            {/* New task button */}
+            {canCreate && (
+              <button onClick={handleAddClick} className="gc-btn-primary !py-1 !px-3 !text-xs !gap-1.5">
+                <Plus className="h-3 w-3" /> New Task
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

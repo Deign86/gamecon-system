@@ -141,13 +141,13 @@ export default function AttendancePage() {
 
       {/* ── Sub-tabs (admin/head can see overview) ── */}
       {isAdminOrHead && (
-        <div className="flex gap-1 rounded border border-gc-steel/30 bg-gc-iron/50 p-1 w-fit">
+        <div className="flex gap-1 rounded border border-gc-steel/30 bg-gc-iron/50 p-1 w-full">
           {SUB_TABS.map(({ key, label, Icon }) => (
             <button
               key={key}
               onClick={() => setSubTab(key)}
               className={cn(
-                "flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-all border",
+                "flex flex-1 items-center justify-center gap-1.5 rounded px-3 py-2 font-display text-xs uppercase tracking-widest transition-all border",
                 subTab === key
                   ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
                   : "text-gc-mist hover:text-gc-cloud border-transparent"
