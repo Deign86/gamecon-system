@@ -82,7 +82,8 @@ const isNativeApp =
   (typeof window !== "undefined" &&
     window.__TAURI_INTERNALS__ !== undefined);
 
-const recaptchaKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY;
+const recaptchaKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY?.trim();
+const appCheckEnabled = import.meta.env.VITE_ENABLE_APPCHECK === "true";
 const nativeDebugToken = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN;
 
 if (isNativeApp && nativeDebugToken) {
@@ -114,6 +115,12 @@ if (isNativeApp && nativeDebugToken) {
    * Skip App Check so unregistered debug-token exchanges don't
    * cause 403 errors that cascade into auth failures. */
   console.info("[App Check] Skipped in development.");
+} else if (!appCheckEnabled) {
+  /* ─── Production browser (default safe mode) ───
+   * Keep App Check off unless explicitly enabled so a bad key/provider
+   * configuration cannot block auth/firestore flows in production.
+   */
+  console.info("[App Check] Skipped: VITE_ENABLE_APPCHECK is not true.");
 } else if (recaptchaKey) {
   /* ─── Production browser ───
    * ReCaptchaEnterpriseProvider runs an invisible challenge to
@@ -127,6 +134,10 @@ if (isNativeApp && nativeDebugToken) {
   } catch (err) {
     console.error("[App Check] Initialization failed:", err);
   }
+} else {
+  console.warn(
+    "[App Check] Skipped: VITE_ENABLE_APPCHECK=true but VITE_RECAPTCHA_ENTERPRISE_KEY is missing."
+  );
 }
 
 export default app;
