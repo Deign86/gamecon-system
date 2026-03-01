@@ -1,33 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
-import { LogIn, AlertCircle, Info, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { LogIn, AlertCircle, Info, Eye, EyeOff } from "lucide-react";
 import { signIn } from "../hooks/useAuth";
 import GCLogo from "./GCLogo";
-
-/** Inline reCAPTCHA Enterprise badge — shown only on the login screen. */
-function RecaptchaBadge() {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.8, duration: 0.5 }}
-      className="mt-5 flex items-center justify-center gap-1.5"
-    >
-      <ShieldCheck className="h-3.5 w-3.5 text-gc-faded" />
-      <span className="text-[9px] font-mono text-gc-faded tracking-wider">
-        Protected by{" "}
-        <a
-          href="https://cloud.google.com/recaptcha-enterprise"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline decoration-gc-faded/30 underline-offset-2 hover:text-gc-mist transition-colors"
-        >
-          reCAPTCHA Enterprise
-        </a>
-      </span>
-    </motion.div>
-  );
-}
 
 const AUTH_ERROR_MESSAGES = {
   "auth/invalid-credential":    "Incorrect email or password. Please try again.",
@@ -263,8 +238,6 @@ export default function AuthGate() {
           v2.0 — PLAYVERSE OPS
         </p>
 
-        {/* reCAPTCHA Enterprise indicator */}
-        <RecaptchaBadge />
       </motion.div>
       </div>
     </div>

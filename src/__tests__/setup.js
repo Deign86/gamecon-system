@@ -71,13 +71,6 @@ vi.mock("firebase/functions", () => ({
   httpsCallable: vi.fn(() => vi.fn()),
 }));
 
-/* ── Mock Firebase App Check ── */
-vi.mock("firebase/app-check", () => ({
-  initializeAppCheck: vi.fn(),
-  ReCaptchaEnterpriseProvider: vi.fn(),
-  CustomProvider: vi.fn(),
-}));
-
 /* ── Mock Firebase Messaging (optional in tests) ── */
 vi.mock("firebase/messaging", () => ({
   getMessaging: vi.fn(),
