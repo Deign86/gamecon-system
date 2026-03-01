@@ -81,8 +81,8 @@ export const EXPENSE_CATEGORIES = [
 ];
 
 export const SHIFT_BLOCKS = [
-  { id: "d1-morning",   label: "Day 1 — Morning",   date: "2026-03-05", start: "09:00", end: "12:00" },
-  { id: "d1-afternoon", label: "Day 1 — Afternoon",  date: "2026-03-05", start: "13:00", end: "17:00" },
-  { id: "d2-morning",   label: "Day 2 — Morning",   date: "2026-03-06", start: "09:00", end: "12:00" },
-  { id: "d2-afternoon", label: "Day 2 — Afternoon",  date: "2026-03-06", start: "13:00", end: "17:00" },
+  { id: "d1-morning",   label: "Day 1 — Morning",   shortLabel: "D1 AM", date: "2026-03-05", start: "09:00", end: "12:00" },
+  { id: "d1-afternoon", label: "Day 1 — Afternoon",  shortLabel: "D1 PM", date: "2026-03-05", start: "13:00", end: "17:00" },
+  { id: "d2-morning",   label: "Day 2 — Morning",   shortLabel: "D2 AM", date: "2026-03-06", start: "09:00", end: "12:00" },
+  { id: "d2-afternoon", label: "Day 2 — Afternoon",  shortLabel: "D2 PM", date: "2026-03-06", start: "13:00", end: "17:00" },
 ];

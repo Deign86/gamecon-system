@@ -86,8 +86,9 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-4">
-      {/* ── Block tabs (same style as ShiftBoard) ── */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+      {/* ── Block tabs — 2×2 grid on mobile, scrollable row on sm+ ── */}
+      {/* Mobile: tactical 2×2 grid — all 4 blocks visible without scroll */}
+      <div className="grid grid-cols-2 gap-1.5 sm:hidden">
         {ATTENDANCE_SESSIONS.map((s, i) => {
           const isActive = i === blockIdx;
           return (
@@ -95,7 +96,38 @@ export default function AttendancePage() {
               key={s.id}
               onClick={() => setBlockIdx(i)}
               className={cn(
-                "shrink-0 rounded px-3 py-2 text-xs font-semibold transition-all border",
+                "relative rounded border px-3 py-2.5 text-center overflow-hidden transition-all duration-200",
+                isActive
+                  ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
+                  : "bg-gc-iron border-gc-steel/50 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"
+              )}
+            >
+              {/* Active — crimson bottom bar indicator */}
+              {isActive && (
+                <span className="absolute bottom-0 inset-x-0 h-[2px] bg-gc-crimson" />
+              )}
+              <div className="flex flex-col items-center gap-0.5">
+                <span className="font-display text-[12px] font-bold tracking-[0.12em] uppercase leading-none">
+                  {s.id.startsWith("d1") ? "Day 1" : "Day 2"}
+                </span>
+                <span className="font-mono text-[9px] leading-none mt-0.5 opacity-70 uppercase">
+                  {s.id.includes("morning") ? "Morning" : "Afternoon"}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {/* sm+: Scrollable single row */}
+      <div className="hidden sm:flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {ATTENDANCE_SESSIONS.map((s, i) => {
+          const isActive = i === blockIdx;
+          return (
+            <button
+              key={s.id}
+              onClick={() => setBlockIdx(i)}
+              className={cn(
+                "shrink-0 rounded px-3 py-2 text-xs font-display tracking-[0.08em] uppercase transition-all border",
                 isActive
                   ? "bg-gc-crimson/15 border-gc-crimson/40 text-gc-crimson"
                   : "bg-gc-iron border-gc-steel/60 text-gc-mist hover:text-gc-cloud hover:border-gc-steel"

@@ -65,7 +65,10 @@ export default function VenueMapWithStatus({ onNavigate }) {
                 />
               )}
               <span className="relative z-10 font-bold">{label}</span>
-              <span className="relative z-10 ml-1.5 text-[9px] font-mono opacity-60">
+              <span className={
+                "relative z-10 ml-1.5 text-[9px] font-mono transition-all duration-200 " +
+                (day === key ? "opacity-60" : "text-gc-cloud/60")
+              }>
                 {date}
               </span>
             </button>

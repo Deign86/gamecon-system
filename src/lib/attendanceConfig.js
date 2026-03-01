@@ -25,6 +25,7 @@ export const STATUS_META = {
 export const ATTENDANCE_SESSIONS = SHIFT_BLOCKS.map((b) => ({
   id: b.id,            // e.g. "d1-morning"
   label: b.label,      // e.g. "Day 1 — Morning"
+  shortLabel: b.shortLabel || b.label, // e.g. "D1 AM" (mobile-friendly)
   blockId: b.id,       // same — used to fetch committeeShifts
   date: b.date,
   start: b.start,

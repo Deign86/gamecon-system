@@ -17,6 +17,7 @@ import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import Modal from "./Modal";
 import { ModalErrorBoundary } from "./ErrorBoundary";
 import OfflineGuard from "./OfflineGuard";
+import { cn } from "../lib/utils";
 
 /* Lazy-load modal content — only loaded when the modal is opened */
 const ZoneCounter     = lazy(() => import("./ZoneCounter"));
@@ -142,13 +143,16 @@ export default function Dashboard() {
         className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"
         variants={stagger}
       >
-        {CARDS.map(({ key, label, Icon, accent, id }) => (
+        {CARDS.map(({ key, label, Icon, accent, id }, idx) => (
           <motion.button
             key={key}
             variants={cardVariant}
             onClick={() => openModal(key)}
             aria-label={`Open ${label}`}
-            className="gc-card group relative flex flex-col items-center gap-3 p-5 sm:p-6 text-center cursor-pointer"
+            className={cn(
+              "gc-card group relative flex flex-col items-center gap-3 p-5 sm:p-6 text-center cursor-pointer",
+              idx === CARDS.length - 1 && CARDS.length % 2 === 1 && "col-span-2 sm:col-span-1"
+            )}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
           >
