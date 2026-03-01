@@ -45,3 +45,6 @@ venv/
 
 # Raw data / reference sheets — not part of the app source
 *.xlsx
+
+.env.vercel.temp
+.recaptcha_key.txt
