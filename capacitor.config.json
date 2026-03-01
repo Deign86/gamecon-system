@@ -1,5 +1,9 @@
 {
   "appId": "com.playverse.ops",
   "appName": "PlayVerse Ops",
-  "webDir": "dist"
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false,
+    "zoomEnabled": false
+  }
 }
