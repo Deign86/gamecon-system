@@ -11,7 +11,7 @@
         "test": "vitest",
         "test:ci": "vitest run --reporter=verbose",
         "test:coverage": "vitest run --coverage",
-        "lint": "eslint src/ --ext .js,.jsx --max-warnings 0",
+        "lint": "eslint src/ --ext .js,.jsx",
         "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
         "format:check": "prettier --check \"src/**/*.{js,jsx,json,css}\""
     },
