@@ -30,6 +30,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Prettier format check (non-blocking)
+        run: npm run format:check
+        continue-on-error: true
+        if: matrix.node-version == 20
+
       - name: Run tests
         run: npm run test:ci
 
