@@ -19,7 +19,6 @@ importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-com
 /**
  * Firebase config is injected here.
  * For local development, copy these values from your .env file.
- * In CI/CD, this file should be generated at build time.
  *
  * IMPORTANT: If you change your .env, update these values to match.
  */
