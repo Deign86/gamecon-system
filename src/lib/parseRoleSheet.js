@@ -11,8 +11,14 @@
  * @typedef {{ committee: string, day: DaySlot, members: string[] }} CommitteeSchedule
  */
 
-import * as XLSX from "xlsx";
 import { COMMITTEE_MAP, DAY_SLOTS } from "./roleConfig";
+
+/* Lazy-loaded xlsx module — keeps the ~880 KB bundle out of the main chunk */
+let _XLSX = null;
+async function getXLSX() {
+  if (!_XLSX) _XLSX = await import("xlsx");
+  return _XLSX;
+}
 
 /* ─── helpers ─── */
 
@@ -98,7 +104,7 @@ function isTruthy(v) {
  * Some committees occupy a SINGLE column (no day sub-columns) —
  * those are treated as "DAY1/2" (both days).
  */
-function buildColumnIndex(sheet) {
+function buildColumnIndex(sheet, XLSX) {
   const range = XLSX.utils.decode_range(sheet["!ref"]);
   const maxCol = range.e.c;
 
@@ -241,7 +247,8 @@ function buildColumnIndex(sheet) {
  * @param {ArrayBuffer} buffer
  * @returns {{ personRoles: PersonRoles[], committeeSchedules: CommitteeSchedule[] }}
  */
-export function parseRoleSheet(buffer) {
+export async function parseRoleSheet(buffer) {
+  const XLSX = await getXLSX();
   const wb = XLSX.read(buffer, { type: "array" });
   if (wb.SheetNames.length === 0) throw new Error("Workbook has no sheets");
 
@@ -259,7 +266,7 @@ export function parseRoleSheet(buffer) {
     if (!sheet || !sheet["!ref"]) continue;
 
     const range = XLSX.utils.decode_range(sheet["!ref"]);
-    const { nameCol, colMap, dataStartRow } = buildColumnIndex(sheet);
+    const { nameCol, colMap, dataStartRow } = buildColumnIndex(sheet, XLSX);
 
     // Skip sheets where we detected zero committees
     if (Object.keys(colMap).length === 0) continue;

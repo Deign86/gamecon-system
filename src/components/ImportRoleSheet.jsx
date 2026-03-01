@@ -29,7 +29,7 @@ export default function ImportRoleSheet({ onDone }) {
 
     try {
       const buf = await f.arrayBuffer();
-      const data = parseRoleSheet(buf);
+      const data = await parseRoleSheet(buf);
       setParsed(data);
       setStage("preview");
     } catch (err) {
