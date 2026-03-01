@@ -83,7 +83,8 @@ const isNativeApp =
     window.__TAURI_INTERNALS__ !== undefined);
 
 const recaptchaKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY?.trim();
-const appCheckEnabled = import.meta.env.VITE_ENABLE_APPCHECK === "true";
+const appCheckEnabled =
+  import.meta.env.VITE_ENABLE_APPCHECK?.trim() === "true" || Boolean(recaptchaKey);
 const nativeDebugToken = import.meta.env.VITE_APPCHECK_DEBUG_TOKEN;
 
 if (isNativeApp && nativeDebugToken) {
