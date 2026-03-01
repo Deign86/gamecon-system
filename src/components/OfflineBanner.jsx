@@ -6,7 +6,7 @@
  *   (b) device is back online with queued items — amber "SYNCING" bar
  *   (c) just reconnected — brief green "LINK RESTORED" flash
  *
- * Expandable: tap to reveal what works / doesn't work offline.
+ * Expandable: tap to reveal what works / doesn't work offline + the CF queue.
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -21,17 +21,23 @@ import {
   ShieldCheck,
   ShieldOff,
   CheckCircle2,
+  CloudUpload,
+  Trash2,
+  Clock,
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { getPending, removeItem } from "../lib/offlineQueue";
 
 /* ── Offline capability matrix ── */
 const CAN_DO = [
   "View cached dashboard data",
   "Browse headcounts, shifts, attendance",
   "Read contributions & tasks",
-  "Log attendance (auto-syncs later)",
-  "Update task status",
-  "Record contributions",
+  "Log attendance (queued → auto-syncs)",
+  "Update task status (queued → auto-syncs)",
+  "Record contributions (queued → auto-syncs)",
+  "Update headcounts (queued → auto-syncs)",
+  "Role/status updates (queued → auto-syncs)",
 ];
 const CANNOT_DO = [
   "Create new user accounts",
@@ -45,10 +51,32 @@ export default function OfflineBanner() {
   const { isOnline, pendingCount, isSyncing, replayNow } = useOnlineStatus();
   const [expanded, setExpanded] = useState(false);
   const [showRestored, setShowRestored] = useState(false);
+  const [queueItems, setQueueItems] = useState([]);
   const wasOffline = useRef(false);
 
   const showOffline = !isOnline;
   const showSyncing = isOnline && (pendingCount > 0 || isSyncing);
+
+  /* Load queue items when the panel expands */
+  useEffect(() => {
+    if (expanded && pendingCount > 0) {
+      getPending().then(setQueueItems);
+    } else if (!expanded) {
+      setQueueItems([]);
+    }
+  }, [expanded, pendingCount]);
+
+  /* Refresh queue items whenever pending count changes */
+  useEffect(() => {
+    if (expanded) {
+      getPending().then(setQueueItems);
+    }
+  }, [pendingCount]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleDiscard(id) {
+    await removeItem(id);
+    setQueueItems((prev) => prev.filter((item) => item.id !== id));
+  }
 
   /* Flash "LINK RESTORED" briefly when coming back online */
   useEffect(() => {
@@ -186,13 +214,47 @@ export default function OfflineBanner() {
                         </div>
                       </div>
 
-                      {/* Queue status footer */}
+                      {/* Queue status + items */}
                       {pendingCount > 0 && (
-                        <div className="mt-3 flex items-center gap-2 rounded border border-gc-warning/15 bg-gc-warning/[0.04] px-3 py-2">
-                          <CloudOff className="h-3 w-3 text-gc-warning shrink-0" />
-                          <span className="font-mono text-[10px] text-gc-warning/80">
-                            {pendingCount} operation{pendingCount > 1 ? "s" : ""} will auto-sync when signal returns
-                          </span>
+                        <div className="mt-3 space-y-2">
+                          {/* Header */}
+                          <div className="flex items-center gap-2 rounded border border-gc-warning/15 bg-gc-warning/[0.04] px-3 py-2">
+                            <CloudUpload className="h-3 w-3 text-gc-warning shrink-0" />
+                            <span className="font-mono text-[10px] text-gc-warning/80 flex-1">
+                              {pendingCount} operation{pendingCount > 1 ? "s" : ""} will auto-sync when signal returns
+                            </span>
+                          </div>
+
+                          {/* Individual queue items */}
+                          {queueItems.length > 0 && (
+                            <div className="space-y-1.5 max-h-32 overflow-y-auto pr-0.5">
+                              {queueItems.map((item) => (
+                                <div
+                                  key={item.id}
+                                  className="flex items-center gap-2 rounded border border-gc-steel/20 bg-gc-iron/60 px-3 py-2"
+                                >
+                                  <Clock className="h-3 w-3 text-gc-warning/60 shrink-0" />
+                                  <div className="flex-1 min-w-0">
+                                    <p className="font-body text-[11px] text-gc-cloud truncate">
+                                      {item.label || item.fnName}
+                                    </p>
+                                    {item.retries > 0 && (
+                                      <p className="font-mono text-[9px] text-gc-mist/50">
+                                        {item.retries} attempt{item.retries > 1 ? "s" : ""} failed
+                                      </p>
+                                    )}
+                                  </div>
+                                  <button
+                                    onClick={() => handleDiscard(item.id)}
+                                    title="Discard this queued action"
+                                    className="flex h-5 w-5 items-center justify-center rounded text-gc-mist/40 hover:text-gc-danger hover:bg-gc-danger/10 transition-colors"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

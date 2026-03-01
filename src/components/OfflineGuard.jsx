@@ -4,22 +4,30 @@
  * When offline and the wrapped feature is network-dependent:
  *   - Modal variant: replaces modal content with a tactical "UNAVAILABLE" screen
  *   - Inline variant: shows a compact badge overlay on the card/trigger
+ *   - Queued variant: renders children with an amber "OFFLINE — changes queued" banner
  *
  * Usage:
  *   <OfflineGuard requires="network" label="Create User">
  *     <CreateUserForm />
  *   </OfflineGuard>
  *
+ *   <OfflineGuard requires="queue" label="Attendance">
+ *     <AttendanceList />   {/* form still works; writes queued by Firestore SDK *\/}
+ *   </OfflineGuard>
+ *
  * If `requires` is "cache" (default), children render normally even offline.
  */
 
-import { motion } from "motion/react";
-import { WifiOff, ShieldOff, CloudOff } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { WifiOff, ShieldOff, CloudOff, CloudUpload } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 /**
  * @param {object} props
- * @param {"cache"|"network"} props.requires — "network" = needs connectivity; "cache" = works offline
+ * @param {"cache"|"network"|"queue"} props.requires
+ *   "network" = blocks when offline
+ *   "queue"   = allows writes offline (Firestore SDK queues); shows amber banner
+ *   "cache"   = always renders children (default)
  * @param {string} props.label — human-readable feature name
  * @param {"modal"|"inline"} [props.variant="modal"] — display variant for the guard
  * @param {React.ReactNode} props.children
@@ -32,11 +40,16 @@ export default function OfflineGuard({
   children,
   onClose,
 }) {
-  const { isOnline } = useOnlineStatus();
+  const { isOnline, pendingCount } = useOnlineStatus();
 
   /* If online or feature works from cache, render children normally */
   if (isOnline || requires === "cache") {
     return children;
+  }
+
+  /* Queued mode — render children with an amber offline warning banner */
+  if (requires === "queue") {
+    return <QueuedWrapper label={label} pendingCount={pendingCount}>{children}</QueuedWrapper>;
   }
 
   /* ── Network-required but offline ── */
@@ -121,6 +134,55 @@ function InlineGuard({ label }) {
       <span className="font-mono text-[8px] tracking-wider text-gc-mist/50 mt-0.5">
         REQUIRES CONNECTION
       </span>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   QueuedWrapper — amber "offline mode" banner
+   above children. Writes still work via Firestore
+   SDK persistent cache; this just communicates
+   the queued state to the user.
+   ───────────────────────────────────────────── */
+function QueuedWrapper({ label, pendingCount, children }) {
+  return (
+    <div className="space-y-0">
+      {/* Amber offline-mode banner */}
+      <AnimatePresence>
+        <motion.div
+          key="queue-banner"
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden"
+        >
+          <div className="flex items-center gap-2 rounded-t border border-gc-warning/20 bg-gc-warning/[0.05] px-3 py-2.5">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gc-warning opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-gc-warning" />
+            </span>
+            <CloudUpload className="h-3.5 w-3.5 text-gc-warning shrink-0" />
+            <div className="min-w-0">
+              <span className="font-display text-[11px] tracking-[0.15em] uppercase text-gc-warning font-bold">
+                Offline Mode
+              </span>
+              <span className="ml-2 font-mono text-[9px] text-gc-warning/60">
+                — {label} changes will auto-sync when signal returns
+              </span>
+            </div>
+            {pendingCount > 0 && (
+              <span className="ml-auto shrink-0 rounded bg-gc-warning/15 border border-gc-warning/25 px-1.5 py-0.5 font-mono text-[9px] text-gc-warning/80 tabular-nums">
+                {pendingCount} PENDING
+              </span>
+            )}
+          </div>
+        </motion.div>
+      </AnimatePresence>
+      {/* Children still render and work */}
+      <div className="rounded-b border border-t-0 border-gc-warning/10 bg-transparent">
+        {children}
+      </div>
     </div>
   );
 }

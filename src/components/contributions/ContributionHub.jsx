@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck } from "lucide-react";
+import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck, CloudUpload } from "lucide-react";
 import { useCollection } from "../../hooks/useFirestore";
 import { useAuth } from "../../hooks/useAuth";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import { useQueuedWrite } from "../../hooks/useQueuedWrite";
 import { logActivity } from "../../lib/auditLog";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { fmtDate, cn } from "../../lib/utils";
@@ -86,6 +88,8 @@ export default function ContributionHub() {
 /* ── My Log sub-view (personal contribution form + recent list) ── */
 function MyLogView() {
   const { user, profile } = useAuth();
+  const { isOnline } = useOnlineStatus();
+  const { execute: queuedWrite } = useQueuedWrite();
   const isViewer = profile?.role === "viewer";
   const { docs: contributions, add } = useCollection("contributions");
   const [task, setTask]     = useState("");
@@ -98,6 +102,7 @@ function MyLogView() {
   const [comm, setComm]     = useState(defaultComm);
   const [busy, setBusy]     = useState(false);
   const [success, setSuccess] = useState(false);
+  const [queued, setQueued]   = useState(false);
 
   // Filter to only the current user's contributions
   const myContribs = contributions.filter((c) => c.userId === user?.uid || c.userName === profile?.name);
@@ -107,25 +112,32 @@ function MyLogView() {
     if (isViewer || !task.trim()) return;
     setBusy(true);
     try {
-      await add({
-        userId: user.uid,
-        userName: profile?.name || "Unknown",
-        committee: comm,
-        task: task.trim(),
-        description: desc.trim(),
-      });
+      const { queued: wasQueued } = await queuedWrite(() =>
+        add({
+          userId: user.uid,
+          userName: profile?.name || "Unknown",
+          committee: comm,
+          task: task.trim(),
+          description: desc.trim(),
+        })
+      );
       logActivity({
         action: "contribution.create",
         category: "contribution",
-        details: `Self-logged contribution: ${task.trim()}`,
-        meta: { committee: comm, task: task.trim() },
+        details: `Self-logged contribution: ${task.trim()}${wasQueued ? " [queued offline]" : ""}`,
+        meta: { committee: comm, task: task.trim(), queued: wasQueued },
         userId: user.uid,
         userName: profile?.name || "Unknown",
       });
       setTask("");
       setDesc("");
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
+      if (wasQueued) {
+        setQueued(true);
+        setTimeout(() => setQueued(false), 3000);
+      } else {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 2000);
+      }
     } finally {
       setBusy(false);
     }
@@ -184,17 +196,28 @@ function MyLogView() {
           disabled={busy || !task.trim()}
           className={cn(
             "gc-btn-primary w-full sm:w-auto",
-            success && "!bg-gc-success/80"
+            success && "!bg-gc-success/80",
+            queued && "!bg-gc-warning/80 !border-gc-warning/50"
           )}
         >
-          {success ? (
+          {queued ? (
+            <><CloudUpload className="h-4 w-4" /> Queued for sync!</>
+          ) : success ? (
             <><CheckCircle className="h-4 w-4" /> Logged!</>
           ) : busy ? (
             <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
           ) : (
-            <><Send className="h-4 w-4" /> Log Contribution</>
+            <><Send className="h-4 w-4" /> {!isOnline ? "Log (Offline)" : "Log Contribution"}</>
           )}
         </button>
+
+        {/* Offline queue notice */}
+        {!isOnline && (
+          <p className="text-[10px] font-mono text-gc-warning/70 flex items-center gap-1">
+            <CloudUpload className="h-3 w-3" />
+            Offline — contributions will sync automatically when signal returns
+          </p>
+        )}
       </form>
       )}
 

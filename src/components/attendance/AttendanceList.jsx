@@ -1,10 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Check, Clock, ShieldCheck, X, Search, Filter } from "lucide-react";
+import { Check, Clock, ShieldCheck, X, Search, Filter, CloudUpload } from "lucide-react";
 import { markAttendance } from "../../lib/attendanceFirestore";
 import { logActivity } from "../../lib/auditLog";
 import { STATUS_META } from "../../lib/attendanceConfig";
 import { useAuth } from "../../hooks/useAuth";
+import { useOnlineStatus } from "../../hooks/useOnlineStatus";
+import { useQueuedWrite } from "../../hooks/useQueuedWrite";
 import { cn } from "../../lib/utils";
 
 const STATUS_BUTTONS = [
@@ -25,9 +27,23 @@ const itemVar = {
 
 export default function AttendanceList({ volunteers, records, blockId, canMark }) {
   const { user } = useAuth();
+  const { isOnline } = useOnlineStatus();
+  const { execute: queuedWrite } = useQueuedWrite();
   const [search, setSearch]         = useState("");
   const [filterComm, setFilterComm] = useState("all");
   const [busy, setBusy]             = useState(null);
+  // Track person IDs whose last mark was done while offline (visually show QUEUED badge)
+  const [queuedIds, setQueuedIds]   = useState(new Set());
+
+  /* Clear queued badges when connectivity is restored and data syncs */
+  const prevOnlineRef = useRef(isOnline);
+  if (prevOnlineRef.current !== isOnline) {
+    prevOnlineRef.current = isOnline;
+    if (isOnline && queuedIds.size > 0) {
+      // Give Firestore a moment to sync, then clear queued badges
+      setTimeout(() => setQueuedIds(new Set()), 3500);
+    }
+  }
 
   /* ── committees present in current volunteer list ── */
   const presentComms = useMemo(() => {
@@ -54,12 +70,32 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
     if (busy || !canMark) return;
     setBusy(person.id);
     try {
-      await markAttendance(blockId, person, status, user.uid);
+      const { queued } = await queuedWrite(() =>
+        markAttendance(blockId, person, status, user.uid)
+      );
+
+      if (queued) {
+        // Mark this row as pending sync so the user sees the QUEUED badge
+        setQueuedIds((prev) => {
+          const next = new Set(prev);
+          next.add(person.id);
+          return next;
+        });
+      } else {
+        // Confirmed synced — remove queued badge if present
+        setQueuedIds((prev) => {
+          if (!prev.has(person.id)) return prev;
+          const next = new Set(prev);
+          next.delete(person.id);
+          return next;
+        });
+      }
+
       logActivity({
         action: "attendance.mark",
         category: "attendance",
-        details: `Marked ${person.name} as ${status} (${blockId})`,
-        meta: { blockId, personId: person.id, personName: person.name, status },
+        details: `Marked ${person.name} as ${status} (${blockId})${queued ? " [queued]" : ""}`,
+        meta: { blockId, personId: person.id, personName: person.name, status, queued },
         userId: user.uid,
         userName: user.displayName || "Unknown",
       });
@@ -131,9 +167,10 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
         >
           <AnimatePresence>
             {filtered.map((person) => {
-              const rec    = records[person.id];
-              const status = rec?.status;
-              const meta   = status ? STATUS_META[status] : null;
+              const rec     = records[person.id];
+              const status  = rec?.status;
+              const meta    = status ? STATUS_META[status] : null;
+              const isQueued = queuedIds.has(person.id);
 
               return (
                 <motion.li
@@ -142,9 +179,11 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
                   layout
                   className={cn(
                     "rounded border p-3 bg-gc-slate/60 transition-colors",
-                    status
-                      ? `border-${meta.color}/20 bg-${meta.color}/5`
-                      : "border-gc-steel/30"
+                    isQueued
+                      ? "border-gc-warning/30 bg-gc-warning/[0.04]"
+                      : status
+                        ? `border-${meta.color}/20 bg-${meta.color}/5`
+                        : "border-gc-steel/30"
                   )}
                 >
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -153,7 +192,7 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
                       <span
                         className={cn(
                           "flex-shrink-0 h-2.5 w-2.5 rounded-full",
-                          status ? `bg-${meta.color}` : "bg-gc-steel/50"
+                          isQueued ? "bg-gc-warning animate-pulse" : status ? `bg-${meta.color}` : "bg-gc-steel/50"
                         )}
                       />
                       <div className="min-w-0">
@@ -164,7 +203,13 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
                           {(person.committees || []).join(", ")}
                         </p>
                       </div>
-                      {status && (
+                      {/* Status badge OR queued indicator */}
+                      {isQueued ? (
+                        <span className="ml-auto sm:ml-2 flex-shrink-0 inline-flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-display tracking-widest uppercase bg-gc-warning/15 text-gc-warning border border-gc-warning/25">
+                          <CloudUpload className="h-2.5 w-2.5" />
+                          Queued
+                        </span>
+                      ) : status ? (
                         <span
                           className={cn(
                             "ml-auto sm:ml-2 flex-shrink-0 rounded px-2 py-0.5 text-[10px] font-display tracking-widest uppercase",
@@ -173,7 +218,7 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
                         >
                           {meta.label}
                         </span>
-                      )}
+                      ) : null}
                     </div>
 
                     {/* Right: action buttons */}

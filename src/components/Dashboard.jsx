@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import Modal from "./Modal";
+import { ModalErrorBoundary } from "./ErrorBoundary";
+import OfflineGuard from "./OfflineGuard";
 
 /* Lazy-load modal content — only loaded when the modal is opened */
 const ZoneCounter     = lazy(() => import("./ZoneCounter"));
@@ -178,58 +180,108 @@ export default function Dashboard() {
         ))}
       </motion.div>
 
-      {/* Modals — content lazy-loaded on first open */}
+      {/* Modals — content lazy-loaded on first open, errors contained per-modal */}
       {activeModal === "headcount" && (
         <Modal open onClose={closeModal} title="LIVE HEADCOUNT" wide>
-          <Suspense fallback={<ModalFallback />}><ZoneCounter /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Headcount">
+                <ZoneCounter />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "shifts" && (
         <Modal open onClose={closeModal} title="SHIFT BOARD" wide>
-          <Suspense fallback={<ModalFallback />}><ShiftBoard highlightCommittee={modalData?.committeeId} /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Shift Board">
+                <ShiftBoard highlightCommittee={modalData?.committeeId} />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "attendance" && (
         <Modal open onClose={closeModal} title="STAFF ATTENDANCE" wide>
-          <Suspense fallback={<ModalFallback />}><AttendancePage /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Attendance">
+                <AttendancePage />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "contributions" && (
         <Modal open onClose={closeModal} title="CONTRIBUTIONS" wide>
-          <Suspense fallback={<ModalFallback />}><ContributionHub /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Contributions">
+                <ContributionHub />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "budget" && (
         <Modal open onClose={closeModal} title="BUDGET MONITOR" wide>
-          <Suspense fallback={<ModalFallback />}><ExpenseTracker /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Budget">
+                <ExpenseTracker />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "incidents" && (
         <Modal open onClose={closeModal} title="INCIDENTS" wide>
-          <Suspense fallback={<ModalFallback />}><IncidentLog /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Incidents">
+                <IncidentLog />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "committees" && (
         <Modal open onClose={closeModal} title="COMMITTEES" wide>
-          <Suspense fallback={<ModalFallback />}><CommitteeCard /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <CommitteeCard />
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "venuemap" && (
         <Modal open onClose={closeModal} title="VENUE MAP" wide>
-          <Suspense fallback={<ModalFallback />}><VenueMapWithStatus onNavigate={(key, data) => { closeModal(); setTimeout(() => openModal(key, data), 150); }} /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <VenueMapWithStatus onNavigate={(key, data) => { closeModal(); setTimeout(() => openModal(key, data), 150); }} />
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
 
       {activeModal === "tasks" && (
         <Modal open onClose={closeModal} title="TASK BOARD" wide>
-          <Suspense fallback={<ModalFallback />}><TaskBoard /></Suspense>
+          <ModalErrorBoundary onClose={closeModal}>
+            <Suspense fallback={<ModalFallback />}>
+              <OfflineGuard requires="queue" label="Tasks">
+                <TaskBoard />
+              </OfflineGuard>
+            </Suspense>
+          </ModalErrorBoundary>
         </Modal>
       )}
     </motion.div>
