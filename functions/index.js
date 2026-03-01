@@ -88,11 +88,15 @@ function normalizeCommittees(arr) {
   const seen = new Set();
   const result = [];
   for (const entry of arr) {
+    if (!entry || typeof entry !== "object") continue;
+    if (typeof entry.committee !== "string" || typeof entry.day !== "string") continue;
     const canonical = normalizeCommitteeName(entry.committee);
-    const k = `${canonical}::${entry.day}`;
+    const day = entry.day.trim();
+    if (!canonical || !day) continue;
+    const k = `${canonical}::${day}`;
     if (!seen.has(k)) {
       seen.add(k);
-      result.push({ committee: canonical, day: entry.day });
+      result.push({ committee: canonical, day });
     }
   }
   return result;
@@ -179,7 +183,7 @@ exports.createUserAccount = onCall(callOpts, async (request) => {
     if (err.code === "auth/email-already-exists") {
       throw new HttpsError("already-exists", "An account with this email already exists.");
     }
-    throw new HttpsError("internal", err.message);
+    throw new HttpsError("internal", "Failed to create user account.");
   }
 
   // 2. Set custom claims (role: proctor)
@@ -572,4 +576,3 @@ exports.onNewIncident = onDocumentCreated(
     }
   }
 );
-
