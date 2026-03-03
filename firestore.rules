@@ -30,6 +30,10 @@ service cloud.firestore {
       return isSignedIn() && callerRole() in ['admin', 'head', 'committee-head'];
     }
 
+    function isAdminOrProctor() {
+      return isSignedIn() && callerRole() in ['admin', 'proctor'];
+    }
+
     /* ───────────────────────────────────
      *  Counters (global headcount counter)
      *  Read: any auth'd user
@@ -152,11 +156,11 @@ service cloud.firestore {
     /* ───────────────────────────────────
      *  Committee Shifts (new shift-handling system)
      *  Read: any auth'd user
-     *  Write: admin only
+     *  Write: admin or proctor (mirrors canManageShifts in ShiftBoard.jsx)
      * ─────────────────────────────────── */
     match /committeeShifts/{id} {
       allow read:  if isSignedIn();
-      allow write: if isAdmin();
+      allow write: if isAdminOrProctor();
     }
 
     /* ───────────────────────────────────

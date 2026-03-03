@@ -289,12 +289,7 @@ export default function ShiftBoard({ highlightCommittee }) {
         });
         toast(`${member.name} added to ${comm.name}.`, "success");
       } catch (err) {
-        // If backend rejects due to maxAllowed, surface a helpful toast
-        if (err?.message?.includes("Max staff")) {
-          toast(err.message.replace(/Max staff for /, ""), "error");
-        } else {
-          toast("Failed to add assignee.", "error");
-        }
+        toast("Failed to add assignee.", "error");
       }
     },
     [addDialog.committeeId, displayBlock, user, toast]
