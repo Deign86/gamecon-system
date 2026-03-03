@@ -82,7 +82,7 @@ function committeeColor(name) {
    ───────────────────────────────────────────── */
 export default function RoleTasking() {
   const { user, profile } = useAuth();
-  const { addToast } = useToast();
+  const toast = useToast();
   const isAdmin = profile?.role === "admin";
 
   /* ── Firestore subscriptions (hooks MUST be called unconditionally) ── */
@@ -125,10 +125,10 @@ export default function RoleTasking() {
     setExporting(true);
     try {
       await exportRoleAssignments(persons, schedules);
-      addToast({ type: "success", message: "Role & Tasking exported." });
+      toast("Role & Tasking exported.", "success");
     } catch (err) {
       console.error(err);
-      addToast({ type: "error", message: "Export failed. See console for details." });
+      toast("Export failed. See console for details.", "error");
     } finally {
       setExporting(false);
     }
@@ -138,12 +138,12 @@ export default function RoleTasking() {
     if (!confirmDelete) return;
     try {
       await deletePerson(confirmDelete.id, profile?.id || user?.uid);
-      addToast({ type: "success", message: `"${confirmDelete.name}" removed.` });
+      toast(`"${confirmDelete.name}" removed.`, "success");
       if (editingPerson === confirmDelete.id) setEditingPerson(null);
       if (expandedPerson === confirmDelete.name) setExpandedPerson(null);
     } catch (err) {
       console.error(err);
-      addToast({ type: "error", message: err.message || "Delete failed." });
+      toast(err.message || "Delete failed.", "error");
     } finally {
       setConfirmDelete(null);
     }
