@@ -276,27 +276,34 @@ export default function ShiftBoard({ highlightCommittee }) {
   );
 
   const handleAddAssignee = useCallback(
-    async (member) => {
+    async (membersInput) => {
       const cId = addDialog.committeeId;
       const comm = COMMITTEES.find((c) => c.id === cId);
       if (!comm || !user) return;
+      // Accept either a single member object or an array
+      const members = Array.isArray(membersInput) ? membersInput : [membersInput];
+      if (members.length === 0) return;
       try {
-        await addAssigneeToShift(
-          displayBlock,
-          cId,
-          comm.name,
-          member,
-          user.uid
+        await Promise.all(
+          members.map((member) =>
+            addAssigneeToShift(displayBlock, cId, comm.name, member, user.uid)
+          )
         );
-        logActivity({
-          action: "shift.add_assignee",
-          category: "shift",
-          details: `Added ${member.name} to ${comm.name} (${displayBlock})`,
-          meta: { dayBlock: displayBlock, committeeId: cId, assignee: member.name },
-          userId: user.uid,
-          userName: profile?.name || "Admin",
-        });
-        toast(`${member.name} added to ${comm.name}.`, "success");
+        for (const member of members) {
+          logActivity({
+            action: "shift.add_assignee",
+            category: "shift",
+            details: `Added ${member.name} to ${comm.name} (${displayBlock})`,
+            meta: { dayBlock: displayBlock, committeeId: cId, assignee: member.name },
+            userId: user.uid,
+            userName: profile?.name || "Admin",
+          });
+        }
+        const label =
+          members.length === 1
+            ? `${members[0].name} added to ${comm.name}.`
+            : `${members.length} members added to ${comm.name}.`;
+        toast(label, "success");
       } catch (err) {
         toast("Failed to add assignee.", "error");
       }

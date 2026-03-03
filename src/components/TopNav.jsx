@@ -22,7 +22,7 @@ export default function TopNav() {
   });
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gc-steel/40 backdrop-blur-xl bg-gc-void/90">
+    <header className="sticky top-0 z-40 border-b border-gc-steel/40 backdrop-blur-xl bg-gc-void/90 will-change-transform">
       {/* Top accent line */}
       <div className="h-[2px] w-full bg-gradient-to-r from-transparent via-gc-crimson/60 to-transparent" />
 

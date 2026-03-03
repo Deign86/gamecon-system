@@ -145,6 +145,9 @@
 @layer components {
 
   /* ── Noise + scan-line overlay ── */
+  /* will-change: transform + translateZ(0) promotes each fixed overlay to its
+     own GPU compositor layer, completely isolating them from the main scroll
+     layer so the grain animation never blocks or stalls scroll rendering. */
   .gc-noise::before {
     content: "";
     position: fixed;
@@ -155,6 +158,8 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     background-size: 256px 256px;
     animation: grain 0.5s steps(1) infinite;
+    will-change: transform;
+    transform: translateZ(0);
   }
   .gc-noise::after {
     content: "";
@@ -169,6 +174,8 @@
       rgba(0, 0, 0, 0.012) 3px,
       rgba(0, 0, 0, 0.012) 4px
     );
+    will-change: transform;
+    transform: translateZ(0);
   }
 
   /* ── Corner triangle accent (cyber-industrial motif) ── */
@@ -213,15 +220,17 @@
   }
 
   /* ── Accent bar card — animated shimmer ── */
+  /* Shimmer uses transform: translateX() instead of background-position so the
+     animation runs entirely on the GPU compositor with no per-frame repaints. */
   .gc-card-accent {
-    @apply gc-card;
+    @apply gc-card overflow-hidden;
   }
   .gc-card-accent::before {
     content: "";
     position: absolute;
     top: 0;
-    left: 0;
-    right: 0;
+    left: -100%;
+    width: 100%;
     height: 2px;
     background: linear-gradient(
       90deg,
@@ -231,12 +240,13 @@
       rgb(var(--gc-crimson) / 0.5) 80%,
       transparent 100%
     );
-    background-size: 200% 100%;
     animation: shimmer 4s ease-in-out infinite;
     border-radius: 6px 6px 0 0;
+    will-change: transform;
   }
 
   /* ── Skeleton loader — crimson shimmer sweep ── */
+  /* Same transform-based approach as shimmer — no background-position repaints. */
   .gc-skeleton {
     position: relative;
     overflow: hidden;
@@ -246,7 +256,10 @@
   .gc-skeleton::after {
     content: "";
     position: absolute;
-    inset: 0;
+    top: 0;
+    bottom: 0;
+    left: -100%;
+    width: 100%;
     background: linear-gradient(
       105deg,
       transparent 30%,
@@ -255,9 +268,9 @@
       rgb(var(--gc-crimson) / 0.06) 56%,
       transparent 70%
     );
-    background-size: 250% 100%;
     animation: skeletonSweep 1.8s ease-in-out infinite;
     pointer-events: none;
+    will-change: transform;
   }
 
   /* ── Counter badge — angular ── */
@@ -562,7 +575,6 @@ html.light .gc-skeleton::after {
     rgb(190 14 42 / 0.04) 56%,
     transparent 70%
   );
-  background-size: 250% 100%;
 }
 
 html.light .text-shadow-red {

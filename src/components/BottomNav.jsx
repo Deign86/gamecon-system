@@ -37,7 +37,7 @@ export default function BottomNav() {
       : BASE_TABS;
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-gc-steel/30 backdrop-blur-xl bg-gc-void/90 safe-bottom">
+    <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-gc-steel/30 backdrop-blur-xl bg-gc-void/90 safe-bottom will-change-transform">
       {/* Top accent gradient */}
       <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-gc-crimson/40 to-transparent" />
 

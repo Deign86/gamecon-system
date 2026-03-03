@@ -66,18 +66,20 @@ export default {
           "0%":   { boxShadow: "0 0 0 0 rgba(200,16,46,0.6)" },
           "100%": { boxShadow: "0 0 0 18px rgba(200,16,46,0)" },
         },
+        /* box-shadow repaints on every frame; animate opacity instead */
         glow: {
-          "0%":   { boxShadow: "0 0 12px rgba(200,16,46,0.15)" },
-          "100%": { boxShadow: "0 0 28px rgba(200,16,46,0.35)" },
+          "0%":   { opacity: "0.4" },
+          "100%": { opacity: "1" },
         },
         countPop: {
           "0%":   { transform: "scale(1)" },
           "50%":  { transform: "scale(1.25)" },
           "100%": { transform: "scale(1)" },
         },
+        /* backgroundPosition animation causes repaints; use translate instead */
         diagonalShift: {
-          "0%":   { backgroundPosition: "0% 0%" },
-          "100%": { backgroundPosition: "100% 100%" },
+          "0%":   { transform: "translate(0%, 0%)" },
+          "100%": { transform: "translate(4%, 4%)" },
         },
         grain: {
           "0%, 100%": { transform: "translate(0,0)" },
@@ -91,17 +93,20 @@ export default {
           "80%":      { transform: "translate(-2%,0)" },
           "90%":      { transform: "translate(1%,1%)" },
         },
+        /* translateX-based shimmer: GPU compositor only, zero repaints */
         shimmer: {
-          "0%":   { backgroundPosition: "200% 0" },
-          "100%": { backgroundPosition: "-200% 0" },
+          "0%":   { transform: "translateX(-100%)" },
+          "50%":  { transform: "translateX(200%)" },
+          "100%": { transform: "translateX(-100%)" },
         },
         borderPulse: {
           "0%, 100%": { opacity: "0.3" },
           "50%":      { opacity: "0.8" },
         },
+        /* translateX-based sweep: GPU compositor only, zero repaints */
         skeletonSweep: {
-          "0%":   { backgroundPosition: "250% 0" },
-          "100%": { backgroundPosition: "-250% 0" },
+          "0%":   { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(300%)" },
         },
       },
       backgroundImage: {
