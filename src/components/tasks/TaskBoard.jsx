@@ -31,6 +31,7 @@ export default function TaskBoard() {
   const [editingTask, setEditingTask]     = useState(null);
   const [filterCommittee, setFilterCommittee] = useState("");
   const [showFilters, setShowFilters]     = useState(false);
+  const [draggingTask, setDraggingTask]   = useState(null); // { id, fromStatus } | null
 
   /* Permissions: admin + proctor can create/update; only admin can delete */
   const canCreate = ["admin", "proctor"].includes(profile?.role);
@@ -78,6 +79,23 @@ export default function TaskBoard() {
       }
     },
     [user, profile, toast]
+  );
+
+  /* ─── drag handlers ─── */
+  const handleDragStart = useCallback((taskId, fromStatus) => {
+    setDraggingTask({ id: taskId, fromStatus });
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggingTask(null);
+  }, []);
+
+  const handleDrop = useCallback(
+    (taskId, toStatus) => {
+      setDraggingTask(null);
+      handleStatusChange(taskId, toStatus);
+    },
+    [handleStatusChange]
   );
 
   const handleCardClick = useCallback((task) => {
@@ -262,6 +280,10 @@ export default function TaskBoard() {
                 onStatusChange={canCreate ? handleStatusChange : undefined}
                 onAddClick={handleAddClick}
                 canCreate={canCreate}
+                draggingTask={canCreate ? draggingTask : null}
+                onDragStart={canCreate ? handleDragStart : undefined}
+                onDragEnd={canCreate ? handleDragEnd : undefined}
+                onDrop={canCreate ? handleDrop : undefined}
               />
             </motion.div>
           ))}

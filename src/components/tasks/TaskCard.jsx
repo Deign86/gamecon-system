@@ -1,6 +1,6 @@
-import { forwardRef } from "react";
+import { forwardRef, useRef } from "react";
 import { motion } from "motion/react";
-import { Clock, Flag, MapPin, Users } from "lucide-react";
+import { Clock, Flag, GripVertical, MapPin, Users } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
 
 const PRIORITY_CHIP = {
@@ -19,8 +19,27 @@ function relativeTime(ts) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-const TaskCard = forwardRef(function TaskCard({ task, onClick, onStatusChange }, ref) {
+const TaskCard = forwardRef(function TaskCard({ task, onClick, onStatusChange, onDragStart, onDragEnd, isDragging }, ref) {
   const prio = PRIORITY_CHIP[task.priority] || PRIORITY_CHIP.medium;
+  const didDrag = useRef(false);
+
+  function handleDragStart(e) {
+    didDrag.current = true;
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("taskId", task.id);
+    e.dataTransfer.setData("fromStatus", task.status);
+    onDragStart?.(task.id, task.status);
+  }
+
+  function handleDragEnd() {
+    didDrag.current = false;
+    onDragEnd?.();
+  }
+
+  function handleClick() {
+    if (didDrag.current) return;
+    onClick?.(task);
+  }
 
   return (
     <motion.div
@@ -28,16 +47,25 @@ const TaskCard = forwardRef(function TaskCard({ task, onClick, onStatusChange },
       layout
       layoutId={task.id}
       initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ opacity: isDragging ? 0.35 : 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ type: "spring", damping: 24, stiffness: 280 }}
-      onClick={() => onClick?.(task)}
-      className="gc-card gc-slash group cursor-pointer p-3"
+      draggable="true"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onClick={handleClick}
+      className={cn(
+        "gc-card gc-slash group cursor-grab active:cursor-grabbing p-3 select-none",
+        isDragging && "ring-1 ring-gc-crimson/30"
+      )}
     >
-      {/* Title */}
-      <p className="text-sm font-bold text-gc-cloud leading-snug">
-        {task.title}
-      </p>
+      {/* Title row with drag handle */}
+      <div className="flex items-start gap-1.5">
+        <GripVertical className="hidden sm:block h-3.5 w-3.5 shrink-0 mt-0.5 text-gc-steel/60 group-hover:text-gc-mist transition-colors" />
+        <p className="text-sm font-bold text-gc-cloud leading-snug flex-1">
+          {task.title}
+        </p>
+      </div>
 
       {/* Description teaser */}
       {task.description && (

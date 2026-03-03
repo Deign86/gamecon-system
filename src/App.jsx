@@ -60,7 +60,7 @@ function AppShell() {
 
   return (
     <TabCtx.Provider value={{ tab, setTab }}>
-      <div className="flex min-h-screen flex-col gc-diag-bg gc-noise">
+      <div className="flex h-screen flex-col gc-diag-bg gc-noise overflow-hidden">
         <TopNav />
         <OfflineBanner />
         <ForegroundNotificationHandler />
