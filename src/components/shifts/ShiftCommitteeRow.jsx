@@ -19,6 +19,8 @@ import { getShiftLimits } from "../../lib/shiftLimitsConfig";
  *   committee     – { id, name, color }
  *   shift         – Firestore shift doc or null
  *   isAdmin       – boolean
+ *   canAdd        – boolean (defaults to isAdmin)
+ *   canRemove     – boolean (defaults to isAdmin) — show remove button on assignee pills
  *   currentUserId – uid of current user
  *   onAdd         – (committeeId) => void  — opens the add-assignee dialog
  *   dayBlock      – string (e.g. "d2-morning") for day-block-aware limits
@@ -29,6 +31,7 @@ export default function ShiftCommitteeRow({
   shift,
   isAdmin,
   canAdd = isAdmin,
+  canRemove = isAdmin,
   currentUserId,
   dayBlock,
   onAdd,
@@ -179,8 +182,8 @@ export default function ShiftCommitteeRow({
                           </span>
                         )}
 
-                        {/* Remove button (admin only) */}
-                        {isAdmin && (
+                        {/* Remove button (admin / proctor) */}
+                        {canRemove && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

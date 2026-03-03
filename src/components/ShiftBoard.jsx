@@ -28,6 +28,7 @@ import {
 } from "../lib/roleFirestore";
 import ShiftCommitteeRow from "./shifts/ShiftCommitteeRow";
 import AddAssigneeDialog from "./shifts/AddAssigneeDialog";
+import ConfirmDialog from "./ConfirmDialog";
 import { logActivity } from "../lib/auditLog";
 import { useToast } from "./Toast";
 import { exportShifts } from "../lib/exportExcel";
@@ -254,6 +255,14 @@ export default function ShiftBoard({ highlightCommittee }) {
     return () => clearTimeout(timer);
   }, [highlightCommittee, loadingShifts]);
 
+  /* ── Remove assignee confirm state ── */
+  const [removeConfirm, setRemoveConfirm] = useState({
+    open: false,
+    shiftId: null,
+    userId: null,
+    userName: null,
+  });
+
   /* ── Add assignee dialog state ── */
   const [addDialog, setAddDialog] = useState({ open: false, committeeId: null });
 
@@ -295,26 +304,34 @@ export default function ShiftBoard({ highlightCommittee }) {
     [addDialog.committeeId, displayBlock, user, toast]
   );
 
+  // Step 1: open confirmation dialog
   const handleRemoveAssignee = useCallback(
-    async (shiftId, userId, userName) => {
-      if (!user) return;
-      try {
-        await removeAssigneeFromShift(shiftId, userId, user.uid);
-        logActivity({
-          action: "shift.remove_assignee",
-          category: "shift",
-          details: `Removed ${userName} from shift ${shiftId}`,
-          meta: { shiftId, removedUserId: userId, removedUserName: userName },
-          userId: user.uid,
-          userName: profile?.name || "Admin",
-        });
-        toast(`${userName} removed.`, "warning");
-      } catch (err) {
-        toast("Failed to remove assignee.", "error");
-      }
+    (shiftId, userId, userName) => {
+      setRemoveConfirm({ open: true, shiftId, userId, userName });
     },
-    [user, toast]
+    []
   );
+
+  // Step 2: confirmed — execute the Firestore removal
+  const handleRemoveConfirmed = useCallback(async () => {
+    const { shiftId, userId, userName } = removeConfirm;
+    setRemoveConfirm((s) => ({ ...s, open: false }));
+    if (!user || !shiftId || !userId) return;
+    try {
+      await removeAssigneeFromShift(shiftId, userId, user.uid);
+      logActivity({
+        action: "shift.remove_assignee",
+        category: "shift",
+        details: `Removed ${userName} from shift ${shiftId}`,
+        meta: { shiftId, removedUserId: userId, removedUserName: userName },
+        userId: user.uid,
+        userName: profile?.name || "Admin",
+      });
+      toast(`${userName} removed from shift.`, "warning");
+    } catch (err) {
+      toast("Failed to remove assignee.", "error");
+    }
+  }, [removeConfirm, user, toast]);
 
   /* ── Summary stats ── */
   const { totalAssigned, underStaffedCount } = useMemo(() => {
@@ -497,6 +514,7 @@ export default function ShiftBoard({ highlightCommittee }) {
                 shift={shift}
                 isAdmin={isAdmin}
                 canAdd={canManageShifts}
+                canRemove={canManageShifts}
                 currentUserId={user?.uid}
                 dayBlock={displayBlock}
                 onAdd={openAddDialog}
@@ -537,6 +555,18 @@ export default function ShiftBoard({ highlightCommittee }) {
         suggestedMembers={addDialog.committeeId ? (suggestedByCommittee[addDialog.committeeId] || []) : []}
         alreadyAssigned={dialogShift?.assignees || []}
         onSelect={handleAddAssignee}
+      />
+
+      {/* ── Remove Assignee Confirm Dialog ── */}
+      <ConfirmDialog
+        open={removeConfirm.open}
+        onClose={() => setRemoveConfirm((s) => ({ ...s, open: false }))}
+        onConfirm={handleRemoveConfirmed}
+        title="Remove Member"
+        message={`Remove ${removeConfirm.userName} from this shift? This cannot be undone.`}
+        confirmLabel="Remove"
+        cancelLabel="Keep"
+        variant="danger"
       />
     </div>
   );
