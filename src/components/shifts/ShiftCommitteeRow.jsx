@@ -28,6 +28,7 @@ export default function ShiftCommitteeRow({
   committee,
   shift,
   isAdmin,
+  canAdd = isAdmin,
   currentUserId,
   dayBlock,
   onAdd,
@@ -201,8 +202,8 @@ export default function ShiftCommitteeRow({
                 </p>
               )}
 
-              {/* Admin: Add button */}
-              {isAdmin && (
+              {/* Admin / Proctor: Add button */}
+              {canAdd && (
                 <button
                   onClick={() => onAdd(committee.id)}
                   className="mt-1 inline-flex items-center gap-1.5 rounded border border-dashed border-gc-steel bg-gc-iron px-3 py-1.5 text-xs font-body font-semibold text-gc-mist transition-all hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5"

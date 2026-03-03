@@ -72,6 +72,7 @@ export default function ShiftBoard({ highlightCommittee }) {
   const toast = useToast();
   const { user, profile } = useAuth();
   const isAdmin = profile?.role === "admin";
+  const canManageShifts = isAdmin || profile?.role === "proctor";
 
   /* ── active block state ── */
   const [activeBlock, setActiveBlock] = useState(SHIFT_BLOCKS[0]?.id || "");
@@ -492,14 +493,15 @@ export default function ShiftBoard({ highlightCommittee }) {
         >
           {COMMITTEES.map((committee) => {
             const shift = shiftMap[committee.id];
-            // Only show committees that have a shift doc, or all if admin
-            if (!shift && !isAdmin) return null;
+            // Only show committees that have a shift doc, or all if admin/proctor
+            if (!shift && !canManageShifts) return null;
             return (
               <ShiftCommitteeRow
                 key={committee.id}
                 committee={committee}
                 shift={shift}
                 isAdmin={isAdmin}
+                canAdd={canManageShifts}
                 currentUserId={user?.uid}
                 dayBlock={displayBlock}
                 onAdd={openAddDialog}
