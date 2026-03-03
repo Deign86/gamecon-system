@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Check, Clock, ShieldCheck, X, Search, Filter, CloudUpload } from "lucide-react";
-import { markAttendance } from "../../lib/attendanceFirestore";
+import { markAttendance, clearAttendance } from "../../lib/attendanceFirestore";
 import { logActivity } from "../../lib/auditLog";
 import { STATUS_META } from "../../lib/attendanceConfig";
 import { useAuth } from "../../hooks/useAuth";
@@ -65,42 +65,61 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
     return list.sort((a, b) => a.name.localeCompare(b.name));
   }, [volunteers, filterComm, search]);
 
-  /* ── mark handler ── */
+  /* ── mark / undo handler ── */
   async function handleMark(person, status) {
     if (busy || !canMark) return;
+    const currentStatus = records[person.id]?.status;
+    const isUndo = currentStatus === status;
     setBusy(person.id);
     try {
-      const { queued } = await queuedWrite(() =>
-        markAttendance(blockId, person, status, user.uid)
-      );
-
-      if (queued) {
-        // Mark this row as pending sync so the user sees the QUEUED badge
-        setQueuedIds((prev) => {
-          const next = new Set(prev);
-          next.add(person.id);
-          return next;
-        });
-      } else {
-        // Confirmed synced — remove queued badge if present
+      if (isUndo) {
+        // Clicking the already-active button clears the record
+        await queuedWrite(() => clearAttendance(blockId, person.id));
         setQueuedIds((prev) => {
           if (!prev.has(person.id)) return prev;
           const next = new Set(prev);
           next.delete(person.id);
           return next;
         });
-      }
+        logActivity({
+          action: "attendance.undo",
+          category: "attendance",
+          details: `Cleared attendance for ${person.name} (${blockId})`,
+          meta: { blockId, personId: person.id, personName: person.name, previousStatus: status },
+          userId: user.uid,
+          userName: user.displayName || "Unknown",
+        });
+      } else {
+        const { queued } = await queuedWrite(() =>
+          markAttendance(blockId, person, status, user.uid)
+        );
 
-      logActivity({
-        action: "attendance.mark",
-        category: "attendance",
-        details: `Marked ${person.name} as ${status} (${blockId})${queued ? " [queued]" : ""}`,
-        meta: { blockId, personId: person.id, personName: person.name, status, queued },
-        userId: user.uid,
-        userName: user.displayName || "Unknown",
-      });
+        if (queued) {
+          setQueuedIds((prev) => {
+            const next = new Set(prev);
+            next.add(person.id);
+            return next;
+          });
+        } else {
+          setQueuedIds((prev) => {
+            if (!prev.has(person.id)) return prev;
+            const next = new Set(prev);
+            next.delete(person.id);
+            return next;
+          });
+        }
+
+        logActivity({
+          action: "attendance.mark",
+          category: "attendance",
+          details: `Marked ${person.name} as ${status} (${blockId})${queued ? " [queued]" : ""}`,
+          meta: { blockId, personId: person.id, personName: person.name, status, queued },
+          userId: user.uid,
+          userName: user.displayName || "Unknown",
+        });
+      }
     } catch (err) {
-      if (import.meta.env.DEV) console.error("Failed to mark attendance", err);
+      if (import.meta.env.DEV) console.error("Failed to mark/undo attendance", err);
     } finally {
       setBusy(null);
     }
@@ -231,7 +250,7 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
                               key={key}
                               disabled={busy === person.id}
                               onClick={() => handleMark(person, key)}
-                              title={STATUS_META[key].label}
+                              title={isActive ? `Undo ${STATUS_META[key].label}` : STATUS_META[key].label}
                               className={cn(
                                 "relative flex h-8 w-8 items-center justify-center rounded transition-all",
                                 isActive

@@ -13,6 +13,7 @@ import {
   collection,
   doc,
   setDoc,
+  deleteDoc,
   onSnapshot,
   query,
   where,
@@ -135,6 +136,20 @@ export async function markAttendance(blockId, person, status, markedByUid) {
   }
 
   await setDoc(doc(db, ATTENDANCE_COL, docId), data, { merge: true });
+}
+
+/* ─── Write: clear (undo) an attendance record ─── */
+
+/**
+ * Delete an attendance record, effectively resetting a person's status
+ * back to "unmarked" for a given block.
+ *
+ * @param {string} blockId   e.g. "d1-morning"
+ * @param {string} personId  the userId / person key
+ */
+export async function clearAttendance(blockId, personId) {
+  const docId = attendanceDocId(blockId, personId);
+  await deleteDoc(doc(db, ATTENDANCE_COL, docId));
 }
 
 /* ─── Bulk: mark all unmarked as absent ─── */
