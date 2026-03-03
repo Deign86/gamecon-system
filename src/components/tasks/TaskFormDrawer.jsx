@@ -470,10 +470,7 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
                   type="button"
                   onClick={handleSave}
                   disabled={!title.trim() || saving}
-                  className={cn(
-                    "gc-btn-primary",
-                    (!title.trim() || saving) && "opacity-40 pointer-events-none"
-                  )}
+                  className="gc-btn-primary"
                 >
                   {saving ? "SAVING…" : isEdit ? "UPDATE" : "CREATE"}
                 </button>

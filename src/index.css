@@ -336,6 +336,18 @@
     transform: translateY(0);
     box-shadow: 0 1px 8px rgb(var(--gc-crimson) / 0.3);
   }
+  .gc-btn-primary:disabled {
+    background: linear-gradient(135deg, rgb(var(--gc-iron)), rgb(var(--gc-slate)));
+    box-shadow: none;
+    border-color: rgb(var(--gc-steel) / 0.5);
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .gc-btn-primary:disabled:hover {
+    transform: none;
+    box-shadow: none;
+  }
   .gc-btn-ghost {
     @apply gc-btn;
     color: rgb(var(--gc-cloud));

@@ -156,7 +156,7 @@ export default function ExpenseTracker() {
           </div>
 
           <div className="flex gap-2">
-            <button type="submit" disabled={busy} className="gc-btn-primary flex-1">
+            <button type="submit" disabled={busy || !item.trim() || !amount} className="gc-btn-primary flex-1">
               {busy ? (
                 <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
               ) : (

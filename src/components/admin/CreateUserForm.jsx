@@ -315,10 +315,7 @@ export default function CreateUserForm({ onCreated }) {
             <button
               type="submit"
               disabled={creating || !name.trim() || !email.trim() || !allPasswordChecksPassed}
-              className={cn(
-                "gc-btn-primary",
-                (creating || !name.trim() || !email.trim() || !allPasswordChecksPassed) && "opacity-50 pointer-events-none"
-              )}
+              className="gc-btn-primary"
             >
               {creating ? (
                 <>

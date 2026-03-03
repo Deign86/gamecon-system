@@ -147,7 +147,7 @@ export default function AddPersonDialog({ open, onClose, userId }) {
           <button
             type="submit"
             disabled={!name.trim() || busy}
-            className="gc-btn-primary text-xs gap-1.5 flex-1 disabled:opacity-40"
+            className="gc-btn-primary text-xs gap-1.5 flex-1"
           >
             {busy ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

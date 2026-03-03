@@ -240,8 +240,8 @@ export default function AuthGate() {
 
             <button
               type="submit"
-              disabled={busy}
-              className="gc-btn-primary w-full disabled:opacity-50"
+              disabled={busy || !email.trim() || !pass.trim()}
+              className="gc-btn-primary w-full"
             >
               {busy ? (
                 <>

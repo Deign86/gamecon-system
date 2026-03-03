@@ -194,10 +194,7 @@ export default function ChangePasswordForm() {
             <button
               type="submit"
               disabled={!canSubmit}
-              className={cn(
-                "gc-btn-primary w-full",
-                !canSubmit && "opacity-40 cursor-not-allowed hover:transform-none hover:shadow-none"
-              )}
+              className="gc-btn-primary w-full"
             >
               {status === "loading" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
