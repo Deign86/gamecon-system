@@ -10,6 +10,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  deleteDoc,
   writeBatch,
   serverTimestamp,
   query,
@@ -359,4 +360,51 @@ export async function createNewPerson(name, committee, day, userId) {
 
   await batch.commit();
   return personId;
+}
+
+/* ────────────────────────────────────────────
+ *  4. Delete a person entirely
+ * ──────────────────────────────────────────── */
+
+/**
+ * Permanently delete a person from roleAssignments and remove their name
+ * from every committeeSchedule document they appear in.
+ *
+ * @param {string} personId  – roleAssignments doc id
+ * @param {string} userId    – admin uid (for audit trail)
+ */
+export async function deletePerson(personId, userId) {
+  const personRef = doc(db, ROLE_ASSIGNMENTS, personId);
+  const personSnap = await getDoc(personRef);
+
+  if (!personSnap.exists()) {
+    throw new Error(`Person doc ${personId} not found`);
+  }
+
+  const personData = personSnap.data();
+  const personName = personData.name;
+
+  // Find all committeeSchedule docs that list this person
+  const schedQ = query(
+    collection(db, COMMITTEE_SCHEDULES),
+    where("members", "array-contains", personName)
+  );
+  const schedSnaps = await getDocs(schedQ);
+
+  const batch = writeBatch(db);
+
+  // Remove person from each schedule
+  schedSnaps.forEach((snap) => {
+    const members = (snap.data().members || []).filter((m) => m !== personName);
+    batch.update(snap.ref, {
+      members,
+      lastUpdatedAt: serverTimestamp(),
+      lastUpdatedBy: userId,
+    });
+  });
+
+  // Delete the roleAssignment doc itself
+  batch.delete(personRef);
+
+  await batch.commit();
 }

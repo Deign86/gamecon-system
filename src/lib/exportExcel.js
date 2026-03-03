@@ -425,3 +425,66 @@ export async function exportLogs(logs) {
 
   await downloadWorkbook(XLSX, wb, `AuditLogs_${new Date().toISOString().slice(0, 10)}`);
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+ * 7 — ROLE ASSIGNMENTS
+ * ══════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Export role & tasking assignments.
+ *
+ * @param {Array} persons   - roleAssignment docs: { id, name, assignments[], source }
+ * @param {Array} schedules - committeeSchedule docs: { committee, day, members[] }
+ */
+export async function exportRoleAssignments(persons, schedules) {
+  const XLSX = await getXLSX();
+  const wb = XLSX.utils.book_new();
+  const dateStr = new Date().toISOString().slice(0, 10);
+
+  /* ── Sheet 1: By Person ── */
+  const personHeaders = ["Name", "Committee", "Day", "Source"];
+  const personRows = [];
+  const sorted = [...persons].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  sorted.forEach((p) => {
+    const assignments = p.assignments || [];
+    if (assignments.length === 0) {
+      personRows.push([p.name || "", "", "", p.source || ""]);
+    } else {
+      assignments.forEach((a) => {
+        personRows.push([p.name || "", a.committee || "", a.day || "", p.source || ""]);
+      });
+    }
+  });
+  const wsPersons = XLSX.utils.aoa_to_sheet([personHeaders, ...personRows]);
+  autoWidth(wsPersons, personHeaders);
+  XLSX.utils.book_append_sheet(wb, wsPersons, "By Person");
+
+  /* ── Sheet 2: By Committee ── */
+  const commHeaders = ["Committee", "Day", "Member Name", "#"];
+  const commRows = [];
+  const sortedSched = [...schedules].sort((a, b) => {
+    const c = (a.committee || "").localeCompare(b.committee || "");
+    return c !== 0 ? c : (a.day || "").localeCompare(b.day || "");
+  });
+  sortedSched.forEach((s) => {
+    (s.members || []).forEach((name, i) => {
+      commRows.push([s.committee || "", s.day || "", name, i + 1]);
+    });
+  });
+  const wsComm = XLSX.utils.aoa_to_sheet([commHeaders, ...commRows]);
+  autoWidth(wsComm, commHeaders);
+  XLSX.utils.book_append_sheet(wb, wsComm, "By Committee");
+
+  /* ── Sheet 3: Summary ── */
+  const summaryHeaders = ["Committee", "Day", "Member Count"];
+  const summaryRows = sortedSched.map((s) => [
+    s.committee || "",
+    s.day || "",
+    (s.members || []).length,
+  ]);
+  const wsSummary = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryRows]);
+  autoWidth(wsSummary, summaryHeaders);
+  XLSX.utils.book_append_sheet(wb, wsSummary, "Summary");
+
+  await downloadWorkbook(XLSX, wb, `RoleTasking_${dateStr}`);
+}

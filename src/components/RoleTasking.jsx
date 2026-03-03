@@ -8,11 +8,13 @@ import {
   ChevronRight,
   ChevronDown,
   Upload,
+  Download,
   ClipboardList,
   Calendar,
   X,
   Pencil,
   UserPlus,
+  Trash2,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useAuth } from "../hooks/useAuth";
@@ -22,10 +24,14 @@ import {
   subscribeCommitteeSchedules,
 } from "../lib/roleFirestore";
 import Modal from "./Modal";
+import ConfirmDialog from "./ConfirmDialog";
 import ImportRoleSheet from "./ImportRoleSheet";
 import PersonRolesEditor from "./roles/PersonRolesEditor";
 import CommitteeScheduleEditor from "./roles/CommitteeScheduleEditor";
 import AddPersonDialog from "./roles/AddPersonDialog";
+import { deletePerson } from "../lib/rolesEditor";
+import { exportRoleAssignments } from "../lib/exportExcel";
+import { useToast } from "./Toast";
 
 /* ── animation variants ── */
 const stagger = {
@@ -76,6 +82,7 @@ function committeeColor(name) {
    ───────────────────────────────────────────── */
 export default function RoleTasking() {
   const { user, profile } = useAuth();
+  const { addToast } = useToast();
   const isAdmin = profile?.role === "admin";
 
   /* ── Firestore subscriptions (hooks MUST be called unconditionally) ── */
@@ -108,6 +115,39 @@ export default function RoleTasking() {
   /* ── modals ── */
   const [importOpen, setImportOpen]       = useState(false);
   const [addPersonOpen, setAddPersonOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(null); // { id, name } | null
+
+  /* ── exporting ── */
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await exportRoleAssignments(persons, schedules);
+      addToast({ type: "success", message: "Role & Tasking exported." });
+    } catch (err) {
+      console.error(err);
+      addToast({ type: "error", message: "Export failed. See console for details." });
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleDeletePerson() {
+    if (!confirmDelete) return;
+    try {
+      await deletePerson(confirmDelete.id, profile?.id || user?.uid);
+      addToast({ type: "success", message: `"${confirmDelete.name}" removed.` });
+      if (editingPerson === confirmDelete.id) setEditingPerson(null);
+      if (expandedPerson === confirmDelete.name) setExpandedPerson(null);
+    } catch (err) {
+      console.error(err);
+      addToast({ type: "error", message: err.message || "Delete failed." });
+    } finally {
+      setConfirmDelete(null);
+    }
+  }
 
   /* ── editing state ── */
   const [editingPerson, setEditingPerson]       = useState(null); // person id or null
@@ -195,6 +235,14 @@ export default function RoleTasking() {
 
         {isAdmin && (
           <div className="flex gap-2 self-start">
+            <button
+              onClick={handleExport}
+              disabled={exporting || persons.length === 0}
+              className="gc-btn-ghost gap-2 text-xs disabled:opacity-50"
+            >
+              <Download className="h-4 w-4" />
+              {exporting ? "Exporting…" : "Export"}
+            </button>
             <button
               onClick={() => setAddPersonOpen(true)}
               className="gc-btn-ghost gap-2 text-xs"
@@ -371,6 +419,20 @@ export default function RoleTasking() {
                         title="Edit assignments"
                       >
                         <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+
+                    {/* Admin delete */}
+                    {isAdmin && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setConfirmDelete({ id: person.id, name: person.name });
+                        }}
+                        className="flex h-7 w-7 items-center justify-center rounded transition-colors mr-1 text-gc-mist hover:text-gc-danger hover:bg-gc-danger/10"
+                        title="Delete person"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
                       </button>
                     )}
 
@@ -605,6 +667,18 @@ export default function RoleTasking() {
         open={addPersonOpen}
         onClose={() => setAddPersonOpen(false)}
         userId={profile?.id || user?.uid}
+      />
+
+      {/* ── Confirm delete ── */}
+      <ConfirmDialog
+        open={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDeletePerson}
+        variant="danger"
+        title="DELETE PERSON"
+        message={`Remove "${confirmDelete?.name}" from all role assignments and committee schedules? This cannot be undone.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
       />
     </motion.div>
   );
