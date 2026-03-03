@@ -404,7 +404,7 @@ export default function ShiftBoard({ highlightCommittee }) {
       </div>
       {/* Legend */}
       <div className="text-xs text-gc-mist px-1">
-        Exhibitors: 2 per block · Ticketing/Voting: 3–4 · Crowd Control: 12–24 · Documentation: 2–4 · Guest Relations: 4–6 · Marketing: 2 · Awards: up to 4
+        Min. staff — Exhibitors: 2 · Ticketing/Voting: 3 · Crowd Control: 12 · Documentation: 2 · Guest Relations: 4 · Marketing: 2 · Awards (Day 2): 2
       </div>
 
       {/* ── Summary bar ── */}

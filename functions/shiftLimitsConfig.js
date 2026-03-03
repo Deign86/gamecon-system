@@ -6,34 +6,34 @@
  */
 
 const DEFAULT_SHIFT_LIMITS = {
-  // Exhibitors: 1 per booth per block
-  "exhibitors": { min: 1, max: 1 },
+  // Exhibitors: minimum 1 per booth per block
+  "exhibitors": { min: 1 },
 
-  // Ticketing & Voting combined
-  "ticketing_voting": { min: 3, max: 4 },
+  // Ticketing & Voting combined: minimum 3
+  "ticketing_voting": { min: 3 },
 
-  // Crowd Control: 12–24
-  "crowd-control": { min: 12, max: 24 },
+  // Crowd Control: minimum 12
+  "crowd-control": { min: 12 },
 
-  // Documentation (photographers): 2–4
-  "documentation": { min: 2, max: 4 },
+  // Documentation (photographers): minimum 2
+  "documentation": { min: 2 },
 
-  // Guest Relations: 4–6 per block
-  "guest-relations": { min: 4, max: 6 },
+  // Guest Relations: minimum 4 per block
+  "guest-relations": { min: 4 },
 
-  // Marketing: 2 per block
-  "marketing": { min: 2, max: 2 },
+  // Marketing: minimum 2 per block
+  "marketing": { min: 2 },
 
-  // Awards & Prizes: 0–4 default (Day 1 = optional, Day 2 = required)
-  "awards-prizes": { min: 0, max: 4 },
+  // Awards & Prizes: 0 required by default (Day 1 = optional, Day 2 = required)
+  "awards-prizes": { min: 0 },
 };
 
 /**
  * Per-day-block overrides.
  */
 const DAY_BLOCK_OVERRIDES = {
-  "d2-morning__awards-prizes":   { min: 2, max: 4 },
-  "d2-afternoon__awards-prizes": { min: 2, max: 4 },
+  "d2-morning__awards-prizes":   { min: 2 },
+  "d2-afternoon__awards-prizes": { min: 2 },
 };
 
 /**

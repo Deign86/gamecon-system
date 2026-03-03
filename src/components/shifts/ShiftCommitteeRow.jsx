@@ -41,9 +41,7 @@ export default function ShiftCommitteeRow({
   // Resolve limits dynamically from config (overrides stale stored values)
   const configLimits = getShiftLimits(committee.id, dayBlock);
   const minRequired = configLimits?.min ?? shift?.minRequired ?? shift?.requiredCount ?? 1;
-  const maxAllowed = configLimits?.max ?? shift?.maxAllowed ?? shift?.requiredCount ?? Infinity;
   const underStaffed = assignees.length < minRequired;
-  const isFull = assignees.length >= maxAllowed;
   const accentColor = committee.color || "#C8102E";
 
   /* ── Auto-expand when highlighted ── */
@@ -96,7 +94,7 @@ export default function ShiftCommitteeRow({
             {committee.name}
           </span>
           <span className="ml-2 text-xs text-gc-mist font-body">
-            {assignees.length}/{isFinite(maxAllowed) ? maxAllowed : "—"}
+            {assignees.length} assigned
           </span>
         </div>
 
@@ -106,15 +104,15 @@ export default function ShiftCommitteeRow({
             <AlertCircle className="h-3 w-3" />
             NEEDS {Math.max(0, minRequired - assignees.length)}
           </span>
-        ) : isFull ? (
-          <span className="flex items-center gap-1 rounded bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
-            <CheckCircle2 className="h-3 w-3" />
-            FULL
-          </span>
         ) : assignees.length === 0 && minRequired === 0 ? (
           <span className="flex items-center gap-1 rounded bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
             <CheckCircle2 className="h-3 w-3" />
             OK
+          </span>
+        ) : !underStaffed ? (
+          <span className="flex items-center gap-1 rounded bg-gc-success/12 border border-gc-success/25 px-2 py-0.5 text-[10px] font-bold text-gc-success">
+            <CheckCircle2 className="h-3 w-3" />
+            MET
           </span>
         ) : (
           <span className="flex items-center gap-1 rounded bg-gc-warning/12 border border-gc-warning/25 px-2 py-0.5 text-[10px] font-bold text-gc-warning">
@@ -207,17 +205,10 @@ export default function ShiftCommitteeRow({
               {isAdmin && (
                 <button
                   onClick={() => onAdd(committee.id)}
-                  disabled={isFull}
-                  title={isFull ? `Max staff for this role reached (${maxAllowed})` : undefined}
-                  className={cn(
-                    "mt-1 inline-flex items-center gap-1.5 rounded border border-dashed px-3 py-1.5 text-xs font-body font-semibold transition-all",
-                    isFull
-                      ? "bg-gc-steel/30 border-gc-steel/30 text-gc-mist cursor-not-allowed"
-                      : "border-gc-steel bg-gc-iron text-gc-mist hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5"
-                  )}
+                  className="mt-1 inline-flex items-center gap-1.5 rounded border border-dashed border-gc-steel bg-gc-iron px-3 py-1.5 text-xs font-body font-semibold text-gc-mist transition-all hover:text-gc-crimson hover:border-gc-crimson/40 hover:bg-gc-crimson/5"
                 >
                   <UserPlus className="h-3.5 w-3.5" />
-                  {isFull ? "Full" : "Add Member"}
+                  Add Member
                 </button>
               )}
             </div>

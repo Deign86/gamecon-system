@@ -1,30 +1,31 @@
 /**
- * Shift limits configuration — min/max staff per committee per block.
+ * Shift limits configuration — minimum staff per committee per block.
+ * No maximum limits are enforced; only minimums apply.
  * Committee IDs should match `COMMITTEES[].id` from seed data.
  */
 export const DEFAULT_SHIFT_LIMITS = {
   // Exhibitors: 2 per block (morning and afternoon)
-  "exhibitors": { min: 2, max: 2 },
+  "exhibitors": { min: 2 },
 
-  // Ticketing & Voting combined: 3–4 people per block
+  // Ticketing & Voting combined: minimum 3 people per block
   // We'll use this key for combined checks; individual 'ticketing'/'voting'
   // logic will map to this when evaluating limits.
-  "ticketing_voting": { min: 3, max: 4 },
+  "ticketing_voting": { min: 3 },
 
-  // Crowd Control: 12–24 (1–2 per post, multiple posts)
-  "crowd-control": { min: 12, max: 24 },
+  // Crowd Control: minimum 12
+  "crowd-control": { min: 12 },
 
-  // Documentation (photographers on floor): 2–4
-  "documentation": { min: 2, max: 4 },
+  // Documentation (photographers on floor): minimum 2
+  "documentation": { min: 2 },
 
-  // Guest Relations: 4–6 per block
-  "guest-relations": { min: 4, max: 6 },
+  // Guest Relations: minimum 4 per block
+  "guest-relations": { min: 4 },
 
-  // Marketing: 2 per block
-  "marketing": { min: 2, max: 2 },
+  // Marketing: minimum 2 per block
+  "marketing": { min: 2 },
 
-  // Awards & Prizes: 0–4 default (Day 1 = optional, Day 2 = required)
-  "awards-prizes": { min: 0, max: 4 },
+  // Awards & Prizes: 0 required by default (Day 1 = optional, Day 2 = required)
+  "awards-prizes": { min: 0 },
 };
 
 /**
@@ -32,9 +33,9 @@ export const DEFAULT_SHIFT_LIMITS = {
  * when a matching dayBlock + committeeId entry exists.
  */
 export const DAY_BLOCK_OVERRIDES = {
-  // Awards needs 2–4 staff on Day 2 blocks
-  "d2-morning__awards-prizes":   { min: 2, max: 4 },
-  "d2-afternoon__awards-prizes": { min: 2, max: 4 },
+  // Awards needs at least 2 staff on Day 2 blocks
+  "d2-morning__awards-prizes":   { min: 2 },
+  "d2-afternoon__awards-prizes": { min: 2 },
 };
 
 /**
