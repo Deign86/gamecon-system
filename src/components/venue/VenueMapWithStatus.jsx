@@ -45,13 +45,13 @@ export default function VenueMapWithStatus({ onNavigate }) {
       {/* ── Header: Day toggle + aggregate stats ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         {/* Day toggle */}
-        <div className="flex rounded-md border border-gc-steel/40 bg-gc-void overflow-hidden">
+        <div className="grid grid-cols-2 divide-x divide-gc-steel/40 rounded-md border border-gc-steel/40 bg-gc-void overflow-hidden">
           {DAY_OPTIONS.map(({ key, label, date }) => (
             <button
               key={key}
               onClick={() => setDay(key)}
               className={
-                "relative px-4 py-2 text-xs font-display tracking-[0.15em] transition-all duration-200 " +
+                "relative px-4 py-2 text-xs font-display tracking-[0.15em] transition-all duration-200 text-center " +
                 (day === key
                   ? "bg-gc-crimson/15 text-gc-crimson border-gc-crimson/30"
                   : "text-gc-mist hover:text-gc-cloud hover:bg-gc-iron/50")
