@@ -226,7 +226,7 @@ function MyLogView() {
         <h3 className="mb-3 font-display text-base font-bold tracking-wider text-gc-mist">
           MY RECENT
         </h3>
-        <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+        <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
           {myContribs.length === 0 && (
             <p className="text-sm text-gc-hint text-center py-6">No contributions logged yet.</p>
           )}
@@ -242,9 +242,9 @@ function MyLogView() {
                   style={{ background: committee?.color || "#666" }}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gc-cloud truncate">{c.task}</p>
+                  <p className="text-sm font-semibold text-gc-cloud">{c.task}</p>
                   {c.description && (
-                    <p className="text-xs text-gc-mist mt-0.5 line-clamp-2">{c.description}</p>
+                    <p className="text-xs text-gc-mist mt-0.5">{c.description}</p>
                   )}
                   <p className="text-[10px] text-gc-hint mt-1 font-mono">
                     {committee?.name || "General"} · {fmtDate(c.timestamp)}

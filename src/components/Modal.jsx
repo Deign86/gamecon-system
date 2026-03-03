@@ -11,7 +11,7 @@ import { cn } from "../lib/utils";
  * Instead, a `mounted` flag keeps the DOM around long enough for
  * the exit animation to play, then unmounts via onAnimationComplete.
  */
-export default function Modal({ open, onClose, title, children, wide = false }) {
+export default function Modal({ open, onClose, title, children, wide = false, extraWide = false }) {
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const openRef = useRef(open);
@@ -96,7 +96,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         aria-labelledby={titleId}
         className={cn(
           "w-full rounded-md border border-gc-steel/40 bg-gc-night shadow-2xl shadow-black/50 overflow-hidden",
-          wide ? "max-w-2xl" : "max-w-md"
+          extraWide ? "max-w-4xl" : wide ? "max-w-2xl" : "max-w-md"
         )}
         initial={{ opacity: 0, y: 40, scale: 0.97 }}
         animate={open ? { opacity: 1, y: 0, scale: 1 } : { opacity: 0, y: 20, scale: 0.97 }}
@@ -123,7 +123,7 @@ export default function Modal({ open, onClose, title, children, wide = false }) 
         </div>
 
         {/* Content */}
-        <div className="max-h-[70vh] overflow-y-auto p-5">
+        <div className={cn("overflow-y-auto p-5", extraWide ? "max-h-[85vh]" : "max-h-[70vh]")}>
           {children}
         </div>
       </motion.div>

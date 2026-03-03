@@ -163,11 +163,11 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
                           className="px-4 py-2.5 flex items-start gap-3"
                         >
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gc-cloud truncate">
+                            <p className="text-sm font-semibold text-gc-cloud">
                               {c.task}
                             </p>
                             {c.details && (
-                              <p className="text-xs text-gc-mist line-clamp-1 mt-0.5">
+                              <p className="text-xs text-gc-mist mt-0.5">
                                 {c.details}
                               </p>
                             )}

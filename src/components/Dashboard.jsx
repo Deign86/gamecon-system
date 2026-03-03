@@ -222,7 +222,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "contributions" && (
-        <Modal open onClose={closeModal} title="CONTRIBUTIONS" wide>
+        <Modal open onClose={closeModal} title="CONTRIBUTIONS" extraWide>
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Contributions">

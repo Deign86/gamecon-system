@@ -160,7 +160,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
         </div>
 
         {/* User list */}
-        <div className="flex-1 space-y-1 overflow-y-auto max-h-[55vh] sm:max-h-[calc(100vh-280px)] pr-0.5">
+        <div className="flex-1 space-y-1 overflow-y-auto max-h-[65vh] sm:max-h-[calc(100vh-220px)] pr-0.5">
           {loadingPeople ? (
             <ContributionListSkeleton />
           ) : filteredPeople.length === 0 ? (
@@ -260,7 +260,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
             </div>
 
             {/* Contributions list */}
-            <div className="flex-1 space-y-2 overflow-y-auto max-h-[50vh] sm:max-h-[calc(100vh-320px)] pr-0.5">
+            <div className="flex-1 space-y-2 overflow-y-auto max-h-[60vh] sm:max-h-[calc(100vh-240px)] pr-0.5">
               {loadingC ? (
                 <div className="flex justify-center py-10">
                   <span className="h-5 w-5 rounded-full border-2 border-gc-crimson border-t-transparent animate-spin" />
@@ -301,11 +301,11 @@ export default function PersonContributionView({ myEntriesOnly }) {
                         />
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gc-cloud truncate">
+                          <p className="text-sm font-semibold text-gc-cloud">
                             {c.task}
                           </p>
                           {c.details && (
-                            <p className="mt-0.5 text-xs text-gc-mist line-clamp-2">
+                            <p className="mt-0.5 text-xs text-gc-mist">
                               {c.details}
                             </p>
                           )}
