@@ -104,8 +104,8 @@ function MyLogView() {
   const [success, setSuccess] = useState(false);
   const [queued, setQueued]   = useState(false);
 
-  // Filter to only the current user's contributions
-  const myContribs = contributions.filter((c) => c.userId === user?.uid || c.userName === profile?.name);
+  // Filter to contributions where the current user is the subject (userId is always the person the entry is about)
+  const myContribs = contributions.filter((c) => c.userId === user?.uid);
 
   async function handleSubmit(e) {
     e.preventDefault();

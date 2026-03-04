@@ -86,11 +86,9 @@ export default function ProfilePanel() {
     }
   }
 
-  // Filter to entries logged BY me (loggedBy) – covers the new proctor-for-classmate model.
-  // Falls back to userId match for legacy entries that pre-date loggedBy.
-  const mine = myContribs.filter(
-    (c) => c.loggedBy === user?.uid || (!c.loggedBy && c.userId === user?.uid)
-  );
+  // Filter to contributions WHERE I am the subject (userId), not who logged them.
+  // This ensures entries a proctor logged on behalf of someone else don't appear here.
+  const mine = myContribs.filter((c) => c.userId === user?.uid);
 
   return (
     <motion.div
