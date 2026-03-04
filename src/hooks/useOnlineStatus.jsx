@@ -42,15 +42,26 @@ export function OnlineStatusProvider({ children }) {
 
   /* ── Platform-aware network monitoring ── */
   useEffect(() => {
+    // RC-2 fix: track whether the effect is still live so that if the
+    // component unmounts before the async startNetworkMonitor() promise
+    // settles, we call the returned cleanup immediately instead of
+    // swallowing it (which would let the underlying listener run forever).
+    let mounted = true;
     let cleanup = null;
 
     startNetworkMonitor((online) => {
       setIsOnline(online);
     }).then((unsub) => {
-      cleanup = unsub;
+      if (mounted) {
+        cleanup = unsub;
+      } else {
+        // Effect already cleaned up — tear down the monitor right away.
+        if (typeof unsub === "function") unsub();
+      }
     });
 
     return () => {
+      mounted = false;
       if (typeof cleanup === "function") cleanup();
     };
   }, []);
@@ -62,12 +73,20 @@ export function OnlineStatusProvider({ children }) {
 
   /* ── Replay function ── */
   const replayNow = useCallback(async () => {
+    // RC-3 fix: acquire the lock BEFORE the async checkConnectivity() call.
+    // Previously the guard and the lock-set were separated by an await,
+    // creating a TOCTOU window where two concurrent callers could both pass
+    // the guard before either one set syncLock.current = true.
     if (syncLock.current) return;
+    syncLock.current = true;
+
     // Double-check actual connectivity before replay
     const connected = await checkConnectivity();
-    if (!connected) return;
+    if (!connected) {
+      syncLock.current = false;
+      return;
+    }
 
-    syncLock.current = true;
     setIsSyncing(true);
     try {
       const result = await replayQueue(functions);

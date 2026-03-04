@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck, CloudUpload } from "lucide-react";
 import { useCollection } from "../../hooks/useFirestore";
@@ -103,6 +103,14 @@ function MyLogView() {
   const [busy, setBusy]     = useState(false);
   const [success, setSuccess] = useState(false);
   const [queued, setQueued]   = useState(false);
+  // RC-6 fix: store timer IDs so they can be cancelled if the component
+  // unmounts before the feedback banners auto-dismiss.
+  const successTimerRef = useRef(null);
+  const queuedTimerRef  = useRef(null);
+  useEffect(() => () => {
+    if (successTimerRef.current) clearTimeout(successTimerRef.current);
+    if (queuedTimerRef.current)  clearTimeout(queuedTimerRef.current);
+  }, []);
 
   // Filter to contributions where the current user is the subject (userId is always the person the entry is about)
   const myContribs = contributions.filter((c) => c.userId === user?.uid);
@@ -133,10 +141,12 @@ function MyLogView() {
       setDesc("");
       if (wasQueued) {
         setQueued(true);
-        setTimeout(() => setQueued(false), 3000);
+        if (queuedTimerRef.current) clearTimeout(queuedTimerRef.current);
+        queuedTimerRef.current = setTimeout(() => setQueued(false), 3000);
       } else {
         setSuccess(true);
-        setTimeout(() => setSuccess(false), 2000);
+        if (successTimerRef.current) clearTimeout(successTimerRef.current);
+        successTimerRef.current = setTimeout(() => setSuccess(false), 2000);
       }
     } finally {
       setBusy(false);

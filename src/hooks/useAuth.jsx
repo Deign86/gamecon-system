@@ -15,19 +15,33 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // RC-1 fix: use a generation counter so rapid auth-state changes (token
+    // refresh, quick sign-out → sign-in) cannot apply a stale profile fetch
+    // on top of a newer one.  Each iteration of this effect gets its own
+    // `gen` value; the async callback checks whether it still "owns" the
+    // current generation before committing any state.
+    let gen = 0;
+
     const unsub = onAuthStateChanged(auth, async (fbUser) => {
-      setUser(fbUser);
+      const myGen = ++gen;
+
       if (fbUser) {
         try {
           const snap = await getDoc(doc(db, "users", fbUser.uid));
+          if (myGen !== gen) return; // a newer auth event superseded us
+          setUser(fbUser);
           setProfile(snap.exists() ? { id: snap.id, ...snap.data() } : null);
         } catch (err) {
           // Profile fetch failed (offline / permission error)
           // Set profile null so the app doesn't softlock on the loading screen
           if (import.meta.env.DEV) console.error("[useAuth] profile fetch failed:", err);
+          if (myGen !== gen) return;
+          setUser(fbUser);
           setProfile(null);
         }
       } else {
+        if (myGen !== gen) return;
+        setUser(null);
         setProfile(null);
       }
       setLoading(false);

@@ -55,6 +55,10 @@ export default function AttendancePage() {
 
   /* ── subscribe to attendance records for this block ── */
   useEffect(() => {
+    // RC-5 fix: reset records immediately so that while the new block's
+    // snapshot is loading, we never display stale records from the previous
+    // block against the new block's volunteer list (wrong unmarkedCount).
+    setRecords({});
     const unsub = subscribeAttendanceForBlock(blockId, setRecords);
     return unsub;
   }, [blockId]);

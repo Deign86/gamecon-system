@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, CheckCircle } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
@@ -18,6 +18,10 @@ export default function ContributionForm() {
   const [comm, setComm]     = useState(defaultComm);
   const [busy, setBusy]     = useState(false);
   const [success, setSuccess] = useState(false);
+  // RC-6 fix: store the timer ID so we can cancel it if the component
+  // unmounts before the 2-second reset fires (avoids setState-after-unmount).
+  const successTimerRef = useRef(null);
+  useEffect(() => () => { if (successTimerRef.current) clearTimeout(successTimerRef.current); }, []);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -42,7 +46,8 @@ export default function ContributionForm() {
       setTask("");
       setDesc("");
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
+      if (successTimerRef.current) clearTimeout(successTimerRef.current);
+      successTimerRef.current = setTimeout(() => setSuccess(false), 2000);
     } finally {
       setBusy(false);
     }

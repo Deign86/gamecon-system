@@ -13,6 +13,13 @@ import { error as logError } from "../lib/logger";
 
 const COUNTER_REF = doc(db, "counters", "headcount");
 
+// RC-7 fix: module-level guard so that when multiple instances of this hook
+// are mounted simultaneously (e.g. fullscreen view + dashboard), only the
+// first one fires the initialising setDoc when the document doesn't yet
+// exist.  All subsequent instances see the document appear via onSnapshot
+// and skip the write.
+let _counterInitPending = false;
+
 /**
  * Combined total headcount.
  *
@@ -32,7 +39,8 @@ export function useTotalHeadcount() {
   const [extra, setExtra]           = useState(0);
   const [loadingZones, setLoadingZones]   = useState(true);
   const [loadingExtra, setLoadingExtra]   = useState(true);
-  const extraRef = useRef(0); // keep a ref for decrement guard
+  const extraRef  = useRef(0); // keep a ref for decrement guard
+  const pendingRef = useRef(0); // net unconfirmed writes (negative = in-flight decrements)
 
   /* ── Listen to zones collection (same source as dashboard) ── */
   useEffect(() => {
@@ -63,7 +71,9 @@ export function useTotalHeadcount() {
           const val = snap.data().count ?? 0;
           setExtra(val);
           extraRef.current = val;
-        } else {
+          _counterInitPending = false; // document now confirmed present
+        } else if (!_counterInitPending) {
+          _counterInitPending = true;
           setDoc(COUNTER_REF, { count: 0, lastUpdated: serverTimestamp() });
         }
         setLoadingExtra(false);
@@ -91,14 +101,27 @@ export function useTotalHeadcount() {
    * Decrement the standalone counter.
    * Returns `"blocked"` if the extra counter is already 0
    * (i.e. count is at the staff/zones floor), or `"ok"` on success.
+   *
+   * `pendingRef` tracks in-flight decrements so rapid taps can't sneak
+   * past the guard before Firestore's onSnapshot updates `extraRef`.
    */
   const decrementCount = useCallback(async () => {
-    if (extraRef.current <= 0) return "blocked";
-    await updateDoc(COUNTER_REF, {
-      count: increment(-1),
-      lastUpdated: serverTimestamp(),
-    });
-    return "ok";
+    if (extraRef.current + pendingRef.current <= 0) return "blocked";
+    pendingRef.current -= 1;
+    try {
+      await updateDoc(COUNTER_REF, {
+        count: increment(-1),
+        lastUpdated: serverTimestamp(),
+      });
+      return "ok";
+    } catch (err) {
+      logError("Decrement error:", err);
+      return "blocked";
+    } finally {
+      // Restore the pending slot — the snapshot listener will reflect the
+      // real server value, so we no longer need to reserve this slot.
+      pendingRef.current += 1;
+    }
   }, []);
 
   async function resetCount() {

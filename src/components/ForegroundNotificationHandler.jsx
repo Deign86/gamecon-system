@@ -85,6 +85,12 @@ export default function ForegroundNotificationHandler() {
     if (!deviceNotifEnabled) return;
 
     const cleanups = [];
+    // RC-4 fix: track whether this effect iteration is still live.
+    // The Capacitor listener registration is async (.then()), so if the
+    // effect tears down before the promise resolves, we must call the
+    // returned unsub immediately rather than silently discarding it —
+    // otherwise the listener fires toasts for the rest of the session.
+    let effectActive = true;
 
     /* 1 · Web push messages from the Firebase messaging service worker.
      *     Listens directly on navigator.serviceWorker for messages forwarded
@@ -112,7 +118,13 @@ export default function ForegroundNotificationHandler() {
       const body = payload?.notification?.body || "A new incident has been reported.";
       deduplicatedToast(incId, `${title}: ${body}`);
     }).then((unsub) => {
-      if (typeof unsub === "function") cleanups.push(unsub);
+      if (typeof unsub !== "function") return;
+      if (effectActive) {
+        cleanups.push(unsub);
+      } else {
+        // Effect already cleaned up — remove the listener immediately.
+        try { unsub(); } catch (_) { /* swallow */ }
+      }
     });
 
     /* 3 · Firestore listener — universal fallback for ALL platforms.
@@ -139,6 +151,7 @@ export default function ForegroundNotificationHandler() {
     cleanupRef.current = cleanups;
 
     return () => {
+      effectActive = false;
       cleanups.forEach((fn) => {
         try {
           fn();
