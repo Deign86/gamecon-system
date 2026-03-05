@@ -11,6 +11,8 @@ import {
   Users,
   ChevronsRight,
   Zap,
+  Search,
+  X,
 } from "lucide-react";
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { ShiftBoardSkeleton } from "./Skeleton";
@@ -287,6 +289,20 @@ export default function ShiftBoard({ highlightCommittee }) {
     committeeId: null,
   });
 
+  /* ── Search / filter state ── */
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredCommittees = useMemo(() => {
+    if (!searchQuery.trim()) return COMMITTEES;
+    const q = searchQuery.toLowerCase().trim();
+    return COMMITTEES.filter((committee) => {
+      if (committee.name.toLowerCase().includes(q)) return true;
+      const shift = shiftMap[committee.id];
+      if (shift?.assignees?.some((a) => a.name?.toLowerCase().includes(q))) return true;
+      return false;
+    });
+  }, [searchQuery, shiftMap]);
+
   /* ── Add assignee dialog state ── */
   const [addDialog, setAddDialog] = useState({ open: false, committeeId: null });
 
@@ -539,6 +555,29 @@ export default function ShiftBoard({ highlightCommittee }) {
         </div>
       </div>
 
+      {/* ── Search input ── */}
+      {!loadingShifts && shifts.length > 0 && (
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gc-mist" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search committees or assignees…"
+            className="w-full rounded border border-gc-steel/60 bg-gc-iron py-2 pl-8 pr-8 font-body text-xs text-gc-cloud placeholder:text-gc-mist/60 outline-none focus:border-gc-crimson/50 focus:ring-1 focus:ring-gc-crimson/20 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gc-mist hover:text-gc-cloud transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* ── Loading state ── */}
       {loadingShifts ? (
         <ShiftBoardSkeleton />
@@ -586,30 +625,50 @@ export default function ShiftBoard({ highlightCommittee }) {
           initial="hidden"
           animate="show"
         >
-          {COMMITTEES.map((committee) => {
-            const shift = shiftMap[committee.id];
-            // Only show committees that have a shift doc, or all if admin/proctor
-            if (!shift && !canManageShifts) return null;
-            return (
-              <ShiftCommitteeRow
-                key={committee.id}
-                committee={committee}
-                shift={shift}
-                isAdmin={isAdmin}
-                canAdd={canManageShifts}
-                canRemove={canManageShifts}
-                currentUserId={user?.uid}
-                dayBlock={displayBlock}
-                onAdd={openAddDialog}
-                onRemove={handleRemoveAssignee}
-                highlighted={highlightedId === committee.id}
-                rowRef={(el) => { committeeRefs.current[committee.id] = el; }}
-              />
-            );
-          })}
+          {filteredCommittees.length === 0 && searchQuery.trim() ? (
+            <motion.div
+              key="no-search-results"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex flex-col items-center gap-2 py-10 text-center"
+            >
+              <Search className="h-8 w-8 text-gc-steel" />
+              <p className="font-display text-sm tracking-wider text-gc-mist uppercase">
+                No results for &ldquo;{searchQuery}&rdquo;
+              </p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="mt-1 font-body text-xs text-gc-crimson hover:text-gc-scarlet transition-colors"
+              >
+                Clear search
+              </button>
+            </motion.div>
+          ) : (
+            filteredCommittees.map((committee) => {
+              const shift = shiftMap[committee.id];
+              // Only show committees that have a shift doc, or all if admin/proctor
+              if (!shift && !canManageShifts) return null;
+              return (
+                <ShiftCommitteeRow
+                  key={committee.id}
+                  committee={committee}
+                  shift={shift}
+                  isAdmin={isAdmin}
+                  canAdd={canManageShifts}
+                  canRemove={canManageShifts}
+                  currentUserId={user?.uid}
+                  dayBlock={displayBlock}
+                  onAdd={openAddDialog}
+                  onRemove={handleRemoveAssignee}
+                  highlighted={highlightedId === committee.id}
+                  rowRef={(el) => { committeeRefs.current[committee.id] = el; }}
+                />
+              );
+            })
+          )}
 
           {/* Admin CTA if some committees missing shift docs */}
-          {isAdmin && shifts.length > 0 && shifts.length < COMMITTEES.length && (
+          {isAdmin && shifts.length > 0 && shifts.length < COMMITTEES.length && !searchQuery.trim() && (
             <div className="text-center pt-2">
               <button
                 onClick={handleInitialise}
