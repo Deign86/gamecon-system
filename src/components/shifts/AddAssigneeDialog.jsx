@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Search, UserPlus, X, Users, Star, Check, Plus } from "lucide-react";
+import { Search, UserPlus, X, Users, UserX, Star, Check, Plus, Link2 } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
 
 /**
@@ -224,16 +224,69 @@ export default function AddAssigneeDialog({
               )}
 
               {/* Empty state */}
-              {suggested.length === 0 && others.length === 0 && (
-                <div className="py-10 text-center">
-                  <Users className="mx-auto h-8 w-8 text-gc-mist/40 mb-2" />
-                  <p className="text-sm text-gc-mist">
-                    {search
-                      ? "No matching members found."
-                      : "All members are already assigned."}
-                  </p>
-                </div>
-              )}
+              {suggested.length === 0 && others.length === 0 && (() => {
+                const q = search.toLowerCase().trim();
+                const alreadyMatch = q
+                  ? alreadyAssigned.some((a) =>
+                      (a.name || "").toLowerCase().includes(q)
+                    )
+                  : false;
+
+                if (alreadyMatch) {
+                  return (
+                    <div className="py-10 px-4 flex flex-col items-center gap-3 text-center">
+                      <span className="flex items-center justify-center h-10 w-10 rounded-full bg-gc-iron border border-gc-steel/40 text-gc-success">
+                        <Check className="h-5 w-5" />
+                      </span>
+                      <p className="text-sm font-display tracking-wide text-gc-cloud">
+                        Already on this shift.
+                      </p>
+                      <p className="text-xs font-body text-gc-mist max-w-xs leading-relaxed">
+                        The person you searched for is already assigned to{" "}
+                        <span className="text-gc-crimson font-semibold">{committeeName}</span>{" "}
+                        for this block.
+                      </p>
+                    </div>
+                  );
+                }
+
+                if (search) {
+                  return (
+                    <div className="py-10 px-4 flex flex-col items-center gap-3 text-center">
+                      <span className="flex items-center justify-center h-10 w-10 rounded-full bg-gc-iron border border-gc-steel/40 text-gc-mist">
+                        <UserX className="h-5 w-5" />
+                      </span>
+                      <p className="text-sm font-display tracking-wide text-gc-cloud">
+                        Not a member of {committeeName}.
+                      </p>
+                      <p className="text-xs font-body text-gc-mist max-w-xs leading-relaxed">
+                        This list only shows people assigned to{" "}
+                        <span className="text-gc-crimson font-semibold">{committeeName}</span>{" "}
+                        in the Role Sheet. If they&rsquo;re not appearing, their committee
+                        assignment may not include this committee yet &mdash; check{" "}
+                        <span className="text-gc-crimson font-semibold">Role Tasking</span>{" "}
+                        and assign them first.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="py-10 px-4 flex flex-col items-center gap-3 text-center">
+                    <span className="flex items-center justify-center h-10 w-10 rounded-full bg-gc-iron border border-gc-steel/40 text-gc-mist">
+                      <Users className="h-5 w-5" />
+                    </span>
+                    <p className="text-sm font-display tracking-wide text-gc-cloud">
+                      All members are already assigned.
+                    </p>
+                    <p className="text-xs font-body text-gc-mist max-w-xs leading-relaxed">
+                      Everyone in{" "}
+                      <span className="text-gc-crimson font-semibold">{committeeName}</span>{" "}
+                      has been added to this shift block.
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* ── Confirm bar ── */}
