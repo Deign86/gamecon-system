@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   Loader2,
   FileSpreadsheet,
+  Users,
+  ChevronsRight,
 } from "lucide-react";
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { ShiftBoardSkeleton } from "./Skeleton";
@@ -263,6 +265,14 @@ export default function ShiftBoard({ highlightCommittee }) {
     userName: null,
   });
 
+  /* ── Conflict warning state ── */
+  const [conflictWarning, setConflictWarning] = useState({
+    open: false,
+    members: [],
+    conflicts: [], // [{ member: {userId,name}, committees: [string,...] }]
+    committeeId: null,
+  });
+
   /* ── Add assignee dialog state ── */
   const [addDialog, setAddDialog] = useState({ open: false, committeeId: null });
 
@@ -275,14 +285,11 @@ export default function ShiftBoard({ highlightCommittee }) {
     []
   );
 
-  const handleAddAssignee = useCallback(
-    async (membersInput) => {
-      const cId = addDialog.committeeId;
+  /* ── Core write: actually add members to a shift ── */
+  const doAddAssignees = useCallback(
+    async (cId, members) => {
       const comm = COMMITTEES.find((c) => c.id === cId);
       if (!comm || !user) return;
-      // Accept either a single member object or an array
-      const members = Array.isArray(membersInput) ? membersInput : [membersInput];
-      if (members.length === 0) return;
       try {
         await Promise.all(
           members.map((member) =>
@@ -308,7 +315,41 @@ export default function ShiftBoard({ highlightCommittee }) {
         toast("Failed to add assignee.", "error");
       }
     },
-    [addDialog.committeeId, displayBlock, user, toast]
+    [displayBlock, user, toast]
+  );
+
+  const handleAddAssignee = useCallback(
+    async (membersInput) => {
+      const cId = addDialog.committeeId;
+      if (!cId || !user) return;
+      const members = Array.isArray(membersInput) ? membersInput : [membersInput];
+      if (members.length === 0) return;
+
+      // ── Conflict detection: is any member already in another committee this block? ──
+      const conflictMap = {};
+      for (const member of members) {
+        for (const shift of shifts) {
+          if (shift.committeeId === cId) continue;
+          if (shift.assignees?.some((a) => a.userId === member.userId)) {
+            if (!conflictMap[member.userId]) {
+              conflictMap[member.userId] = { member, committees: [] };
+            }
+            conflictMap[member.userId].committees.push(
+              shift.committeeName || shift.committeeId
+            );
+          }
+        }
+      }
+      const conflicts = Object.values(conflictMap);
+
+      if (conflicts.length > 0) {
+        setConflictWarning({ open: true, members, conflicts, committeeId: cId });
+        return;
+      }
+
+      await doAddAssignees(cId, members);
+    },
+    [addDialog.committeeId, displayBlock, user, shifts, doAddAssignees]
   );
 
   // Step 1: open confirmation dialog
@@ -575,6 +616,102 @@ export default function ShiftBoard({ highlightCommittee }) {
         cancelLabel="Keep"
         variant="danger"
       />
+
+      {/* ── Double-Assignment Conflict Warning ── */}
+      <AnimatePresence>
+        {conflictWarning.open && (
+          <motion.div
+            key="conflict-overlay"
+            className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => e.target === e.currentTarget && setConflictWarning((s) => ({ ...s, open: false }))}
+          >
+            <motion.div
+              className="w-full max-w-sm rounded-lg border border-gc-warning/40 bg-gc-night shadow-2xl shadow-black/60 overflow-hidden"
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 16, scale: 0.97 }}
+              transition={{ type: "spring", damping: 26, stiffness: 300 }}
+            >
+              {/* Warning accent bar */}
+              <div className="h-0.5 w-full bg-gc-warning" />
+
+              {/* Header */}
+              <div className="px-5 pt-4 pb-3 flex items-start gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gc-warning/15 mt-0.5">
+                  <AlertTriangle className="h-5 w-5 text-gc-warning" />
+                </span>
+                <div>
+                  <h3 className="font-display text-lg font-bold tracking-wider text-gc-white leading-tight">
+                    DOUBLE ASSIGNMENT
+                  </h3>
+                  <p className="font-body text-xs text-gc-mist mt-0.5">
+                    The following {conflictWarning.conflicts.length === 1 ? "person is" : "people are"} already
+                    assigned to another committee this block.
+                  </p>
+                </div>
+              </div>
+
+              {/* Conflict list */}
+              <div className="px-5 pb-3 space-y-2">
+                {conflictWarning.conflicts.map(({ member, committees }) => (
+                  <div
+                    key={member.userId}
+                    className="flex items-start gap-2.5 rounded border border-gc-warning/20 bg-gc-warning/5 px-3 py-2.5"
+                  >
+                    <Users className="h-4 w-4 text-gc-warning shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="font-body text-sm font-semibold text-gc-white truncate">
+                        {member.name}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-1 mt-1">
+                        {committees.map((cName) => (
+                          <span
+                            key={cName}
+                            className="inline-flex items-center gap-1 rounded bg-gc-warning/10 border border-gc-warning/20 px-1.5 py-0.5 font-mono text-[9px] text-gc-warning uppercase tracking-wider"
+                          >
+                            <ChevronsRight className="h-2.5 w-2.5" />
+                            {cName}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <p className="px-5 pb-4 font-body text-xs text-gc-mist">
+                You can still proceed — this is a warning only.
+              </p>
+
+              {/* Actions */}
+              <div className="flex items-center gap-2.5 border-t border-gc-steel/40 bg-gc-iron/60 px-5 py-3">
+                <button
+                  onClick={() => setConflictWarning((s) => ({ ...s, open: false }))}
+                  className="rounded border border-gc-steel/60 bg-transparent px-4 py-2 font-display text-sm tracking-wider text-gc-mist hover:text-gc-white hover:border-gc-steel transition-colors"
+                >
+                  CANCEL
+                </button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={async () => {
+                    const { committeeId, members } = conflictWarning;
+                    setConflictWarning((s) => ({ ...s, open: false }));
+                    await doAddAssignees(committeeId, members);
+                  }}
+                  className="flex flex-1 items-center justify-center gap-2 rounded bg-gc-warning/15 border border-gc-warning/40 px-4 py-2 font-display text-sm tracking-wider text-gc-warning hover:bg-gc-warning/25 hover:border-gc-warning/60 transition-all"
+                >
+                  <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                  PROCEED ANYWAY
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
