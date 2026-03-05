@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, UserPlus, X, Users, UserX, Star, Check, Plus, Link2 } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
+import { useAuth } from "../../hooks/useAuth";
 
 /**
  * Bulk-select dialog for adding assignees to a committee shift.
@@ -28,6 +29,8 @@ export default function AddAssigneeDialog({
   alreadyAssigned = [],
   onSelect,
 }) {
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === "admin";
   const [search, setSearch] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
   const inputRef = useRef(null);
@@ -263,9 +266,20 @@ export default function AddAssigneeDialog({
                         This list only shows people assigned to{" "}
                         <span className="text-gc-crimson font-semibold">{committeeName}</span>{" "}
                         in the Role Sheet. If they&rsquo;re not appearing, they haven&rsquo;t
-                        been assigned to this committee yet &mdash; ask an{" "}
-                        <span className="text-gc-crimson font-semibold">admin</span>{" "}
-                        to add them under Role Tasking first.
+                        been assigned to this committee yet &mdash;{" "}
+                        {isAdmin ? (
+                          <>
+                            go to{" "}
+                            <span className="text-gc-crimson font-semibold">Role Tasking</span>{" "}
+                            and assign them to this committee first.
+                          </>
+                        ) : (
+                          <>
+                            ask an{" "}
+                            <span className="text-gc-crimson font-semibold">admin</span>{" "}
+                            to assign them to this committee under Role Tasking.
+                          </>
+                        )}
                       </p>
                     </div>
                   );
