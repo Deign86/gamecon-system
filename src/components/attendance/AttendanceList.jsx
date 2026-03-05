@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Check, Clock, ShieldCheck, X, Search, Filter, CloudUpload } from "lucide-react";
+import { Check, Clock, ShieldCheck, X, Search, Filter, CloudUpload, Link2 } from "lucide-react";
 import { markAttendance, clearAttendance } from "../../lib/attendanceFirestore";
 import { logActivity } from "../../lib/auditLog";
 import { STATUS_META } from "../../lib/attendanceConfig";
@@ -174,9 +174,42 @@ export default function AttendanceList({ volunteers, records, blockId, canMark }
 
       {/* ── Volunteer list ── */}
       {filtered.length === 0 ? (
-        <p className="py-12 text-center text-sm text-gc-mist font-body">
-          No volunteers found for this block.
-        </p>
+        (() => {
+          const hasActiveFilter = search.trim() !== "" || filterComm !== "all";
+          return hasActiveFilter ? (
+            /* Search/filter returned nothing — explain the Shift Board link */
+            <div className="py-10 px-4 flex flex-col items-center gap-3 text-center">
+              <span className="flex items-center justify-center h-10 w-10 rounded-full bg-gc-iron border border-gc-steel/40 text-gc-mist">
+                <Link2 className="h-5 w-5" />
+              </span>
+              <p className="text-sm font-display tracking-wide text-gc-cloud">
+                No volunteers match your search.
+              </p>
+              <p className="text-xs font-body text-gc-mist max-w-xs leading-relaxed">
+                Attendance pulls its list directly from the{" "}
+                <span className="text-gc-crimson font-semibold">Shift Board</span>.
+                If you can&rsquo;t find someone here, they may not have been assigned to a
+                committee shift yet &mdash; check the Shift Board and assign them first.
+              </p>
+            </div>
+          ) : (
+            /* Block is entirely empty — same hint still applies */
+            <div className="py-10 px-4 flex flex-col items-center gap-3 text-center">
+              <span className="flex items-center justify-center h-10 w-10 rounded-full bg-gc-iron border border-gc-steel/40 text-gc-mist">
+                <Link2 className="h-5 w-5" />
+              </span>
+              <p className="text-sm font-display tracking-wide text-gc-cloud">
+                No volunteers assigned to this block.
+              </p>
+              <p className="text-xs font-body text-gc-mist max-w-xs leading-relaxed">
+                Attendance is linked to the{" "}
+                <span className="text-gc-crimson font-semibold">Shift Board</span>.
+                Add volunteers to a committee shift for this block first, then they will
+                appear here for check-in.
+              </p>
+            </div>
+          );
+        })()
       ) : (
         <motion.ul
           className="space-y-2"
