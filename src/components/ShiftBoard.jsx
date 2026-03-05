@@ -10,6 +10,7 @@ import {
   FileSpreadsheet,
   Users,
   ChevronsRight,
+  Zap,
 } from "lucide-react";
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { ShiftBoardSkeleton } from "./Skeleton";
@@ -20,6 +21,7 @@ import { COMMITTEE_NAMES } from "../lib/roleConfig";
 import { cn } from "../lib/utils";
 import {
   subscribeShiftsForBlock,
+  getShiftsForBlock,
   addAssigneeToShift,
   removeAssigneeFromShift,
   initialiseBlockShifts,
@@ -39,6 +41,15 @@ import { exportShifts } from "../lib/exportExcel";
 function blockToDay(blockId) {
   if (blockId.startsWith("d1")) return "DAY 1";
   if (blockId.startsWith("d2")) return "DAY 2";
+  return null;
+}
+
+/* ── Return the other block on the same day (morning ↔ afternoon) ── */
+function siblingBlock(blockId) {
+  if (blockId === "d1-morning")   return "d1-afternoon";
+  if (blockId === "d1-afternoon") return "d1-morning";
+  if (blockId === "d2-morning")   return "d2-afternoon";
+  if (blockId === "d2-afternoon") return "d2-morning";
   return null;
 }
 
@@ -269,7 +280,10 @@ export default function ShiftBoard({ highlightCommittee }) {
   const [conflictWarning, setConflictWarning] = useState({
     open: false,
     members: [],
-    conflicts: [], // [{ member: {userId,name}, committees: [string,...] }]
+    // Same block, different committee: [{ member, committees: string[] }]
+    conflicts: [],
+    // Same day, other block: [{ member, blockLabel: string, committees: string[] }]
+    sameDayConflicts: [],
     committeeId: null,
   });
 
@@ -325,7 +339,7 @@ export default function ShiftBoard({ highlightCommittee }) {
       const members = Array.isArray(membersInput) ? membersInput : [membersInput];
       if (members.length === 0) return;
 
-      // ── Conflict detection: is any member already in another committee this block? ──
+      // ── Conflict detection 1: already in another committee THIS block ──
       const conflictMap = {};
       for (const member of members) {
         for (const shift of shifts) {
@@ -342,8 +356,29 @@ export default function ShiftBoard({ highlightCommittee }) {
       }
       const conflicts = Object.values(conflictMap);
 
-      if (conflicts.length > 0) {
-        setConflictWarning({ open: true, members, conflicts, committeeId: cId });
+      // ── Conflict detection 2: already assigned on the OTHER block of the same day ──
+      const sameDayMap = {};
+      const sibId = siblingBlock(displayBlock);
+      if (sibId) {
+        const sibShifts = await getShiftsForBlock(sibId);
+        const sibLabel = SHIFT_BLOCKS.find((b) => b.id === sibId)?.label || sibId;
+        for (const member of members) {
+          for (const sShift of sibShifts) {
+            if (sShift.assignees?.some((a) => a.userId === member.userId)) {
+              if (!sameDayMap[member.userId]) {
+                sameDayMap[member.userId] = { member, blockLabel: sibLabel, committees: [] };
+              }
+              sameDayMap[member.userId].committees.push(
+                sShift.committeeName || sShift.committeeId
+              );
+            }
+          }
+        }
+      }
+      const sameDayConflicts = Object.values(sameDayMap);
+
+      if (conflicts.length > 0 || sameDayConflicts.length > 0) {
+        setConflictWarning({ open: true, members, conflicts, sameDayConflicts, committeeId: cId });
         return;
       }
 
@@ -645,42 +680,96 @@ export default function ShiftBoard({ highlightCommittee }) {
                 </span>
                 <div>
                   <h3 className="font-display text-lg font-bold tracking-wider text-gc-white leading-tight">
-                    DOUBLE ASSIGNMENT
+                    ASSIGNMENT CONFLICT
                   </h3>
                   <p className="font-body text-xs text-gc-mist mt-0.5">
-                    The following {conflictWarning.conflicts.length === 1 ? "person is" : "people are"} already
-                    assigned to another committee this block.
+                    Scheduling conflicts detected for the selected{" "}
+                    {conflictWarning.conflicts.length + conflictWarning.sameDayConflicts.length === 1
+                      ? "member"
+                      : "members"}
+                    . Review before proceeding.
                   </p>
                 </div>
               </div>
 
-              {/* Conflict list */}
-              <div className="px-5 pb-3 space-y-2">
-                {conflictWarning.conflicts.map(({ member, committees }) => (
-                  <div
-                    key={member.userId}
-                    className="flex items-start gap-2.5 rounded border border-gc-warning/20 bg-gc-warning/5 px-3 py-2.5"
-                  >
-                    <Users className="h-4 w-4 text-gc-warning shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="font-body text-sm font-semibold text-gc-white truncate">
-                        {member.name}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-1 mt-1">
-                        {committees.map((cName) => (
-                          <span
-                            key={cName}
-                            className="inline-flex items-center gap-1 rounded bg-gc-warning/10 border border-gc-warning/20 px-1.5 py-0.5 font-mono text-[9px] text-gc-warning uppercase tracking-wider"
-                          >
-                            <ChevronsRight className="h-2.5 w-2.5" />
-                            {cName}
-                          </span>
-                        ))}
+              {/* Same-block cross-committee conflicts */}
+              {conflictWarning.conflicts.length > 0 && (
+                <div className="px-5 pb-3 space-y-2">
+                  <p className="font-display text-[10px] tracking-widest uppercase text-gc-warning/70 mb-1.5">
+                    Already assigned — this shift
+                  </p>
+                  {conflictWarning.conflicts.map(({ member, committees }) => (
+                    <div
+                      key={member.userId}
+                      className="flex items-start gap-2.5 rounded border border-gc-warning/20 bg-gc-warning/5 px-3 py-2.5"
+                    >
+                      <Users className="h-4 w-4 text-gc-warning shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="font-body text-sm font-semibold text-gc-white truncate">
+                          {member.name}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1 mt-1">
+                          {committees.map((cName) => (
+                            <span
+                              key={cName}
+                              className="inline-flex items-center gap-1 rounded bg-gc-warning/10 border border-gc-warning/20 px-1.5 py-0.5 font-mono text-[9px] text-gc-warning uppercase tracking-wider"
+                            >
+                              <ChevronsRight className="h-2.5 w-2.5" />
+                              {cName}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Same-day cross-block conflicts */}
+              {conflictWarning.sameDayConflicts.length > 0 && (
+                <div className="px-5 pb-3 space-y-2">
+                  {conflictWarning.conflicts.length > 0 && (
+                    <div className="border-t border-gc-steel/30 mb-3" />
+                  )}
+                  <p className="font-display text-[10px] tracking-widest uppercase text-gc-danger/70 mb-1.5">
+                    Assigned on the other block today
+                  </p>
+                  {conflictWarning.sameDayConflicts.map(({ member, blockLabel, committees }) => (
+                    <div
+                      key={member.userId}
+                      className="flex items-start gap-2.5 rounded border border-gc-danger/20 bg-gc-danger/5 px-3 py-2.5"
+                    >
+                      <Zap className="h-4 w-4 text-gc-danger shrink-0 mt-0.5" />
+                      <div className="min-w-0">
+                        <p className="font-body text-sm font-semibold text-gc-white truncate">
+                          {member.name}
+                        </p>
+                        <p className="font-mono text-[10px] text-gc-mist mt-0.5">
+                          Also on: <span className="text-gc-cloud">{blockLabel}</span>
+                        </p>
+                        <div className="flex flex-wrap items-center gap-1 mt-1">
+                          {committees.map((cName) => (
+                            <span
+                              key={cName}
+                              className="inline-flex items-center gap-1 rounded bg-gc-danger/10 border border-gc-danger/20 px-1.5 py-0.5 font-mono text-[9px] text-gc-danger uppercase tracking-wider"
+                            >
+                              <ChevronsRight className="h-2.5 w-2.5" />
+                              {cName}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Fatigue note */}
+                  <div className="flex items-start gap-2 rounded border border-gc-danger/15 bg-gc-danger/5 px-3 py-2 mt-1">
+                    <Zap className="h-3.5 w-3.5 text-gc-danger/70 shrink-0 mt-0.5" />
+                    <p className="font-body text-[11px] text-gc-danger/80 leading-snug">
+                      This member will be working <span className="font-semibold text-gc-danger">both morning and afternoon</span>. Consider the physical and mental fatigue of a full-day assignment.
+                    </p>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
 
               <p className="px-5 pb-4 font-body text-xs text-gc-mist">
                 You can still proceed — this is a warning only.
