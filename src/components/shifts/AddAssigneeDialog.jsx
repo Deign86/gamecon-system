@@ -262,10 +262,10 @@ export default function AddAssigneeDialog({
                       <p className="text-xs font-body text-gc-mist max-w-xs leading-relaxed">
                         This list only shows people assigned to{" "}
                         <span className="text-gc-crimson font-semibold">{committeeName}</span>{" "}
-                        in the Role Sheet. If they&rsquo;re not appearing, their committee
-                        assignment may not include this committee yet &mdash; check{" "}
-                        <span className="text-gc-crimson font-semibold">Role Tasking</span>{" "}
-                        and assign them first.
+                        in the Role Sheet. If they&rsquo;re not appearing, they haven&rsquo;t
+                        been assigned to this committee yet &mdash; ask an{" "}
+                        <span className="text-gc-crimson font-semibold">admin</span>{" "}
+                        to add them under Role Tasking first.
                       </p>
                     </div>
                   );
