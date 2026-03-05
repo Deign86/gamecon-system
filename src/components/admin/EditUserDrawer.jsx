@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { cn, fmtDate } from "../../lib/utils";
 import { COMMITTEE_NAMES, DAY_SLOTS, APP_ROLES, normalizeCommitteeName, normalizeCommittees } from "../../lib/roleConfig";
-import { updateUserRoleAndCommittee } from "../../lib/adminApi";
+import { updateUserRoleAndCommittee, sendPasswordReset } from "../../lib/adminApi";
 import { logActivity } from "../../lib/auditLog";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -47,6 +47,7 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
   const [committees, setCommittees]   = useState([]); // [{ committee, day }]
   const [active, setActive]           = useState(true);
   const [saving, setSaving]           = useState(false);
+  const [resetting, setResetting]     = useState(false);
   const [toast, setToast]             = useState(null);
 
   /* inline add-assignment form */
@@ -394,6 +395,53 @@ export default function EditUserDrawer({ user, open, onClose, onSaved }) {
                     : "User is locked out and cannot sign in."}
                 </p>
               </div>
+
+              {/* ── Password reset (viewer accounts only) ── */}
+              {user?.role === "viewer" && (
+                <div>
+                  <label className="block text-[11px] font-body font-semibold uppercase tracking-wider text-gc-mist mb-2">
+                    Password
+                  </label>
+                  <button
+                    onClick={async () => {
+                      if (!user?.email || resetting) return;
+                      setResetting(true);
+                      setToast(null);
+                      try {
+                        await sendPasswordReset(user.email);
+                        logActivity({
+                          action: "user.password_reset",
+                          category: "admin",
+                          details: `Sent password reset to ${user.name} (${user.email})`,
+                          meta: { targetUid: user.id, email: user.email },
+                          userId: authUser?.uid || "admin",
+                          userName: authProfile?.name || "Admin",
+                        });
+                        setToast({ type: "success", msg: `Password reset sent to ${user.email}` });
+                      } catch (err) {
+                        setToast({ type: "error", msg: err.message || "Failed to send reset email." });
+                      } finally {
+                        setResetting(false);
+                      }
+                    }}
+                    disabled={resetting}
+                    className={cn(
+                      "flex w-full items-center justify-center gap-2 rounded border border-gc-steel/60 bg-gc-iron px-4 py-2.5 text-xs font-body font-semibold text-gc-cloud transition-all duration-200 hover:border-gc-mist hover:text-gc-white",
+                      resetting && "opacity-50 pointer-events-none"
+                    )}
+                  >
+                    {resetting ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Mail className="h-3.5 w-3.5" />
+                    )}
+                    Send Password Reset Email
+                  </button>
+                  <p className="text-[10px] text-gc-hint font-body mt-1.5 pl-1">
+                    Viewer accounts cannot self-change their password. Send a reset link via email.
+                  </p>
+                </div>
+              )}
 
               {/* Toast */}
               <AnimatePresence>

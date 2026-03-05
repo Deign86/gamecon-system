@@ -318,10 +318,12 @@ export default function ProfilePanel() {
         <IncidentNotificationToggle />
       </motion.div>
 
-      {/* Change password */}
-      <motion.div variants={fadeUp} className="gc-card p-4">
-        <ChangePasswordForm />
-      </motion.div>
+      {/* Change password — not available for viewer accounts */}
+      {!isViewer && (
+        <motion.div variants={fadeUp} className="gc-card p-4">
+          <ChangePasswordForm />
+        </motion.div>
+      )}
 
       {/* Event info */}
       <motion.div variants={fadeUp} className="gc-card p-4">
