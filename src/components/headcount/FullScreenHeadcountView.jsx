@@ -297,7 +297,7 @@ function HeadcountInner() {
           onMouseDown={() => startHold(safeDecrement, "down")}
           onMouseUp={stopHold}
           onMouseLeave={stopHold}
-          onTouchStart={() => startHold(safeDecrement, "down")}
+          onTouchStart={(e) => { e.preventDefault(); startHold(safeDecrement, "down"); }}
           onTouchEnd={stopHold}
           disabled={isViewer || count <= 0}
           className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all active:bg-gc-crimson/10 ${
@@ -319,7 +319,7 @@ function HeadcountInner() {
           onMouseDown={() => startHold(incrementCount, "up")}
           onMouseUp={stopHold}
           onMouseLeave={stopHold}
-          onTouchStart={() => startHold(incrementCount, "up")}
+          onTouchStart={(e) => { e.preventDefault(); startHold(incrementCount, "up"); }}
           onTouchEnd={stopHold}
           disabled={isViewer}
           className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all ${
