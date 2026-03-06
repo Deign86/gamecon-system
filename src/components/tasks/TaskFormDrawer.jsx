@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Search, ChevronDown, Trash2, UserPlus, Flag, MapPin } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
@@ -49,6 +49,7 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
   const [people, setPeople]           = useState([]);
   const [loadingPeople, setLoadingPeople] = useState(false);
   const [search, setSearch]           = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [showPicker, setShowPicker]   = useState(false);
   const [filterCommittee, setFilterCommittee] = useState("");
 
@@ -93,10 +94,10 @@ export default function TaskFormDrawer({ open, onClose, onSave, onDelete, initia
 
   /* Filtered people for search */
   const filteredPeople = useMemo(() => {
-    if (!search.trim()) return people;
-    const q = search.toLowerCase();
+    if (!deferredSearch.trim()) return people;
+    const q = deferredSearch.toLowerCase();
     return people.filter((p) => p.name?.toLowerCase().includes(q));
-  }, [people, search]);
+  }, [people, deferredSearch]);
 
   /* Assignee toggle */
   const toggleAssignee = useCallback((person) => {

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from "react";
+﻿import { useState, useEffect, useMemo, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { RoleTaskingSkeleton } from "./Skeleton";
 import {
@@ -155,6 +155,7 @@ export default function RoleTasking() {
 
   /* ── search / filter ── */
   const [search, setSearch]             = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [selectedComm, setSelectedComm] = useState(COMMITTEE_NAMES[0]);
   const [selectedDay, setSelectedDay]   = useState("DAY 1");
 
@@ -163,10 +164,10 @@ export default function RoleTasking() {
 
   /* ── derived data ── */
   const filteredPersons = useMemo(() => {
-    if (!search.trim()) return persons;
-    const q = search.toLowerCase();
+    if (!deferredSearch.trim()) return persons;
+    const q = deferredSearch.toLowerCase();
     return persons.filter((p) => p.name.toLowerCase().includes(q));
-  }, [persons, search]);
+  }, [persons, deferredSearch]);
 
   const currentSchedule = useMemo(() => {
     if (selectedDay === "DAY1/2") {

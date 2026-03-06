@@ -82,6 +82,7 @@ export default function Modal({ open, onClose, title, children, wide = false, ex
     <motion.div
       onClick={(e) => e.target === e.currentTarget && onClose()}
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm px-2 pb-2 sm:p-4"
+      style={{ willChange: "opacity", isolation: "isolate" }}
       initial={{ opacity: 0 }}
       animate={open ? { opacity: 1 } : { opacity: 0, pointerEvents: "none" }}
       transition={{ duration: 0.18 }}
@@ -123,7 +124,10 @@ export default function Modal({ open, onClose, title, children, wide = false, ex
         </div>
 
         {/* Content */}
-        <div className={cn("overflow-y-auto p-5", extraWide ? "max-h-[85vh]" : "max-h-[70vh]")}>
+        <div
+          className={cn("overflow-y-auto p-5 overscroll-y-contain", extraWide ? "max-h-[85vh]" : "max-h-[70vh]")}
+          style={{ willChange: "scroll-position", WebkitOverflowScrolling: "touch" }}
+        >
           {children}
         </div>
       </motion.div>

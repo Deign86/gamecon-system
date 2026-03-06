@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, UserPlus, X, Users, UserX, Star, Check, Plus, Link2 } from "lucide-react";
 import { cn, initials } from "../../lib/utils";
@@ -32,6 +32,7 @@ export default function AddAssigneeDialog({
   const { profile } = useAuth();
   const isAdmin = profile?.role === "admin";
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [selectedIds, setSelectedIds] = useState(new Set());
   const inputRef = useRef(null);
 
@@ -57,7 +58,7 @@ export default function AddAssigneeDialog({
 
   // Filtered + split into suggested vs others
   const { suggested, others } = useMemo(() => {
-    const q = search.toLowerCase().trim();
+    const q = deferredSearch.toLowerCase().trim();
     const filtered = allMembers.filter((m) => {
       if (assignedSet.has(m.userId)) return false; // already on shift — hidden
       if (!q) return true;
@@ -71,7 +72,7 @@ export default function AddAssigneeDialog({
       else oth.push(m);
     }
     return { suggested: sug, others: oth };
-  }, [allMembers, search, assignedSet, suggestedSet]);
+  }, [allMembers, deferredSearch, assignedSet, suggestedSet]);
 
   // Fast lookup by userId for the confirm step
   const memberById = useMemo(() => {

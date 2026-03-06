@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, useDeferredValue } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Clock,
@@ -291,17 +291,18 @@ export default function ShiftBoard({ highlightCommittee }) {
 
   /* ── Search / filter state ── */
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const filteredCommittees = useMemo(() => {
-    if (!searchQuery.trim()) return COMMITTEES;
-    const q = searchQuery.toLowerCase().trim();
+    if (!deferredSearchQuery.trim()) return COMMITTEES;
+    const q = deferredSearchQuery.toLowerCase().trim();
     return COMMITTEES.filter((committee) => {
       if (committee.name.toLowerCase().includes(q)) return true;
       const shift = shiftMap[committee.id];
       if (shift?.assignees?.some((a) => a.name?.toLowerCase().includes(q))) return true;
       return false;
     });
-  }, [searchQuery, shiftMap]);
+  }, [deferredSearchQuery, shiftMap]);
 
   /* ── Add assignee dialog state ── */
   const [addDialog, setAddDialog] = useState({ open: false, committeeId: null });
