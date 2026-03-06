@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Users } from "lucide-react";
 import { getZoneTypeColor } from "../../lib/venueZones";
 
 const overlayVariant = {
@@ -21,9 +22,9 @@ const overlayVariant = {
  */
 export default function ZoneOverlay({ zone, position, status, isSelected, onClick }) {
   const color = getZoneTypeColor(zone.type);
-  const { incidentsOpen, hasData } = status;
+  const { incidentsOpen, staffOnDuty, hasData } = status;
 
-  /* People-tracking removed: use a fixed low opacity for zone fills */
+  /* Use a fixed low opacity for zone fills */
   const heatOpacity = 0.08;
   const hasIncidents = incidentsOpen > 0;
 
@@ -92,7 +93,15 @@ export default function ZoneOverlay({ zone, position, status, isSelected, onClic
           )}
         </div>
 
-        {/* People-tracking removed: no headcount or staff badges shown on the map */}
+        {/* Staff on duty badge */}
+        {staffOnDuty > 0 && (
+          <div className="flex items-center gap-0.5 mt-auto">
+            <Users className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-gc-cloud/50 shrink-0" />
+            <span className="text-[6px] sm:text-[8px] font-mono text-gc-cloud/70 leading-none">
+              {staffOnDuty}
+            </span>
+          </div>
+        )}
 
         {/* Untracked label */}
         {!zone.tracked && !hasData && (
