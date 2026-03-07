@@ -13,7 +13,7 @@ import { useAuth } from "../hooks/useAuth";
  * Instead, a `mounted` flag keeps the DOM around long enough for
  * the exit animation to play, then unmounts via onAnimationComplete.
  */
-export default function Modal({ open, onClose, title, children, wide = false, extraWide = false }) {
+export default function Modal({ open, onClose, title, children, wide = false, extraWide = false, showLock = true }) {
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const openRef = useRef(open);
@@ -121,7 +121,7 @@ export default function Modal({ open, onClose, title, children, wide = false, ex
             {title}
           </h2>
           <div className="flex items-center gap-1">
-            {isAdmin && !lockLoading && (
+            {showLock && isAdmin && !lockLoading && (
               <button
                 onClick={toggleLock}
                 aria-label={locked ? "Unlock event" : "Lock event"}

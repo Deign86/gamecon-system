@@ -258,7 +258,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "committees" && (
-        <Modal open onClose={closeModal} title="COMMITTEES" wide>
+        <Modal open onClose={closeModal} title="COMMITTEES" wide showLock={false}>
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <CommitteeCard />
@@ -268,7 +268,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "venuemap" && (
-        <Modal open onClose={closeModal} title="VENUE MAP" wide>
+        <Modal open onClose={closeModal} title="VENUE MAP" wide showLock={false}>
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <VenueMapWithStatus onNavigate={(key, data) => { closeModal(); setTimeout(() => openModal(key, data), 150); }} />
