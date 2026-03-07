@@ -127,9 +127,6 @@ service cloud.firestore {
     match /contributions/{id} {
       allow read:   if isSignedIn();
       allow create: if isProctorOrAbove();
-      // TEMP migration rule: any signed-in user may update a doc lacking or with null createdAt
-      allow update: if isSignedIn()
-        && (!('createdAt' in resource.data) || resource.data.createdAt == null);
       allow update, delete: if isSignedIn()
         && (resource.data.loggedBy == request.auth.uid || isAdmin());
     }
