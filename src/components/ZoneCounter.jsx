@@ -133,7 +133,7 @@ export default function ZoneCounter() {
           <span>Event is locked — headcount is read-only</span>
         </div>
       )}
-      {/* Total banner */}}
+      {/* Total banner */}
       <div className="flex items-center justify-between rounded bg-gc-crimson/10 border border-gc-crimson/25 px-4 py-3">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-gc-crimson" />
