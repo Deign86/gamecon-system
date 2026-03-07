@@ -6,6 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { useQueuedWrite } from "../../hooks/useQueuedWrite";
 import { logActivity } from "../../lib/auditLog";
+import { createContribution } from "../../lib/contributionsFirestore";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { fmtDate, cn } from "../../lib/utils";
 import PersonContributionView from "./PersonContributionView";
@@ -91,7 +92,7 @@ function MyLogView() {
   const { isOnline } = useOnlineStatus();
   const { execute: queuedWrite } = useQueuedWrite();
   const isViewer = profile?.role === "viewer";
-  const { docs: contributions, add } = useCollection("contributions");
+  const { docs: contributions } = useCollection("contributions");
   const [task, setTask]     = useState("");
   const [desc, setDesc]     = useState("");
 
@@ -121,12 +122,13 @@ function MyLogView() {
     setBusy(true);
     try {
       const { queued: wasQueued } = await queuedWrite(() =>
-        add({
+        createContribution({
           userId: user.uid,
           userName: profile?.name || "Unknown",
           committee: comm,
           task: task.trim(),
-          description: desc.trim(),
+          details: desc.trim(),
+          loggedBy: user.uid,
         })
       );
       logActivity({
