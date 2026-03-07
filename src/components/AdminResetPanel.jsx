@@ -8,9 +8,12 @@ import {
   ShieldAlert,
   WifiOff,
   X,
+  Lock,
+  Unlock,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { useEventLock } from "../hooks/useEventLock";
 import { resetSystemData } from "../lib/resetSystemData";
 import { logActivity } from "../lib/auditLog";
 import { cn } from "../lib/utils";
@@ -24,6 +27,7 @@ const CONFIRMATION_PHRASE = "RESET GAMECON";
 export default function AdminResetPanel() {
   const { profile } = useAuth();
   const { isOnline } = useOnlineStatus();
+  const { locked, lockMeta, toggleLock, lockLoading } = useEventLock();
   const isAdmin = profile?.role === "admin";
 
   const [open, setOpen]           = useState(false);
@@ -34,16 +38,6 @@ export default function AdminResetPanel() {
   const [error, setError]         = useState("");
 
   if (!isAdmin) return null;
-
-  /* System reset absolutely requires connectivity */
-  if (!isOnline) {
-    return (
-      <div className="flex items-center gap-2 rounded border border-gc-steel/30 bg-gc-iron/30 px-4 py-3 text-sm font-body text-gc-mist/60">
-        <WifiOff className="h-4 w-4 text-gc-mist/40 shrink-0" />
-        <span>System reset is unavailable offline</span>
-      </div>
-    );
-  }
 
   const confirmed = phrase.trim().toUpperCase() === CONFIRMATION_PHRASE;
 
@@ -82,17 +76,75 @@ export default function AdminResetPanel() {
   };
 
   return (
-    <>
-      {/* Trigger button */}
-      <button
-        onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded border border-gc-danger/30 bg-gc-danger/8 px-4 py-3 text-sm font-semibold text-gc-danger transition-all hover:bg-gc-danger/15 hover:border-gc-danger/50 w-full"
+    <div className="space-y-3">
+      {/* ── Event Lock ── */}
+      <div
+        className={cn(
+          "flex items-center gap-3 rounded border px-4 py-3 transition-colors",
+          locked
+            ? "border-gc-warning/40 bg-gc-warning/8"
+            : "border-gc-steel/30 bg-gc-iron/40"
+        )}
       >
-        <Trash2 className="h-4 w-4" />
-        Reset System Data
-      </button>
+        <div
+          className={cn(
+            "flex h-8 w-8 shrink-0 items-center justify-center rounded",
+            locked ? "bg-gc-warning/15" : "bg-gc-steel/20"
+          )}
+        >
+          {locked
+            ? <Lock   className="h-4 w-4 text-gc-warning" />
+            : <Unlock className="h-4 w-4 text-gc-mist"    />
+          }
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gc-cloud">
+            {locked ? "Event Locked" : "Event Unlocked"}
+          </p>
+          <p className="text-[11px] text-gc-mist leading-snug">
+            {locked
+              ? `Shifts, attendance, headcount & roles are read-only for non-admins${lockMeta.lockedByName ? ` · locked by ${lockMeta.lockedByName}` : ""}`
+              : "All features are writable for proctors and above"
+            }
+          </p>
+        </div>
+        <button
+          onClick={toggleLock}
+          disabled={lockLoading}
+          className={cn(
+            "shrink-0 rounded border px-3 py-1.5 text-[11px] font-bold tracking-wider font-display transition-all flex items-center gap-1.5",
+            locked
+              ? "border-gc-success/40 bg-gc-success/10 text-gc-success hover:bg-gc-success/20"
+              : "border-gc-warning/40 bg-gc-warning/10 text-gc-warning hover:bg-gc-warning/20"
+          )}
+        >
+          {lockLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : locked ? (
+            <><Unlock className="h-3 w-3" /> UNLOCK</>
+          ) : (
+            <><Lock className="h-3 w-3" /> LOCK EVENT</>
+          )}
+        </button>
+      </div>
 
-      {/* Overlay modal */}
+      {/* ── Reset system data ── */}
+      {!isOnline ? (
+        <div className="flex items-center gap-2 rounded border border-gc-steel/30 bg-gc-iron/30 px-4 py-3 text-sm font-body text-gc-mist/60">
+          <WifiOff className="h-4 w-4 text-gc-mist/40 shrink-0" />
+          <span>System reset is unavailable offline</span>
+        </div>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-2 rounded border border-gc-danger/30 bg-gc-danger/8 px-4 py-3 text-sm font-semibold text-gc-danger transition-all hover:bg-gc-danger/15 hover:border-gc-danger/50 w-full"
+        >
+          <Trash2 className="h-4 w-4" />
+          Reset System Data
+        </button>
+      )}
+
+      {/* ── Reset confirmation modal ── */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -252,6 +304,6 @@ export default function AdminResetPanel() {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }

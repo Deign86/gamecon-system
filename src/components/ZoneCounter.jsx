@@ -1,12 +1,13 @@
 import { useState, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Minus, TrendingUp, Maximize2 } from "lucide-react";
+import { Plus, Minus, TrendingUp, Maximize2, Lock } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useHeadcount } from "../hooks/useHeadcount";
 import { ZoneCounterSkeleton } from "./Skeleton";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { getZoneIcon, cn } from "../lib/utils";
+import { useEventLock } from "../hooks/useEventLock";
 
 /** True when running inside the Tauri desktop shell (v2). */
 const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -14,7 +15,10 @@ const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in 
 export default function ZoneCounter() {
   const { zones, incrementZone, decrementZone, setZoneCount, loading } = useHeadcount();
   const { user, profile } = useAuth();
+  const { locked } = useEventLock();
+  const isAdmin = profile?.role === "admin";
   const isViewer = profile?.role === "viewer";
+  const isEventLocked = locked && !isAdmin;
   const navigate = useNavigate();
   const [pulsing, setPulsing] = useState(null);
   const [editingZone, setEditingZone] = useState(null);
@@ -32,7 +36,7 @@ export default function ZoneCounter() {
   }, [navigate]);
 
   async function handleIncrement(zoneId) {
-    if (isViewer) return;
+    if (isViewer || isEventLocked) return;
     setPulsing(zoneId);
     await incrementZone(zoneId, user?.uid);
     const zoneName = zones.find(z => z.id === zoneId)?.name || zoneId;
@@ -48,7 +52,7 @@ export default function ZoneCounter() {
   }
 
   async function handleDecrement(zoneId) {
-    if (isViewer) return;
+    if (isViewer || isEventLocked) return;
     setPulsing(zoneId);
     await decrementZone(zoneId, user?.uid);
     const zoneName = zones.find(z => z.id === zoneId)?.name || zoneId;
@@ -64,7 +68,7 @@ export default function ZoneCounter() {
   }
 
   function startEditing(zoneId, currentCount) {
-    if (isViewer) return;
+    if (isViewer || isEventLocked) return;
     setEditingZone(zoneId);
     setEditValue(String(currentCount || 0));
     setTimeout(() => inputRef.current?.select(), 0);
@@ -122,7 +126,14 @@ export default function ZoneCounter() {
 
   return (
     <div className="space-y-5">
-      {/* Total banner */}
+      {/* Event lock banner */}
+      {isEventLocked && (
+        <div className="flex items-center gap-2 rounded border border-gc-warning/30 bg-gc-warning/8 px-4 py-2.5 text-sm font-body text-gc-warning">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Event is locked — headcount is read-only</span>
+        </div>
+      )}
+      {/* Total banner */}}
       <div className="flex items-center justify-between rounded bg-gc-crimson/10 border border-gc-crimson/25 px-4 py-3">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-gc-crimson" />
@@ -170,7 +181,7 @@ export default function ZoneCounter() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleDecrement(zone.id)}
-                  disabled={isViewer || count <= 0}
+                  disabled={isViewer || isEventLocked || count <= 0}
                   className="flex h-9 w-9 items-center justify-center rounded bg-gc-iron border border-gc-steel text-gc-cloud hover:bg-gc-steel hover:border-gc-crimson/40 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-90"
                 >
                   <Minus className="h-4 w-4" />
@@ -201,7 +212,7 @@ export default function ZoneCounter() {
 
                 <button
                   onClick={() => handleIncrement(zone.id)}
-                  disabled={isViewer}
+                  disabled={isViewer || isEventLocked}
                   className="flex h-9 w-9 items-center justify-center rounded bg-gc-crimson/20 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/30 hover:border-gc-crimson transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   <Plus className="h-4 w-4" />

@@ -13,6 +13,7 @@ import {
   Zap,
   Search,
   X,
+  Lock,
 } from "lucide-react";
 import { collection, query, where, getDocs, onSnapshot, orderBy } from "firebase/firestore";
 import { ShiftBoardSkeleton } from "./Skeleton";
@@ -38,6 +39,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import { logActivity } from "../lib/auditLog";
 import { useToast } from "./Toast";
 import { exportShifts } from "../lib/exportExcel";
+import { useEventLock } from "../hooks/useEventLock";
 
 /* ── Map shift-block IDs to role-schedule DAY labels ── */
 function blockToDay(blockId) {
@@ -87,8 +89,10 @@ const stagger = {
 export default function ShiftBoard({ highlightCommittee }) {
   const toast = useToast();
   const { user, profile } = useAuth();
+  const { locked } = useEventLock();
   const isAdmin = profile?.role === "admin";
-  const canManageShifts = isAdmin || profile?.role === "proctor";
+  const isEventLocked = locked && !isAdmin;
+  const canManageShifts = (isAdmin || profile?.role === "proctor") && !isEventLocked;
 
   /* ── active block state ── */
   const [activeBlock, setActiveBlock] = useState(SHIFT_BLOCKS[0]?.id || "");
@@ -454,6 +458,13 @@ export default function ShiftBoard({ highlightCommittee }) {
 
   return (
     <div className="space-y-5">
+      {/* ── Event lock banner ── */}
+      {isEventLocked && (
+        <div className="flex items-center gap-2 rounded border border-gc-warning/30 bg-gc-warning/8 px-4 py-2.5 text-sm font-body text-gc-warning">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Event is locked — shift board is read-only</span>
+        </div>
+      )}
       {/* ── Block tabs — 2×2 grid on mobile, scrollable row on sm+ ── */}
       {/* Mobile: tactical 2×2 grid — all 4 blocks visible without scroll */}
       <div className="grid grid-cols-2 gap-1.5 sm:hidden">

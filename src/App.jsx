@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { AuthProvider, useAuth } from "./hooks/useAuth";
 import { ToastProvider, useToast } from "./components/Toast";
 import { OnlineStatusProvider } from "./hooks/useOnlineStatus";
+import { EventLockProvider } from "./hooks/useEventLock";
 import ErrorBoundary from "./components/ErrorBoundary";
 import OfflineGuard from "./components/OfflineGuard";
 import AuthGate from "./components/AuthGate";
@@ -134,7 +135,9 @@ export default function App() {
             <AuthProvider>
               <OnlineStatusProvider>
                 <ToastProvider>
-                  <AppShell />
+                  <EventLockProvider>
+                    <AppShell />
+                  </EventLockProvider>
                 </ToastProvider>
               </OnlineStatusProvider>
             </AuthProvider>

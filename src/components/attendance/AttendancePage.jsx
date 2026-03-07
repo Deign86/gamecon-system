@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ListChecks, BarChart3, UserX, Loader2 } from "lucide-react";
+import { ListChecks, BarChart3, UserX, Loader2, Lock } from "lucide-react";
 import { AttendanceSkeleton } from "../Skeleton";
 import { ATTENDANCE_SESSIONS } from "../../lib/attendanceConfig";
 import {
@@ -12,6 +12,7 @@ import { logActivity } from "../../lib/auditLog";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../Toast";
 import { cn } from "../../lib/utils";
+import { useEventLock } from "../../hooks/useEventLock";
 import AttendanceList from "./AttendanceList";
 import AttendanceSummary from "./AttendanceSummary";
 
@@ -29,8 +30,10 @@ const pageVar = {
 export default function AttendancePage() {
   const { user, profile } = useAuth();
   const toast = useToast();
+  const { locked } = useEventLock();
   const isAdminOrHead = profile?.role === "admin" || profile?.role === "head";
-  const canMark = profile?.role === "admin" || profile?.role === "proctor";
+  const isAdmin = profile?.role === "admin";
+  const canMark = (profile?.role === "admin" || profile?.role === "proctor") && !(locked && !isAdmin);
 
   /* ── state ── */
   const [blockIdx, setBlockIdx]     = useState(0);
@@ -90,6 +93,13 @@ export default function AttendancePage() {
 
   return (
     <div className="space-y-4">
+      {/* ── Event lock banner ── */}
+      {locked && !isAdmin && (
+        <div className="flex items-center gap-2 rounded border border-gc-warning/30 bg-gc-warning/8 px-4 py-2.5 text-sm font-body text-gc-warning">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Event is locked — attendance is read-only</span>
+        </div>
+      )}
       {/* ── Block tabs — 2×2 grid on mobile, scrollable row on sm+ ── */}
       {/* Mobile: tactical 2×2 grid — all 4 blocks visible without scroll */}
       <div className="grid grid-cols-2 gap-1.5 sm:hidden">

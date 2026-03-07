@@ -4,8 +4,9 @@ import { useNavigate } from "react-router";
 import { useTotalHeadcount } from "../../hooks/useTotalHeadcount";
 import { AuthProvider, useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
-import { ShieldAlert } from "lucide-react";
+import { ShieldAlert, Lock } from "lucide-react";
 import { HeadcountFullSkeleton } from "../Skeleton";
+import { EventLockProvider, useEventLock } from "../../hooks/useEventLock";
 
 /* ── Eye SVG icon ── */
 function EyeIcon({ className }) {
@@ -70,7 +71,11 @@ function ArrowLeftIcon({ className }) {
 function HeadcountInner() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { locked } = useEventLock();
+  const isAdmin = profile?.role === "admin";
   const isViewer = profile?.role === "viewer";
+  const isEventLocked = locked && !isAdmin;
+  const isReadOnly = isViewer || isEventLocked;
   const { count, loading, zonesTotal, atStaffFloor, incrementCount, decrementCount } = useTotalHeadcount();
   const [ripple, setRipple] = useState(0);
   const [direction, setDirection] = useState(null); // 'up' | 'down'
@@ -106,7 +111,7 @@ function HeadcountInner() {
 
   /* Keyboard support */
   useEffect(() => {
-    if (isViewer) return;
+    if (isReadOnly) return;
     function onKey(e) {
       if (e.key === "+" || e.key === "=" || e.key === "ArrowUp") {
         e.preventDefault();
@@ -125,7 +130,7 @@ function HeadcountInner() {
 
   /* Hold-to-repeat helpers */
   function startHold(action, dir) {
-    if (isViewer) return;
+    if (isReadOnly) return;
     action();
     if (dir === "up") { setDirection(dir); triggerRipple(); }
     holdRef.current = setTimeout(() => {
@@ -172,7 +177,14 @@ function HeadcountInner() {
         }}
       />
 
-      {/* Back to dashboard */}
+        {/* Lock banner */}
+        {isEventLocked && (
+          <div className="absolute top-16 inset-x-4 z-20 flex items-center justify-center gap-2 rounded border border-gc-warning/30 bg-gc-warning/10 px-4 py-2 text-sm font-body text-gc-warning">
+            <Lock className="h-4 w-4 shrink-0" />
+            <span>Event locked — read-only mode</span>
+          </div>
+        )}
+        {/* Back to dashboard */}}
       <motion.button
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
@@ -299,9 +311,9 @@ function HeadcountInner() {
           onMouseLeave={stopHold}
           onTouchStart={(e) => { e.preventDefault(); startHold(safeDecrement, "down"); }}
           onTouchEnd={stopHold}
-          disabled={isViewer || count <= 0}
+          disabled={isReadOnly || count <= 0}
           className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all active:bg-gc-crimson/10 ${
-            isViewer
+            isReadOnly
               ? "bg-gc-iron/40 border border-gc-steel/30 text-gc-hint cursor-not-allowed opacity-30"
               : atStaffFloor
                 ? "bg-gc-warning/10 border border-gc-warning/30 text-gc-warning/60 cursor-not-allowed"
@@ -321,9 +333,9 @@ function HeadcountInner() {
           onMouseLeave={stopHold}
           onTouchStart={(e) => { e.preventDefault(); startHold(incrementCount, "up"); }}
           onTouchEnd={stopHold}
-          disabled={isViewer}
+          disabled={isReadOnly}
           className={`group relative flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-md backdrop-blur-sm transition-all ${
-            isViewer
+            isReadOnly
               ? "bg-gc-iron/40 border border-gc-steel/30 text-gc-hint cursor-not-allowed opacity-30"
               : "bg-gc-crimson/15 border border-gc-crimson/40 text-gc-crimson hover:bg-gc-crimson/25 hover:border-gc-crimson active:bg-gc-crimson/30"
           }`}
@@ -353,7 +365,9 @@ function HeadcountInner() {
 export default function FullScreenHeadcountView() {
   return (
     <AuthProvider>
-      <HeadcountInner />
+      <EventLockProvider>
+        <HeadcountInner />
+      </EventLockProvider>
     </AuthProvider>
   );
 }
