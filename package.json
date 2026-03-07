@@ -8,6 +8,7 @@
         "build": "vite build",
         "preview": "vite preview",
         "seed": "node scripts/seedFirestore.mjs",
+        "migrate:contributions-createdat": "node scripts/migrateContributionsCreatedAt.mjs",
         "test": "vitest",
         "test:coverage": "vitest run --coverage",
         "lint": "eslint src/ --ext .js,.jsx",
