@@ -111,8 +111,8 @@ async function run() {
   for (const docSnap of snap.docs) {
     const data = docSnap.data();
 
-    // Already has createdAt — skip. Treat null as missing.
-    if (data.createdAt != null && data.createdAt !== null) {
+    // Already has createdAt — skip. null counts as missing.
+    if (data.createdAt != null) {
       skipped++;
       continue;
     }
