@@ -1,7 +1,9 @@
 import { useEffect, useRef, useId, useState } from "react";
 import { motion } from "motion/react";
-import { X } from "lucide-react";
+import { X, Lock, Unlock } from "lucide-react";
 import { cn } from "../lib/utils";
+import { useEventLock } from "../hooks/useEventLock";
+import { useAuth } from "../hooks/useAuth";
 
 /**
  * Modal — state-driven mount/unmount with motion animations.
@@ -17,6 +19,10 @@ export default function Modal({ open, onClose, title, children, wide = false, ex
   const openRef = useRef(open);
   const titleId = useId();
   const [mounted, setMounted] = useState(open);
+
+  const { locked, toggleLock, lockLoading } = useEventLock();
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === "admin";
 
   onCloseRef.current = onClose;
   openRef.current = open;
@@ -114,13 +120,33 @@ export default function Modal({ open, onClose, title, children, wide = false, ex
           >
             {title}
           </h2>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
-          >
-            <X className="h-4.5 w-4.5" aria-hidden="true" />
-          </button>
+          <div className="flex items-center gap-1">
+            {isAdmin && !lockLoading && (
+              <button
+                onClick={toggleLock}
+                aria-label={locked ? "Unlock event" : "Lock event"}
+                title={locked ? "Event locked — click to unlock" : "Event unlocked — click to lock"}
+                className={cn(
+                  "flex h-8 w-8 items-center justify-center rounded transition-colors",
+                  locked
+                    ? "text-gc-warning hover:text-gc-warning hover:bg-gc-warning/15"
+                    : "text-gc-mist hover:text-gc-cloud hover:bg-gc-steel/40"
+                )}
+              >
+                {locked
+                  ? <Lock   className="h-4 w-4" aria-hidden="true" />
+                  : <Unlock className="h-4 w-4" aria-hidden="true" />
+                }
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="flex h-8 w-8 items-center justify-center rounded text-gc-mist hover:text-gc-white hover:bg-gc-steel/40 transition-colors"
+            >
+              <X className="h-4.5 w-4.5" aria-hidden="true" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}

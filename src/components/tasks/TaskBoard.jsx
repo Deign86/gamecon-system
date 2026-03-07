@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "motion/react";
-import { Plus, Filter, Calendar, Loader2, KanbanSquare } from "lucide-react";
+import { Plus, Filter, Calendar, Loader2, KanbanSquare, Lock } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { TaskBoardSkeleton } from "../Skeleton";
 import { useAuth } from "../../hooks/useAuth";
+import { useEventLock } from "../../hooks/useEventLock";
 import { useToast } from "../Toast";
 import {
   subscribeTasks,
@@ -22,6 +23,9 @@ const DAYS = ["DAY 1", "DAY 2"];
 export default function TaskBoard() {
   const { user, profile } = useAuth();
   const toast = useToast();
+  const isAdmin = profile?.role === "admin";
+  const { locked } = useEventLock();
+  const isEventLocked = locked && !isAdmin;
 
   /* ─── state ─── */
   const [day, setDay]                     = useState("DAY 1");
@@ -33,8 +37,9 @@ export default function TaskBoard() {
   const [showFilters, setShowFilters]     = useState(false);
   const [draggingTask, setDraggingTask]   = useState(null); // { id, fromStatus } | null
 
-  /* Permissions: admin + proctor can create/update; only admin can delete */
-  const canCreate = ["admin", "proctor"].includes(profile?.role);
+  /* Permissions: admin + proctor can create/update; only admin can delete.
+     When the event is locked, non-admins lose write access. */
+  const canCreate = ["admin", "proctor"].includes(profile?.role) && !isEventLocked;
   const canDelete = profile?.role === "admin";
 
   /* ─── real-time subscription ─── */
@@ -160,6 +165,13 @@ export default function TaskBoard() {
   /* ─── render ─── */
   return (
     <div className="space-y-5">
+      {/* ── Event lock banner ── */}
+      {isEventLocked && (
+        <div className="flex items-center gap-2 rounded border border-gc-warning/30 bg-gc-warning/8 px-4 py-2.5 text-sm font-body text-gc-warning">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Event is locked — task board is read-only</span>
+        </div>
+      )}
       {/* ── Day tabs ── */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
         {DAYS.map((d) => (

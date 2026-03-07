@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw, FileSpreadsheet } from "lucide-react";
+import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw, FileSpreadsheet, Lock } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
+import { useEventLock } from "../hooks/useEventLock";
 import { logActivity } from "../lib/auditLog";
 import { ZONES } from "../lib/constants";
 import { fmtDate, cn } from "../lib/utils";
@@ -18,6 +19,9 @@ const CAN_RESOLVE = ["admin", "proctor", "head", "committee-head"];
 export default function IncidentLog() {
   const { user, profile } = useAuth();
   const isViewer = profile?.role === "viewer";
+  const isAdmin = profile?.role === "admin";
+  const { locked } = useEventLock();
+  const isEventLocked = locked && !isAdmin;
   const { docs: incidents, add, update } = useCollection("incidents");
   const [title, setTitle]     = useState("");
   const [zone, setZone]       = useState("");
@@ -26,7 +30,7 @@ export default function IncidentLog() {
   const [busy, setBusy]       = useState(false);
   const [resolving, setResolving] = useState(null);
 
-  const canResolve = CAN_RESOLVE.includes(profile?.role);
+  const canResolve = CAN_RESOLVE.includes(profile?.role) && !isEventLocked;
 
   async function handleResolve(incId, newStatus) {
     setResolving(incId);
@@ -56,7 +60,7 @@ export default function IncidentLog() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (isViewer || !title.trim()) return;
+    if (isViewer || isEventLocked || !title.trim()) return;
     setBusy(true);
     try {
       await add({
@@ -89,8 +93,15 @@ export default function IncidentLog() {
 
   return (
     <div className="space-y-5">
-      {/* Quick report form — hidden for viewer role */}
-      {!isViewer && (
+      {/* Event lock banner */}
+      {isEventLocked && (
+        <div className="flex items-center gap-2 rounded border border-gc-warning/30 bg-gc-warning/8 px-4 py-2.5 text-sm font-body text-gc-warning">
+          <Lock className="h-4 w-4 shrink-0" />
+          <span>Event is locked — incidents are read-only</span>
+        </div>
+      )}
+      {/* Quick report form — hidden for viewer role or when locked */}
+      {!isViewer && !isEventLocked && (
       <form onSubmit={handleSubmit} className="space-y-3 rounded bg-gc-danger/5 border border-gc-danger/15 p-4">
         <div className="flex items-center gap-2 mb-1">
           <AlertTriangle className="h-4 w-4 text-gc-danger" />
