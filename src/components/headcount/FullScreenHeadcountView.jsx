@@ -6,7 +6,7 @@ import { AuthProvider, useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../hooks/useTheme";
 import { ShieldAlert, Lock } from "lucide-react";
 import { HeadcountFullSkeleton } from "../Skeleton";
-import { EventLockProvider, useEventLock } from "../../hooks/useEventLock";
+import { EventLockProvider, useModuleLock } from "../../hooks/useEventLock";
 
 /* ── Eye SVG icon ── */
 function EyeIcon({ className }) {
@@ -71,7 +71,7 @@ function ArrowLeftIcon({ className }) {
 function HeadcountInner() {
   const navigate = useNavigate();
   const { profile } = useAuth();
-  const { locked } = useEventLock();
+  const { locked } = useModuleLock('headcount');
   const isAdmin = profile?.role === "admin";
   const isViewer = profile?.role === "viewer";
   const isEventLocked = locked && !isAdmin;

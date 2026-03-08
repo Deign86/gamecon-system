@@ -27,7 +27,7 @@ const CONFIRMATION_PHRASE = "RESET GAMECON";
 export default function AdminResetPanel() {
   const { profile } = useAuth();
   const { isOnline } = useOnlineStatus();
-  const { locked, lockMeta, toggleLock, lockLoading } = useEventLock();
+  const { locks, toggleAllLocks, lockLoading } = useEventLock();
   const isAdmin = profile?.role === "admin";
 
   const [open, setOpen]           = useState(false);
@@ -36,6 +36,11 @@ export default function AdminResetPanel() {
   const [progress, setProgress]   = useState("");
   const [result, setResult]       = useState(null);
   const [error, setError]         = useState("");
+
+  const lockedCount = Object.values(locks).filter(Boolean).length;
+  const totalCount  = Object.keys(locks).length;
+  const allLocked   = lockedCount === totalCount;
+  const anyLocked   = lockedCount > 0;
 
   if (!isAdmin) return null;
 
@@ -77,55 +82,59 @@ export default function AdminResetPanel() {
 
   return (
     <div className="space-y-3">
-      {/* ── Event Lock ── */}
-      <div
-        className={cn(
-          "flex items-center gap-3 rounded border px-4 py-3 transition-colors",
-          locked
-            ? "border-gc-warning/40 bg-gc-warning/8"
-            : "border-gc-steel/30 bg-gc-iron/40"
+      {/* ── Module Locks ── */}
+      <div className={cn(
+        "rounded border px-4 py-3 transition-colors space-y-2",
+        anyLocked ? "border-gc-warning/40 bg-gc-warning/8" : "border-gc-steel/30 bg-gc-iron/40"
+      )}>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className={cn(
+              "flex h-7 w-7 shrink-0 items-center justify-center rounded",
+              anyLocked ? "bg-gc-warning/15" : "bg-gc-steel/20"
+            )}>
+              {anyLocked
+                ? <Lock   className="h-3.5 w-3.5 text-gc-warning" />
+                : <Unlock className="h-3.5 w-3.5 text-gc-mist"    />
+              }
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gc-cloud leading-tight">
+                {allLocked ? "All Modules Locked" : anyLocked ? `${lockedCount} / ${totalCount} Locked` : "All Modules Unlocked"}
+              </p>
+              <p className="text-[10px] text-gc-mist">
+                {anyLocked ? "Locked modules are read-only for non-admins" : "All modules writable for proctors and above"}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={toggleAllLocks}
+            disabled={lockLoading}
+            className={cn(
+              "shrink-0 rounded border px-3 py-1.5 text-[11px] font-bold tracking-wider font-display transition-all flex items-center gap-1.5",
+              allLocked
+                ? "border-gc-success/40 bg-gc-success/10 text-gc-success hover:bg-gc-success/20"
+                : "border-gc-warning/40 bg-gc-warning/10 text-gc-warning hover:bg-gc-warning/20"
+            )}
+          >
+            {lockLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : allLocked ? (
+              <><Unlock className="h-3 w-3" /> UNLOCK ALL</>
+            ) : (
+              <><Lock className="h-3 w-3" /> LOCK ALL</>
+            )}
+          </button>
+        </div>
+        {anyLocked && (
+          <div className="flex flex-wrap gap-1 pt-0.5">
+            {Object.entries(locks).map(([key, isLocked]) => isLocked ? (
+              <span key={key} className="inline-flex items-center gap-1 rounded bg-gc-warning/10 border border-gc-warning/25 px-1.5 py-0.5 font-mono text-[9px] text-gc-warning uppercase tracking-wider">
+                <Lock className="h-2 w-2" />{key}
+              </span>
+            ) : null)}
+          </div>
         )}
-      >
-        <div
-          className={cn(
-            "flex h-8 w-8 shrink-0 items-center justify-center rounded",
-            locked ? "bg-gc-warning/15" : "bg-gc-steel/20"
-          )}
-        >
-          {locked
-            ? <Lock   className="h-4 w-4 text-gc-warning" />
-            : <Unlock className="h-4 w-4 text-gc-mist"    />
-          }
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gc-cloud">
-            {locked ? "Event Locked" : "Event Unlocked"}
-          </p>
-          <p className="text-[11px] text-gc-mist leading-snug">
-            {locked
-              ? `Shifts, attendance, headcount & roles are read-only for non-admins${lockMeta.lockedByName ? ` · locked by ${lockMeta.lockedByName}` : ""}`
-              : "All features are writable for proctors and above"
-            }
-          </p>
-        </div>
-        <button
-          onClick={toggleLock}
-          disabled={lockLoading}
-          className={cn(
-            "shrink-0 rounded border px-3 py-1.5 text-[11px] font-bold tracking-wider font-display transition-all flex items-center gap-1.5",
-            locked
-              ? "border-gc-success/40 bg-gc-success/10 text-gc-success hover:bg-gc-success/20"
-              : "border-gc-warning/40 bg-gc-warning/10 text-gc-warning hover:bg-gc-warning/20"
-          )}
-        >
-          {lockLoading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : locked ? (
-            <><Unlock className="h-3 w-3" /> UNLOCK</>
-          ) : (
-            <><Lock className="h-3 w-3" /> LOCK EVENT</>
-          )}
-        </button>
       </div>
 
       {/* ── Reset system data ── */}

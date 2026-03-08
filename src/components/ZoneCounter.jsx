@@ -7,7 +7,7 @@ import { ZoneCounterSkeleton } from "./Skeleton";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { getZoneIcon, cn } from "../lib/utils";
-import { useEventLock } from "../hooks/useEventLock";
+import { useModuleLock } from "../hooks/useEventLock";
 
 /** True when running inside the Tauri desktop shell (v2). */
 const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
@@ -15,7 +15,7 @@ const isTauri = () => typeof window !== "undefined" && "__TAURI_INTERNALS__" in 
 export default function ZoneCounter() {
   const { zones, incrementZone, decrementZone, setZoneCount, loading } = useHeadcount();
   const { user, profile } = useAuth();
-  const { locked } = useEventLock();
+  const { locked } = useModuleLock('headcount');
   const isAdmin = profile?.role === "admin";
   const isViewer = profile?.role === "viewer";
   const isEventLocked = locked && !isAdmin;

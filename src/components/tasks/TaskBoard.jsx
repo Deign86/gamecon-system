@@ -4,7 +4,7 @@ import { Plus, Filter, Calendar, Loader2, KanbanSquare, Lock } from "lucide-reac
 import { cn } from "../../lib/utils";
 import { TaskBoardSkeleton } from "../Skeleton";
 import { useAuth } from "../../hooks/useAuth";
-import { useEventLock } from "../../hooks/useEventLock";
+import { useModuleLock } from "../../hooks/useEventLock";
 import { useToast } from "../Toast";
 import {
   subscribeTasks,
@@ -24,7 +24,7 @@ export default function TaskBoard() {
   const { user, profile } = useAuth();
   const toast = useToast();
   const isAdmin = profile?.role === "admin";
-  const { locked } = useEventLock();
+  const { locked } = useModuleLock('tasks');
   const isEventLocked = locked && !isAdmin;
 
   /* ─── state ─── */

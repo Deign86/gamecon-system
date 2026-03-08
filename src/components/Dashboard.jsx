@@ -12,8 +12,10 @@ import {
   Clock,
   KanbanSquare,
   WifiOff,
+  Lock,
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { useEventLock } from "../hooks/useEventLock";
 import Modal from "./Modal";
 import { ModalErrorBoundary } from "./ErrorBoundary";
 import OfflineGuard from "./OfflineGuard";
@@ -31,15 +33,15 @@ const AttendancePage  = lazy(() => import("./attendance/AttendancePage"));
 const TaskBoard       = lazy(() => import("./tasks/TaskBoard"));
 
 const CARDS = [
-  { key: "headcount",     label: "Live Headcount",   Icon: Users,          accent: "#C8102E", id: "M-01" },
-  { key: "shifts",        label: "Shift Board",      Icon: Calendar,       accent: "#3B82F6", id: "M-02" },
-  { key: "attendance",    label: "Attendance",       Icon: UserCheck,      accent: "#F59E0B", id: "M-03" },
-  { key: "contributions", label: "Contributions",    Icon: ClipboardCheck, accent: "#22C55E", id: "M-04" },
-  { key: "budget",        label: "Budget Monitor",   Icon: DollarSign,     accent: "#EAB308", id: "M-05" },
-  { key: "incidents",     label: "Incidents",         Icon: AlertTriangle,  accent: "#EF4444", id: "M-06" },
-  { key: "committees",    label: "Committees",        Icon: Laptop2,        accent: "#A855F7", id: "M-07" },
-  { key: "venuemap",      label: "Venue Map",         Icon: MapPin,         accent: "#14B8A6", id: "M-08" },
-  { key: "tasks",         label: "Task Board",        Icon: KanbanSquare,   accent: "#F97316", id: "M-09" },
+  { key: "headcount",     label: "Live Headcount",   Icon: Users,          accent: "#C8102E", id: "M-01", lockable: true  },
+  { key: "shifts",        label: "Shift Board",      Icon: Calendar,       accent: "#3B82F6", id: "M-02", lockable: true  },
+  { key: "attendance",    label: "Attendance",       Icon: UserCheck,      accent: "#F59E0B", id: "M-03", lockable: true  },
+  { key: "contributions", label: "Contributions",    Icon: ClipboardCheck, accent: "#22C55E", id: "M-04", lockable: true  },
+  { key: "budget",        label: "Budget Monitor",   Icon: DollarSign,     accent: "#EAB308", id: "M-05", lockable: true  },
+  { key: "incidents",     label: "Incidents",         Icon: AlertTriangle,  accent: "#EF4444", id: "M-06", lockable: true  },
+  { key: "committees",    label: "Committees",        Icon: Laptop2,        accent: "#A855F7", id: "M-07", lockable: false },
+  { key: "venuemap",      label: "Venue Map",         Icon: MapPin,         accent: "#14B8A6", id: "M-08", lockable: false },
+  { key: "tasks",         label: "Task Board",        Icon: KanbanSquare,   accent: "#F97316", id: "M-09", lockable: true  },
 ];
 
 const stagger = {
@@ -61,6 +63,7 @@ function ModalFallback() {
 
 export default function Dashboard() {
   const { isOnline } = useOnlineStatus();
+  const { locks } = useEventLock();
   const [activeModal, setActiveModal] = useState(null);
   const [modalData, setModalData] = useState(null);
   const closeModal = useCallback(() => { setActiveModal(null); setModalData(null); }, []);
@@ -143,50 +146,74 @@ export default function Dashboard() {
         className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4"
         variants={stagger}
       >
-        {CARDS.map(({ key, label, Icon, accent, id }, idx) => (
-          <motion.button
-            key={key}
-            variants={cardVariant}
-            onClick={() => openModal(key)}
-            aria-label={`Open ${label}`}
-            className={cn(
-              "gc-card group relative flex flex-col items-center gap-3 p-5 sm:p-6 text-center cursor-pointer",
-              idx === CARDS.length - 1 && CARDS.length % 2 === 1 && "col-span-2 sm:col-span-1"
-            )}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            {/* Module ID tag */}
-            <span aria-hidden="true" className="absolute top-2 right-2 text-[8px] font-mono text-gc-hint/60 tracking-wider">
-              {id}
-            </span>
-
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded transition-all duration-300 group-hover:scale-110"
-              style={{
-                background: `${accent}12`,
-                border: `1px solid ${accent}25`,
-              }}
+        {CARDS.map(({ key, label, Icon, accent, id, lockable }, idx) => {
+          const isLocked = lockable && (locks[key] ?? false);
+          return (
+            <motion.button
+              key={key}
+              variants={cardVariant}
+              onClick={() => openModal(key)}
+              aria-label={`Open ${label}${isLocked ? " (event locked)" : ""}`}
+              className={cn(
+                "gc-card group relative flex flex-col items-center gap-3 p-5 sm:p-6 text-center cursor-pointer overflow-hidden",
+                idx === CARDS.length - 1 && CARDS.length % 2 === 1 && "col-span-2 sm:col-span-1",
+                isLocked && "opacity-60"
+              )}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <Icon className="h-6 w-6" style={{ color: accent }} />
-            </div>
-            <span className="font-display text-base sm:text-lg font-bold tracking-wider text-gc-cloud group-hover:text-gc-white transition-colors">
-              {label}
-            </span>
+              {/* Module ID tag */}
+              <span aria-hidden="true" className="absolute top-2 right-2 text-[8px] font-mono text-gc-hint/60 tracking-wider">
+                {id}
+              </span>
 
-            {/* Dot indicator with glow */}
-            <span
-              aria-hidden="true"
-              className="h-1 w-1 rounded-full"
-              style={{ backgroundColor: accent, boxShadow: `0 0 6px ${accent}80` }}
-            />
-          </motion.button>
-        ))}
+              {/* Lock badge — visible when event is locked */}
+              {isLocked && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-2 left-2 flex items-center gap-1 rounded bg-gc-warning/15 border border-gc-warning/30 px-1.5 py-0.5"
+                >
+                  <Lock className="h-2.5 w-2.5 text-gc-warning" />
+                  <span className="font-mono text-[7px] tracking-wider text-gc-warning uppercase">Locked</span>
+                </span>
+              )}
+
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded transition-all duration-300 group-hover:scale-110"
+                style={{
+                  background: isLocked ? `#88880a12` : `${accent}12`,
+                  border: isLocked ? `1px solid #EAB30825` : `1px solid ${accent}25`,
+                }}
+              >
+                {isLocked
+                  ? <Lock className="h-6 w-6 text-gc-warning/70" />
+                  : <Icon className="h-6 w-6" style={{ color: accent }} />
+                }
+              </div>
+              <span className={cn(
+                "font-display text-base sm:text-lg font-bold tracking-wider transition-colors",
+                isLocked ? "text-gc-mist group-hover:text-gc-cloud" : "text-gc-cloud group-hover:text-gc-white"
+              )}>
+                {label}
+              </span>
+
+              {/* Dot indicator with glow */}
+              <span
+                aria-hidden="true"
+                className="h-1 w-1 rounded-full"
+                style={isLocked
+                  ? { backgroundColor: "#EAB308", boxShadow: "0 0 6px #EAB30880" }
+                  : { backgroundColor: accent, boxShadow: `0 0 6px ${accent}80` }
+                }
+              />
+            </motion.button>
+          );
+        })}
       </motion.div>
 
       {/* Modals — content lazy-loaded on first open, errors contained per-modal */}
       {activeModal === "headcount" && (
-        <Modal open onClose={closeModal} title="LIVE HEADCOUNT" wide>
+        <Modal open onClose={closeModal} title="LIVE HEADCOUNT" wide moduleKey="headcount">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Headcount">
@@ -198,7 +225,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "shifts" && (
-        <Modal open onClose={closeModal} title="SHIFT BOARD" wide>
+        <Modal open onClose={closeModal} title="SHIFT BOARD" wide moduleKey="shifts">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Shift Board">
@@ -210,7 +237,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "attendance" && (
-        <Modal open onClose={closeModal} title="STAFF ATTENDANCE" wide>
+        <Modal open onClose={closeModal} title="STAFF ATTENDANCE" wide moduleKey="attendance">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Attendance">
@@ -222,7 +249,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "contributions" && (
-        <Modal open onClose={closeModal} title="CONTRIBUTIONS" extraWide>
+        <Modal open onClose={closeModal} title="CONTRIBUTIONS" extraWide moduleKey="contributions">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Contributions">
@@ -234,7 +261,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "budget" && (
-        <Modal open onClose={closeModal} title="BUDGET MONITOR" wide>
+        <Modal open onClose={closeModal} title="BUDGET MONITOR" wide moduleKey="budget">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Budget">
@@ -246,7 +273,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "incidents" && (
-        <Modal open onClose={closeModal} title="INCIDENTS" wide>
+        <Modal open onClose={closeModal} title="INCIDENTS" wide moduleKey="incidents">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Incidents">
@@ -278,7 +305,7 @@ export default function Dashboard() {
       )}
 
       {activeModal === "tasks" && (
-        <Modal open onClose={closeModal} title="TASK BOARD" wide>
+        <Modal open onClose={closeModal} title="TASK BOARD" wide moduleKey="tasks">
           <ModalErrorBoundary onClose={closeModal}>
             <Suspense fallback={<ModalFallback />}>
               <OfflineGuard requires="queue" label="Tasks">

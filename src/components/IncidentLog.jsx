@@ -2,7 +2,7 @@ import { useState } from "react";
 import { AlertTriangle, Send, Shield, Clock, MapPin, CheckCircle, RotateCcw, FileSpreadsheet, Lock } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
-import { useEventLock } from "../hooks/useEventLock";
+import { useModuleLock } from "../hooks/useEventLock";
 import { logActivity } from "../lib/auditLog";
 import { ZONES } from "../lib/constants";
 import { fmtDate, cn } from "../lib/utils";
@@ -20,7 +20,7 @@ export default function IncidentLog() {
   const { user, profile } = useAuth();
   const isViewer = profile?.role === "viewer";
   const isAdmin = profile?.role === "admin";
-  const { locked } = useEventLock();
+  const { locked } = useModuleLock('incidents');
   const isEventLocked = locked && !isAdmin;
   const { docs: incidents, add, update } = useCollection("incidents");
   const [title, setTitle]     = useState("");

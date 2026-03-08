@@ -39,7 +39,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import { logActivity } from "../lib/auditLog";
 import { useToast } from "./Toast";
 import { exportShifts } from "../lib/exportExcel";
-import { useEventLock } from "../hooks/useEventLock";
+import { useModuleLock } from "../hooks/useEventLock";
 
 /* ── Map shift-block IDs to role-schedule DAY labels ── */
 function blockToDay(blockId) {
@@ -89,7 +89,7 @@ const stagger = {
 export default function ShiftBoard({ highlightCommittee }) {
   const toast = useToast();
   const { user, profile } = useAuth();
-  const { locked } = useEventLock();
+  const { locked } = useModuleLock('shifts');
   const isAdmin = profile?.role === "admin";
   const isEventLocked = locked && !isAdmin;
   const canManageShifts = (isAdmin || profile?.role === "proctor") && !isEventLocked;

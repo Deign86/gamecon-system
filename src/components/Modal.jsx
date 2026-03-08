@@ -2,7 +2,7 @@ import { useEffect, useRef, useId, useState } from "react";
 import { motion } from "motion/react";
 import { X, Lock, Unlock } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useEventLock } from "../hooks/useEventLock";
+import { useModuleLock } from "../hooks/useEventLock";
 import { useAuth } from "../hooks/useAuth";
 
 /**
@@ -13,14 +13,14 @@ import { useAuth } from "../hooks/useAuth";
  * Instead, a `mounted` flag keeps the DOM around long enough for
  * the exit animation to play, then unmounts via onAnimationComplete.
  */
-export default function Modal({ open, onClose, title, children, wide = false, extraWide = false, showLock = true }) {
+export default function Modal({ open, onClose, title, children, wide = false, extraWide = false, showLock = true, moduleKey = null }) {
   const dialogRef = useRef(null);
   const onCloseRef = useRef(onClose);
   const openRef = useRef(open);
   const titleId = useId();
   const [mounted, setMounted] = useState(open);
 
-  const { locked, toggleLock, lockLoading } = useEventLock();
+  const { locked, toggleLock, lockLoading } = useModuleLock(moduleKey);
   const { profile } = useAuth();
   const isAdmin = profile?.role === "admin";
 
@@ -121,11 +121,11 @@ export default function Modal({ open, onClose, title, children, wide = false, ex
             {title}
           </h2>
           <div className="flex items-center gap-1">
-            {showLock && isAdmin && !lockLoading && (
+            {showLock && moduleKey && isAdmin && !lockLoading && (
               <button
                 onClick={toggleLock}
-                aria-label={locked ? "Unlock event" : "Lock event"}
-                title={locked ? "Event locked — click to unlock" : "Event unlocked — click to lock"}
+                aria-label={locked ? `Unlock ${moduleKey}` : `Lock ${moduleKey}`}
+                title={locked ? `${moduleKey} locked — click to unlock` : `${moduleKey} unlocked — click to lock`}
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded transition-colors",
                   locked

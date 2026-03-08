@@ -1,63 +1,78 @@
 /**
- * eventLock.js — Event-wide write-lock helpers.
+ * eventLock.js — Per-module write-lock helpers.
  *
- * Stored in Firestore at `counters/eventLock`:
+ * Stored in Firestore at `counters/moduleLocks`:
  *   {
- *     locked:        boolean,
- *     lockedAt:      Timestamp | null,
- *     lockedBy:      string (uid),
- *     lockedByName:  string,
+ *     headcount:     boolean,
+ *     shifts:        boolean,
+ *     attendance:    boolean,
+ *     contributions: boolean,
+ *     budget:        boolean,
+ *     incidents:     boolean,
+ *     tasks:         boolean,
  *   }
  *
- * When locked = true, write actions in ShiftBoard, Attendance,
- * Live Headcount, and RoleTasking are blocked for non-admin users.
- * Admins always retain full write access.
+ * Each lockable module has an independent lock. Admins always retain full
+ * write access. Firestore security rules must restrict counters/moduleLocks
+ * writes to admin users.
  */
-import { doc, onSnapshot, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
-const LOCK_DOC = doc(db, "counters", "eventLock");
+export const MODULE_KEYS = [
+  "headcount",
+  "shifts",
+  "attendance",
+  "contributions",
+  "budget",
+  "incidents",
+  "tasks",
+];
+
+const DEFAULT_LOCKS = Object.fromEntries(MODULE_KEYS.map((k) => [k, false]));
+
+const LOCKS_DOC = doc(db, "counters", "moduleLocks");
 
 /**
- * Real-time subscription to the lock state.
- * @param {(locked: boolean, meta: object) => void} callback
+ * Real-time subscription to all module lock states.
+ * @param {(locks: Record<string, boolean>) => void} callback
  * @returns unsubscribe function
  */
-export function subscribeEventLock(callback) {
+export function subscribeModuleLocks(callback) {
   return onSnapshot(
-    LOCK_DOC,
+    LOCKS_DOC,
     (snap) => {
       if (!snap.exists()) {
-        callback(false, {});
+        callback({ ...DEFAULT_LOCKS });
         return;
       }
       const data = snap.data();
-      callback(!!data.locked, data);
+      callback(Object.fromEntries(MODULE_KEYS.map((k) => [k, !!data[k]])));
     },
     (err) => {
-      if (import.meta.env.DEV) console.error("[eventLock] subscribe error:", err);
-      callback(false, {});
+      if (import.meta.env.DEV) console.error("[moduleLocks] subscribe error:", err);
+      callback({ ...DEFAULT_LOCKS });
     }
   );
 }
 
 /**
- * Set the event lock state. Admin-only — Cloud Functions re-verify on any
- * sensitive mutation, but the lock itself is only writable by admins via
- * Firestore security rules which must restrict counters/eventLock to admins.
- *
+ * Set the lock state for a single module.
+ * @param {string} moduleKey
  * @param {boolean} locked
- * @param {{ uid: string, name: string }} actor
  */
-export async function setEventLock(locked, actor) {
+export async function setModuleLock(moduleKey, locked) {
+  await setDoc(LOCKS_DOC, { [moduleKey]: locked }, { merge: true });
+}
+
+/**
+ * Set all modules to the same lock state.
+ * @param {boolean} locked
+ */
+export async function setAllModuleLocks(locked) {
   await setDoc(
-    LOCK_DOC,
-    {
-      locked,
-      lockedAt:      locked ? serverTimestamp() : null,
-      lockedBy:      actor.uid,
-      lockedByName:  actor.name,
-    },
+    LOCKS_DOC,
+    Object.fromEntries(MODULE_KEYS.map((k) => [k, locked])),
     { merge: true }
   );
 }

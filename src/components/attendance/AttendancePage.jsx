@@ -12,7 +12,7 @@ import { logActivity } from "../../lib/auditLog";
 import { useAuth } from "../../hooks/useAuth";
 import { useToast } from "../Toast";
 import { cn } from "../../lib/utils";
-import { useEventLock } from "../../hooks/useEventLock";
+import { useModuleLock } from "../../hooks/useEventLock";
 import AttendanceList from "./AttendanceList";
 import AttendanceSummary from "./AttendanceSummary";
 
@@ -30,7 +30,7 @@ const pageVar = {
 export default function AttendancePage() {
   const { user, profile } = useAuth();
   const toast = useToast();
-  const { locked } = useEventLock();
+  const { locked } = useModuleLock('attendance');
   const isAdminOrHead = profile?.role === "admin" || profile?.role === "head";
   const isAdmin = profile?.role === "admin";
   const canMark = (profile?.role === "admin" || profile?.role === "proctor") && !(locked && !isAdmin);
