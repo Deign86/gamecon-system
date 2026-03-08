@@ -1,16 +1,21 @@
 import { useState } from "react";
-import { Plus, Receipt, TrendingDown, FileSpreadsheet } from "lucide-react";
+import { Plus, Receipt, TrendingDown, FileSpreadsheet, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { useCollection } from "../hooks/useFirestore";
 import { useAuth } from "../hooks/useAuth";
 import { logActivity } from "../lib/auditLog";
 import { ROLE_COMMITTEES as COMMITTEES, EXPENSE_CATEGORIES } from "../lib/constants";
 import { peso, fmtDate, cn } from "../lib/utils";
 import { exportExpenses } from "../lib/exportExcel";
+import { useToast } from "./Toast";
+
+const CAN_APPROVE = ["admin", "head"];
 
 export default function ExpenseTracker() {
   const { user, profile }     = useAuth();
   const isViewer = profile?.role === "viewer";
-  const { docs: expenses, add } = useCollection("expenses");
+  const canApprove = CAN_APPROVE.includes(profile?.role);
+  const { docs: expenses, add, update } = useCollection("expenses");
+  const { showToast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [item, setItem]       = useState("");
   const [amount, setAmount]   = useState("");
@@ -51,6 +56,24 @@ export default function ExpenseTracker() {
       if (import.meta.env.DEV) console.error("[ExpenseTracker] submit failed:", err);
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleStatusChange(exp, newStatus) {
+    try {
+      await update(exp.id, { status: newStatus, reviewedBy: user.uid, reviewedByName: profile?.name || "Unknown" });
+      logActivity({
+        action: `expense.${newStatus}`,
+        category: "expense",
+        details: `Marked expense "${exp.item}" as ${newStatus}`,
+        meta: { expenseId: exp.id, newStatus },
+        userId: user.uid,
+        userName: profile?.name || "Unknown",
+      });
+      showToast(`Expense ${newStatus}`, "success");
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("[ExpenseTracker] status update failed:", err);
+      showToast("Failed to update status", "error");
     }
   }
 
@@ -181,13 +204,14 @@ export default function ExpenseTracker() {
         )}
         {expenses.map((exp) => {
           const committee = COMMITTEES.find((c) => c.id === exp.committee);
+          const status = exp.status || "pending";
           return (
             <div
               key={exp.id}
-              className="flex items-center gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
+              className="flex items-start gap-3 rounded bg-gc-iron border border-gc-steel/50 px-3 py-2.5"
             >
               <div
-                className="h-2 w-2 shrink-0 rounded-full"
+                className="h-2 w-2 shrink-0 rounded-full mt-1.5"
                 style={{ background: committee?.color || "#666" }}
               />
               <div className="flex-1 min-w-0">
@@ -195,6 +219,45 @@ export default function ExpenseTracker() {
                 <p className="text-[10px] text-gc-hint font-mono">
                   {exp.category || "Uncategorized"} · {committee?.name || "General"} · {fmtDate(exp.timestamp)}
                 </p>
+                {canApprove && (
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <button
+                      onClick={() => handleStatusChange(exp, "approved")}
+                      disabled={status === "approved"}
+                      title="Approve"
+                      className={cn(
+                        "flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-display tracking-wider border transition-colors",
+                        status === "approved"
+                          ? "bg-gc-success/15 border-gc-success/40 text-gc-success cursor-default"
+                          : "bg-transparent border-gc-steel/40 text-gc-mist hover:bg-gc-success/10 hover:border-gc-success/30 hover:text-gc-success"
+                      )}
+                    >
+                      <CheckCircle2 className="h-3 w-3" /> Approve
+                    </button>
+                    <button
+                      onClick={() => handleStatusChange(exp, "rejected")}
+                      disabled={status === "rejected"}
+                      title="Reject"
+                      className={cn(
+                        "flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-display tracking-wider border transition-colors",
+                        status === "rejected"
+                          ? "bg-gc-danger/15 border-gc-danger/40 text-gc-danger cursor-default"
+                          : "bg-transparent border-gc-steel/40 text-gc-mist hover:bg-gc-danger/10 hover:border-gc-danger/30 hover:text-gc-danger"
+                      )}
+                    >
+                      <XCircle className="h-3 w-3" /> Reject
+                    </button>
+                    {status !== "pending" && (
+                      <button
+                        onClick={() => handleStatusChange(exp, "pending")}
+                        title="Reset to pending"
+                        className="flex items-center gap-1 rounded px-2 py-0.5 text-[10px] font-display tracking-wider border border-gc-steel/40 text-gc-mist bg-transparent hover:bg-gc-iron hover:text-gc-cloud transition-colors"
+                      >
+                        <Clock className="h-3 w-3" /> Pending
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="text-right shrink-0">
                 <span className="font-mono text-sm font-bold text-gc-warning">
@@ -203,12 +266,12 @@ export default function ExpenseTracker() {
                 <span
                   className={cn(
                     "block text-[10px] font-semibold mt-0.5",
-                    exp.status === "approved" ? "text-gc-success" :
-                    exp.status === "rejected" ? "text-gc-danger" :
+                    status === "approved" ? "text-gc-success" :
+                    status === "rejected" ? "text-gc-danger" :
                     "text-gc-mist"
                   )}
                 >
-                  {exp.status || "pending"}
+                  {status}
                 </span>
               </div>
             </div>
