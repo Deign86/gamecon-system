@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useEventLock } from "../hooks/useEventLock";
+import { useAuth } from "../hooks/useAuth";
 import Modal from "./Modal";
 import { ModalErrorBoundary } from "./ErrorBoundary";
 import OfflineGuard from "./OfflineGuard";
@@ -64,6 +65,8 @@ function ModalFallback() {
 export default function Dashboard() {
   const { isOnline } = useOnlineStatus();
   const { locks } = useEventLock();
+  const { profile } = useAuth();
+  const isAdmin = profile?.role === "admin";
   const [activeModal, setActiveModal] = useState(null);
   const [modalData, setModalData] = useState(null);
   const closeModal = useCallback(() => { setActiveModal(null); setModalData(null); }, []);
@@ -147,17 +150,19 @@ export default function Dashboard() {
         variants={stagger}
       >
         {CARDS.map(({ key, label, Icon, accent, id, lockable }, idx) => {
-          const isLocked = lockable && (locks[key] ?? false);
+          const isLocked      = lockable && (locks[key] ?? false);
+          // Admins can always open the card; lock is only a visual/functional block for others
+          const isLockedForMe = isLocked && !isAdmin;
           return (
             <motion.button
               key={key}
               variants={cardVariant}
               onClick={() => openModal(key)}
-              aria-label={`Open ${label}${isLocked ? " (event locked)" : ""}`}
+              aria-label={`Open ${label}${isLockedForMe ? " (event locked)" : isLocked && isAdmin ? " (locked for others)" : ""}`}
               className={cn(
                 "gc-card group relative flex flex-col items-center gap-3 p-5 sm:p-6 text-center cursor-pointer overflow-hidden",
                 idx === CARDS.length - 1 && CARDS.length % 2 === 1 && "col-span-2 sm:col-span-1",
-                isLocked && "opacity-60"
+                isLockedForMe && "opacity-60"
               )}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.97 }}
@@ -167,8 +172,8 @@ export default function Dashboard() {
                 {id}
               </span>
 
-              {/* Lock badge — visible when event is locked */}
-              {isLocked && (
+              {/* Lock badge — full yellow lock for non-admins */}
+              {isLockedForMe && (
                 <span
                   aria-hidden="true"
                   className="absolute top-2 left-2 flex items-center gap-1 rounded bg-gc-warning/15 border border-gc-warning/30 px-1.5 py-0.5"
@@ -178,21 +183,32 @@ export default function Dashboard() {
                 </span>
               )}
 
+              {/* Admin override badge — subtle indicator when card is locked but admin can still access */}
+              {isLocked && isAdmin && (
+                <span
+                  aria-hidden="true"
+                  className="absolute top-2 left-2 flex items-center gap-1 rounded bg-gc-crimson/10 border border-gc-crimson/25 px-1.5 py-0.5"
+                >
+                  <Lock className="h-2.5 w-2.5 text-gc-crimson/60" />
+                  <span className="font-mono text-[7px] tracking-wider text-gc-crimson/60 uppercase">Locked</span>
+                </span>
+              )}
+
               <div
                 className="flex h-12 w-12 items-center justify-center rounded transition-all duration-300 group-hover:scale-110"
                 style={{
-                  background: isLocked ? `#88880a12` : `${accent}12`,
-                  border: isLocked ? `1px solid #EAB30825` : `1px solid ${accent}25`,
+                  background: isLockedForMe ? `#88880a12` : `${accent}12`,
+                  border: isLockedForMe ? `1px solid #EAB30825` : `1px solid ${accent}25`,
                 }}
               >
-                {isLocked
+                {isLockedForMe
                   ? <Lock className="h-6 w-6 text-gc-warning/70" />
                   : <Icon className="h-6 w-6" style={{ color: accent }} />
                 }
               </div>
               <span className={cn(
                 "font-display text-base sm:text-lg font-bold tracking-wider transition-colors",
-                isLocked ? "text-gc-mist group-hover:text-gc-cloud" : "text-gc-cloud group-hover:text-gc-white"
+                isLockedForMe ? "text-gc-mist group-hover:text-gc-cloud" : "text-gc-cloud group-hover:text-gc-white"
               )}>
                 {label}
               </span>
@@ -201,7 +217,7 @@ export default function Dashboard() {
               <span
                 aria-hidden="true"
                 className="h-1 w-1 rounded-full"
-                style={isLocked
+                style={isLockedForMe
                   ? { backgroundColor: "#EAB308", boxShadow: "0 0 6px #EAB30880" }
                   : { backgroundColor: accent, boxShadow: `0 0 6px ${accent}80` }
                 }
