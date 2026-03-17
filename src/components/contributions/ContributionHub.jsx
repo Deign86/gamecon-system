@@ -96,11 +96,29 @@ function MyLogView() {
   const [task, setTask]     = useState("");
   const [desc, setDesc]     = useState("");
 
+  function normalizeCommitteeId(value) {
+    if (!value) return "";
+    const normalized = String(value).trim().toLowerCase();
+
+    const byId = COMMITTEES.find((c) => c.id === normalized);
+    if (byId) return byId.id;
+
+    const byName = COMMITTEES.find((c) => c.name.toLowerCase() === normalized);
+    if (byName) return byName.id;
+
+    const firstWord = normalized.split(/[\s/&,-]+/)[0];
+    const byFirst = COMMITTEES.find((c) =>
+      c.name.toLowerCase().startsWith(firstWord) || c.id.startsWith(firstWord)
+    );
+
+    return byFirst?.id || "";
+  }
+
   const defaultComm =
     Array.isArray(profile?.committees) && profile.committees.length > 0
       ? profile.committees[0].committee || profile.committees[0]
       : profile?.committee || "";
-  const [comm, setComm]     = useState(defaultComm);
+  const [comm, setComm]     = useState(normalizeCommitteeId(defaultComm));
   const [busy, setBusy]     = useState(false);
   const [success, setSuccess] = useState(false);
   const [queued, setQueued]   = useState(false);
@@ -125,7 +143,7 @@ function MyLogView() {
         createContribution({
           userId: user.uid,
           userName: profile?.name || "Unknown",
-          committee: comm,
+          committee: normalizeCommitteeId(comm),
           task: task.trim(),
           details: desc.trim(),
           loggedBy: user.uid,
@@ -243,7 +261,7 @@ function MyLogView() {
             <p className="text-sm text-gc-hint text-center py-6">No contributions logged yet.</p>
           )}
           {myContribs.map((c) => {
-            const committee = COMMITTEES.find((cm) => cm.id === c.committee);
+            const committee = COMMITTEES.find((cm) => cm.id === normalizeCommitteeId(c.committee));
             return (
               <div
                 key={c.id}

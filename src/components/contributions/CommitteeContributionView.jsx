@@ -27,11 +27,29 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
     ? allContribs.filter((c) => c.loggedBy === user?.uid)
     : allContribs;
 
+  function normalizeCommitteeId(value) {
+    if (!value) return "__general__";
+    const normalized = String(value).trim().toLowerCase();
+
+    const byId = COMMITTEES.find((c) => c.id === normalized);
+    if (byId) return byId.id;
+
+    const byName = COMMITTEES.find((c) => c.name.toLowerCase() === normalized);
+    if (byName) return byName.id;
+
+    const firstWord = normalized.split(/[\s/&,-]+/)[0];
+    const byFirst = COMMITTEES.find((c) =>
+      c.name.toLowerCase().startsWith(firstWord) || c.id.startsWith(firstWord)
+    );
+
+    return byFirst?.id || normalized;
+  }
+
   // Group by committee
   const grouped = useMemo(() => {
     const map = {};
     for (const c of displayContribs) {
-      const key = c.committee || "__general__";
+      const key = normalizeCommitteeId(c.committee);
       if (!map[key]) map[key] = [];
       map[key].push(c);
     }
