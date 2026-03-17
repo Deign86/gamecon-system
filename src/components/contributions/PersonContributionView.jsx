@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Search, Plus, Pencil, Trash2, Shield, UserRound, ChevronRight, ClipboardList } from "lucide-react";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { ContributionListSkeleton } from "../Skeleton";
 import { useAuth } from "../../hooks/useAuth";
+import { db } from "../../firebase";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { subscribeRoleAssignments } from "../../lib/roleFirestore";
 import { fmtDate, initials, cn } from "../../lib/utils";
 import {
-  subscribeContributionsByUser,
+  subscribeAllContributions,
   deleteContribution,
 } from "../../lib/contributionsFirestore";
 import { logActivity } from "../../lib/auditLog";
@@ -39,6 +41,64 @@ function committeeNameToId(name) {
   return byFirst?.id || "";
 }
 
+function normalizeText(value = "") {
+  return String(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function tokenSignature(value = "") {
+  return normalizeText(value)
+    .split(" ")
+    .filter(Boolean)
+    .sort()
+    .join(" ");
+}
+
+function namesLikelySame(a, b) {
+  if (!a || !b) return false;
+  const normA = normalizeText(a);
+  const normB = normalizeText(b);
+  if (!normA || !normB) return false;
+  if (normA === normB) return true;
+  if (tokenSignature(a) === tokenSignature(b)) return true;
+
+  const tokensA = normA.split(" ").filter(Boolean);
+  const tokensB = normB.split(" ").filter(Boolean);
+  const short = tokensA.length <= tokensB.length ? tokensA : tokensB;
+  const long = tokensA.length <= tokensB.length ? tokensB : tokensA;
+
+  if (short.length >= 2 && short.every((t) => long.includes(t))) {
+    return true;
+  }
+
+  return false;
+}
+
+function contributionBelongsToPerson(contrib, person) {
+  if (!contrib || !person) return false;
+
+  const rawUserId = String(contrib.userId || "").trim().toLowerCase();
+  const rawUserName = normalizeText(
+    contrib.userName || contrib.name || contrib.displayName || contrib.ownerName || ""
+  );
+  const userIdAsName = normalizeText(contrib.userId || "");
+  const rawUserNameSig = tokenSignature(
+    contrib.userName || contrib.name || contrib.displayName || contrib.ownerName || ""
+  );
+  const userIdAsNameSig = tokenSignature(contrib.userId || "");
+
+  if (rawUserId && person.identityIds.has(rawUserId)) return true;
+  if (rawUserName && person.identityNames.has(rawUserName)) return true;
+  if (rawUserNameSig && person.identitySignatures.has(rawUserNameSig)) return true;
+  if (userIdAsName && person.identityNames.has(userIdAsName)) return true;
+  if (userIdAsNameSig && person.identitySignatures.has(userIdAsNameSig)) return true;
+
+  return false;
+}
+
 export default function PersonContributionView({ myEntriesOnly }) {
   const { user, profile } = useAuth();
   const canWrite = CAN_WRITE_ROLES.includes(profile?.role);
@@ -56,30 +116,115 @@ export default function PersonContributionView({ myEntriesOnly }) {
     return unsub;
   }, []);
 
+  const [accountUsers, setAccountUsers] = useState([]);
+  useEffect(() => {
+    const q = query(collection(db, "users"), orderBy("name", "asc"));
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setAccountUsers(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+      },
+      () => setAccountUsers([])
+    );
+    return unsub;
+  }, []);
+
+  const people = useMemo(() => {
+    return allPeople.map((person) => {
+      const linkedAccount = accountUsers.find((u) => namesLikelySame(person.name, u.name));
+      const currentUserNameCandidates = [
+        profile?.name,
+        user?.displayName,
+        user?.email ? String(user.email).split("@")[0] : null,
+      ].filter(Boolean);
+      const selfMatchesRoster = Boolean(
+        user?.uid && currentUserNameCandidates.some((candidate) => namesLikelySame(person.name, candidate))
+      );
+      const identityIds = new Set(
+        [person.id, linkedAccount?.uid || linkedAccount?.id, selfMatchesRoster ? user?.uid : null]
+          .filter(Boolean)
+          .map((v) => String(v).trim().toLowerCase())
+      );
+      const identityBaseNames = [
+        person.name,
+        linkedAccount?.name,
+        ...(selfMatchesRoster ? currentUserNameCandidates : []),
+      ]
+        .filter(Boolean)
+        .map((v) => String(v));
+      const identityNames = new Set(
+        identityBaseNames
+          .map((v) => normalizeText(v))
+          .filter(Boolean)
+      );
+      const identitySignatures = new Set(
+        identityBaseNames
+          .map((v) => tokenSignature(v))
+          .filter(Boolean)
+      );
+
+      return {
+        ...person,
+        linkedAccount,
+        contributionUserId: linkedAccount?.uid || linkedAccount?.id || person.id,
+        identityIds,
+        identityNames,
+        identitySignatures,
+        searchIndex: [
+          person.name,
+          linkedAccount?.name,
+          linkedAccount?.email,
+          linkedAccount?.uid || linkedAccount?.id,
+          selfMatchesRoster ? profile?.email : null,
+          selfMatchesRoster ? user?.email : null,
+        ]
+          .filter(Boolean)
+          .map((v) => String(v).toLowerCase())
+          .join(" "),
+      };
+    });
+  }, [allPeople, accountUsers, user?.uid, user?.displayName, user?.email, profile?.name, profile?.email]);
+
   /* ── Search / selection ─────────────────────────────── */
   const [search, setSearch]           = useState("");
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserId, setSelectedUserId] = useState(null);
 
   const filteredPeople = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return allPeople.filter(
-      (p) => !q || p.name?.toLowerCase().includes(q)
+    return people.filter(
+      (p) => !q || p.searchIndex.includes(q)
     );
-  }, [allPeople, search]);
+  }, [people, search]);
+
+  const selectedUser = useMemo(
+    () => people.find((p) => p.id === selectedUserId) || null,
+    [people, selectedUserId]
+  );
+
+  useEffect(() => {
+    if (selectedUserId && !people.some((p) => p.id === selectedUserId)) {
+      setSelectedUserId(null);
+    }
+  }, [people, selectedUserId]);
 
   /* ── Contributions for selected user ───────────────── */
-  const [contribs, setContribs]       = useState([]);
+  const [allContribs, setAllContribs] = useState([]);
   const [loadingC, setLoadingC]       = useState(false);
 
   useEffect(() => {
-    if (!selectedUser) { setContribs([]); return; }
+    if (!selectedUser) return;
     setLoadingC(true);
-    const unsub = subscribeContributionsByUser(selectedUser.id, (docs) => {
-      setContribs(docs);
+    const unsub = subscribeAllContributions((docs) => {
+      setAllContribs(docs);
       setLoadingC(false);
     });
     return unsub;
   }, [selectedUser?.id]);
+
+  const contribs = useMemo(() => {
+    if (!selectedUser) return [];
+    return allContribs.filter((c) => contributionBelongsToPerson(c, selectedUser));
+  }, [allContribs, selectedUser]);
 
   // "My Entries" filter override (passed from ContributionTabs)
   const displayedContribs = myEntriesOnly
@@ -155,7 +300,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="gc-input pl-8 text-sm"
-            placeholder="Search classmate…"
+            placeholder="Search name or account email…"
           />
         </div>
 
@@ -165,16 +310,16 @@ export default function PersonContributionView({ myEntriesOnly }) {
             <ContributionListSkeleton />
           ) : filteredPeople.length === 0 ? (
             <p className="text-center text-sm text-gc-hint py-6">
-              {allPeople.length === 0 ? "No roster imported yet." : "No match."}
+              {people.length === 0 ? "No roster imported yet." : "No match."}
             </p>
           ) : (
             filteredPeople.map((p) => {
-              const active  = selectedUser?.id === p.id;
+              const active  = selectedUserId === p.id;
               const commId  = personCommitteeId(p);
               return (
                 <button
                   key={p.id}
-                  onClick={() => setSelectedUser(p)}
+                  onClick={() => setSelectedUserId(p.id)}
                   className={cn(
                     "w-full flex items-center gap-2.5 rounded px-3 py-2 text-left transition-all",
                     active
@@ -224,7 +369,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
               {/* Back (mobile) */}
               <button
                 type="button"
-                onClick={() => setSelectedUser(null)}
+                onClick={() => setSelectedUserId(null)}
                 className="sm:hidden rounded p-1 text-gc-mist hover:text-gc-cloud"
               >
                 <ChevronRight className="h-4 w-4 rotate-180" />

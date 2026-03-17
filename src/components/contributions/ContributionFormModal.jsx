@@ -98,8 +98,9 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
           userName: user.displayName || "Unknown",
         });
       } else {
+        const contributionUserId = targetUser?.contributionUserId || targetUser?.id;
         await createContribution({
-          userId:    targetUser.id,
+          userId:    contributionUserId,
           userName:  targetUser.name,
           committee: committeeId,
           task,
@@ -110,7 +111,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
           action: "contribution.create",
           category: "contribution",
           details: `Logged contribution for ${targetUser.name}: ${task.trim()}`,
-          meta: { targetUserId: targetUser.id, committee: committeeId, task: task.trim() },
+          meta: { targetUserId: contributionUserId, committee: committeeId, task: task.trim() },
           userId: user.uid,
           userName: user.displayName || "Unknown",
         });
