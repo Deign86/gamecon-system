@@ -86,9 +86,21 @@ export default function ProfilePanel() {
     }
   }
 
-  // Filter to contributions WHERE I am the subject (userId), not who logged them.
-  // This ensures entries a proctor logged on behalf of someone else don't appear here.
-  const mine = myContribs.filter((c) => c.userId === user?.uid);
+  // Legacy compat: older contribution docs may identify the subject by userName
+  // (or even a name-like userId) instead of Firebase Auth uid.
+  const mine = myContribs.filter((c) => {
+    const uid = user?.uid || "";
+    const myName = String(profile?.name || "").trim().toLowerCase();
+    const docUserId = String(c.userId || "").trim().toLowerCase();
+    const docUserName = String(c.userName || "").trim().toLowerCase();
+
+    if (uid && c.userId === uid) return true;
+    if (myName && docUserName === myName) return true;
+    if (myName && docUserId === myName) return true;
+
+    // Last-resort fallback for very old self-logs missing subject fields.
+    return uid && c.loggedBy === uid && !c.userId && !c.userName;
+  });
 
   return (
     <motion.div

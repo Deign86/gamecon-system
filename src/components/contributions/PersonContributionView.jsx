@@ -304,9 +304,9 @@ export default function PersonContributionView({ myEntriesOnly }) {
                           <p className="text-sm font-semibold text-gc-cloud">
                             {c.task}
                           </p>
-                          {c.details && (
+                          {(c.details || c.description) && (
                             <p className="mt-0.5 text-xs text-gc-mist">
-                              {c.details}
+                              {c.details || c.description}
                             </p>
                           )}
                           <div className="mt-1.5 flex flex-wrap items-center gap-2">

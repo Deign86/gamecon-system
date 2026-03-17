@@ -131,8 +131,19 @@ function MyLogView() {
     if (queuedTimerRef.current)  clearTimeout(queuedTimerRef.current);
   }, []);
 
-  // Filter to contributions where the current user is the subject (userId is always the person the entry is about)
-  const myContribs = contributions.filter((c) => c.userId === user?.uid);
+  // Legacy compat: older docs may identify the subject by name, not auth uid.
+  const myContribs = contributions.filter((c) => {
+    const uid = user?.uid || "";
+    const myName = String(profile?.name || "").trim().toLowerCase();
+    const docUserId = String(c.userId || "").trim().toLowerCase();
+    const docUserName = String(c.userName || "").trim().toLowerCase();
+
+    if (uid && c.userId === uid) return true;
+    if (myName && docUserName === myName) return true;
+    if (myName && docUserId === myName) return true;
+
+    return uid && c.loggedBy === uid && !c.userId && !c.userName;
+  });
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -273,11 +284,11 @@ function MyLogView() {
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gc-cloud">{c.task}</p>
-                  {c.description && (
-                    <p className="text-xs text-gc-mist mt-0.5">{c.description}</p>
+                  {(c.details || c.description) && (
+                    <p className="text-xs text-gc-mist mt-0.5">{c.details || c.description}</p>
                   )}
                   <p className="text-[10px] text-gc-hint mt-1 font-mono">
-                    {committee?.name || "General"} · {fmtDate(c.timestamp)}
+                    {committee?.name || "General"} · {fmtDate(c.createdAt || c.timestamp)}
                   </p>
                 </div>
               </div>

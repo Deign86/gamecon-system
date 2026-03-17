@@ -75,6 +75,6 @@ export const db = initializeFirestore(app, {
   }),
 });
 
-export const functions = getFunctions(app);
+export const functions = getFunctions(app, "us-central1");
 
 export default app;

@@ -125,7 +125,15 @@ async function assertAdmin(request) {
 
 /* ── Shared options for all callable functions ── */
 const callOpts = {
-  cors: true,
+  // Restrict callable CORS to known app origins while keeping local dev usable.
+  cors: [
+    "https://playverse-ops.vercel.app",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+  ],
+  region: "us-central1",
 };
 
 /* ─── Helper: generate a password that meets Firebase requirements ─── */

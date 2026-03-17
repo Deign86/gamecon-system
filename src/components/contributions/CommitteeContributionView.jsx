@@ -184,9 +184,9 @@ export default function CommitteeContributionView({ myEntriesOnly }) {
                             <p className="text-sm font-semibold text-gc-cloud">
                               {c.task}
                             </p>
-                            {c.details && (
+                            {(c.details || c.description) && (
                               <p className="text-xs text-gc-mist mt-0.5">
-                                {c.details}
+                                {c.details || c.description}
                               </p>
                             )}
                             <p className="mt-1 text-[10px] font-mono text-gc-hint">
