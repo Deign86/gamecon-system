@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Mail, Shield, Users, Calendar, ClipboardCheck, MapPin, Clock, ChevronDown, Check, Loader2, ChevronRight, Sun, Moon, Monitor } from "lucide-react";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useAuth } from "../hooks/useAuth";
-import { useCollection } from "../hooks/useFirestore";
 import { ROLE_COMMITTEES as COMMITTEES } from "../lib/constants";
+import { subscribeAllContributions } from "../lib/contributionsFirestore";
 import { normalizeCommitteeName } from "../lib/roleConfig";
 import { fmtDate, initials, cn } from "../lib/utils";
 import ChangePasswordForm from "./ChangePasswordForm";
@@ -35,7 +35,12 @@ export default function ProfilePanel() {
   const isViewer = profile?.role === "viewer";
   const { setTab } = useTab();
   const { mode, setTheme } = useTheme();
-  const { docs: myContribs } = useCollection("contributions");
+  const [allContribs, setAllContribs] = useState([]);
+
+  useEffect(() => {
+    const unsub = subscribeAllContributions((docs) => setAllContribs(docs));
+    return unsub;
+  }, []);
 
   // Derive active canonical committee names (normalise slugs + legacy values)
   const myCommitteeNames = Array.isArray(profile?.committees) && profile.committees.length > 0
@@ -88,7 +93,7 @@ export default function ProfilePanel() {
 
   // Legacy compat: older contribution docs may identify the subject by userName
   // (or even a name-like userId) instead of Firebase Auth uid.
-  const mine = myContribs.filter((c) => {
+  const mine = allContribs.filter((c) => {
     const uid = user?.uid || "";
     const myName = String(profile?.name || "").trim().toLowerCase();
     const docUserId = String(c.userId || "").trim().toLowerCase();

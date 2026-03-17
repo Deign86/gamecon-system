@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Send, CheckCircle, UserRound, BarChart3, ClipboardCheck, CloudUpload } from "lucide-react";
-import { useCollection } from "../../hooks/useFirestore";
 import { useAuth } from "../../hooks/useAuth";
 import { useOnlineStatus } from "../../hooks/useOnlineStatus";
 import { useQueuedWrite } from "../../hooks/useQueuedWrite";
 import { logActivity } from "../../lib/auditLog";
-import { createContribution } from "../../lib/contributionsFirestore";
+import { createContribution, subscribeAllContributions } from "../../lib/contributionsFirestore";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
 import { fmtDate, cn } from "../../lib/utils";
 import PersonContributionView from "./PersonContributionView";
@@ -92,7 +91,7 @@ function MyLogView() {
   const { isOnline } = useOnlineStatus();
   const { execute: queuedWrite } = useQueuedWrite();
   const isViewer = profile?.role === "viewer";
-  const { docs: contributions } = useCollection("contributions");
+  const [contributions, setContributions] = useState([]);
   const [task, setTask]     = useState("");
   const [desc, setDesc]     = useState("");
 
@@ -126,6 +125,10 @@ function MyLogView() {
   // unmounts before the feedback banners auto-dismiss.
   const successTimerRef = useRef(null);
   const queuedTimerRef  = useRef(null);
+  useEffect(() => {
+    const unsub = subscribeAllContributions((docs) => setContributions(docs));
+    return unsub;
+  }, []);
   useEffect(() => () => {
     if (successTimerRef.current) clearTimeout(successTimerRef.current);
     if (queuedTimerRef.current)  clearTimeout(queuedTimerRef.current);
