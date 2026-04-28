@@ -102,7 +102,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
         await createContribution({
           userId:    contributionUserId,
           userName:  targetUser.name,
-          committee: selectedCommittee,
+          committee: committeeId,
           task,
           details,
           loggedBy:  user.uid,
