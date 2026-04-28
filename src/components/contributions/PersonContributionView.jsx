@@ -282,6 +282,18 @@ export default function PersonContributionView({ myEntriesOnly }) {
     return isAdmin || c.loggedBy === user?.uid;
   }
 
+  /**
+   * For manually-modified persons, prefer the live role-assignment committee
+   * over the stale value stored in the contribution document at log-time.
+   */
+  function resolveDisplayCommittee(contrib, person) {
+    if (person?.source === "manual" || person?.source === "mixed") {
+      const liveCommId = personCommitteeId(person);
+      if (liveCommId) return liveCommId;
+    }
+    return contrib.committee || "";
+  }
+
   /* ── Render ─────────────────────────────────────────── */
   return (
     <div className="flex flex-col sm:flex-row gap-4 h-full min-h-0">
@@ -427,7 +439,8 @@ export default function PersonContributionView({ myEntriesOnly }) {
               ) : (
                 <AnimatePresence initial={false}>
                   {displayedContribs.map((c) => {
-                    const color = committeeColor(c.committee);
+                    const displayCommId = resolveDisplayCommittee(c, selectedUser);
+                    const color = committeeColor(displayCommId);
                     const loggedByMe = c.loggedBy === user?.uid;
                     const editable   = canEditEntry(c);
                     return (
@@ -463,7 +476,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                                 border: `1px solid ${color}30`,
                               }}
                             >
-                              {committeeLabel(c.committee)}
+                              {committeeLabel(displayCommId)}
                             </span>
                             {loggedByMe && (
                               <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold bg-gc-crimson/10 text-gc-crimson border border-gc-crimson/20">
