@@ -283,11 +283,21 @@ export default function PersonContributionView({ myEntriesOnly }) {
   }
 
   /**
-   * For manually-modified persons, prefer the live role-assignment committee
-   * over the stale value stored in the contribution document at log-time.
+   * For manually-modified persons, verify the stored committee is still
+   * among the person's current assignments. If the committee was removed
+   * (stale), fall back to the first current assignment.
    */
   function resolveDisplayCommittee(contrib, person) {
     if (person?.source === "manual" || person?.source === "mixed") {
+      const storedId = contrib.committee || "";
+      // If the stored committee still matches a current assignment, keep it
+      if (storedId && Array.isArray(person.assignments)) {
+        const stillValid = person.assignments.some(
+          (a) => committeeNameToId(a?.committee || "") === storedId
+        );
+        if (stillValid) return storedId;
+      }
+      // Stored committee is stale/removed — fall back to first current assignment
       const liveCommId = personCommitteeId(person);
       if (liveCommId) return liveCommId;
     }

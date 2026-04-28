@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Send, CheckCircle } from "lucide-react";
 import { ROLE_COMMITTEES as COMMITTEES } from "../../lib/constants";
@@ -57,13 +57,42 @@ function defaultCommitteeFor(targetUser) {
 export default function ContributionFormModal({ open, onClose, targetUser, existing }) {
   const { user } = useAuth();
 
-  // Committee is derived from the person's imported assignments — not user-editable.
-  // For edits, preserve the already-stored committee value.
-  const committeeId = existing?.committee || defaultCommitteeFor(targetUser);
-  const committeeName = COMMITTEES.find((c) => c.id === committeeId)?.name
-    || (Array.isArray(targetUser?.assignments) && targetUser.assignments[0]?.committee)
-    || "General";
-  const committeeColor = COMMITTEES.find((c) => c.id === committeeId)?.color || "#64748B";
+  // Build selectable committee options from the person's assignments.
+  // When a person has multiple committees, the user can pick which one applies.
+  const committeeOptions = useMemo(() => {
+    if (!targetUser) return [];
+    const opts = [];
+    if (Array.isArray(targetUser.assignments)) {
+      for (const a of targetUser.assignments) {
+        const id = resolveCommitteeId(a?.committee || "");
+        if (id && !opts.some((o) => o.id === id)) {
+          opts.push({
+            id,
+            name: COMMITTEES.find((c) => c.id === id)?.name || a.committee,
+            color: COMMITTEES.find((c) => c.id === id)?.color || "#64748B",
+          });
+        }
+      }
+    }
+    if (opts.length === 0) {
+      const fallbackId = defaultCommitteeFor(targetUser);
+      if (fallbackId) {
+        opts.push({
+          id: fallbackId,
+          name: COMMITTEES.find((c) => c.id === fallbackId)?.name || "General",
+          color: COMMITTEES.find((c) => c.id === fallbackId)?.color || "#64748B",
+        });
+      }
+    }
+    return opts;
+  }, [targetUser]);
+
+  const [selectedCommittee, setSelectedCommittee] = useState(
+    existing?.committee || committeeOptions[0]?.id || ""
+  );
+  const committeeObj = committeeOptions.find((o) => o.id === selectedCommittee) || committeeOptions[0] || {};
+  const committeeName = committeeObj.name || "General";
+  const committeeColor = committeeObj.color || "#64748B";
 
   const [task, setTask]       = useState(existing?.task || "");
   const [details, setDetails] = useState(existing?.details || existing?.description || "");
@@ -75,6 +104,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
     if (open) {
       setTask(existing?.task || "");
       setDetails(existing?.details || existing?.description || "");
+      setSelectedCommittee(existing?.committee || committeeOptions[0]?.id || "");
       setDone(false);
     }
   }, [open, existing, targetUser]);
@@ -88,6 +118,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
         await updateContribution(existing.id, {
           task: task.trim(),
           details: details.trim(),
+          committee: selectedCommittee,
         });
         logActivity({
           action: "contribution.update",
@@ -102,7 +133,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
         await createContribution({
           userId:    contributionUserId,
           userName:  targetUser.name,
-          committee: committeeId,
+          committee: selectedCommittee,
           task,
           details,
           loggedBy:  user.uid,
@@ -111,7 +142,7 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
           action: "contribution.create",
           category: "contribution",
           details: `Logged contribution for ${targetUser.name}: ${task.trim()}`,
-          meta: { targetUserId: contributionUserId, committee: committeeId, task: task.trim() },
+          meta: { targetUserId: contributionUserId, committee: selectedCommittee, task: task.trim() },
           userId: user.uid,
           userName: user.displayName || "Unknown",
         });
@@ -185,6 +216,25 @@ export default function ContributionFormModal({ open, onClose, targetUser, exist
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4 p-5">
+              {/* Committee selector (shown when person has multiple assignments) */}
+              {committeeOptions.length > 1 && (
+                <div>
+                  <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gc-mist">
+                    Committee
+                  </label>
+                  <select
+                    value={selectedCommittee}
+                    onChange={(e) => setSelectedCommittee(e.target.value)}
+                    className="gc-input text-sm"
+                  >
+                    {committeeOptions.map((opt) => (
+                      <option key={opt.id} value={opt.id}>
+                        {opt.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               {/* Task */}
               <div>
                 <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-gc-mist">
