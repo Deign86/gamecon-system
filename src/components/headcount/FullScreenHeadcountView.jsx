@@ -184,7 +184,7 @@ function HeadcountInner() {
             <span>Event locked — read-only mode</span>
           </div>
         )}
-        {/* Back to dashboard */}}
+        {/* Back to dashboard */}
       <motion.button
         initial={{ opacity: 0, x: 10 }}
         animate={{ opacity: 1, x: 0 }}
