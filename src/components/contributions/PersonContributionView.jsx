@@ -272,6 +272,14 @@ export default function PersonContributionView({ myEntriesOnly }) {
       : null;
     return committeeNameToId(first || "");
   }
+  function personCommitteeLabel(person) {
+    // Show all current assignments joined, e.g. "Exhibitors · Ticketing"
+    if (!Array.isArray(person?.assignments) || person.assignments.length === 0) return "—";
+    const names = person.assignments
+      .map((a) => a?.committee)
+      .filter(Boolean);
+    return names.length > 0 ? names.join(" · ") : "—";
+  }
   function committeeLabel(id) {
     return COMMITTEES.find((c) => c.id === id)?.name || "General";
   }
@@ -363,9 +371,9 @@ export default function PersonContributionView({ myEntriesOnly }) {
                     <p className={cn("text-sm font-semibold truncate", active && "text-white")}>
                       {p.name}
                     </p>
-                    {/* Show first committee assignment */}
+                    {/* Show all committee assignments */}
                     <p className="text-[10px] font-mono text-gc-hint truncate">
-                      {p.assignments?.[0]?.committee || "—"}
+                      {personCommitteeLabel(p)}
                     </p>
                   </div>
                   {active && (
@@ -411,7 +419,7 @@ export default function PersonContributionView({ myEntriesOnly }) {
                 <p className="text-sm font-bold text-gc-white truncate">{selectedUser.name}</p>
                 <p className="flex items-center gap-1 text-[10px] font-mono text-gc-hint">
                   <Shield className="h-2.5 w-2.5" />
-                  {selectedUser.assignments?.[0]?.committee || "—"} · {displayedContribs.length} entr{displayedContribs.length === 1 ? "y" : "ies"}
+                  {personCommitteeLabel(selectedUser)} · {displayedContribs.length} entr{displayedContribs.length === 1 ? "y" : "ies"}
                 </p>
               </div>
 
