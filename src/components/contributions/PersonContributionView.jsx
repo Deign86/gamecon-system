@@ -291,26 +291,19 @@ export default function PersonContributionView({ myEntriesOnly }) {
   }
 
   /**
-   * For manually-modified persons, verify the stored committee is still
-   * among the person's current assignments. If the committee was removed
-   * (stale), fall back to the first current assignment.
+   * Returns an array of committee IDs to display on a contribution badge.
+   * For manual/mixed persons: all their current live role assignments.
+   * For excel persons: the single stored committee id.
    */
-  function resolveDisplayCommittee(contrib, person) {
+  function resolveDisplayCommittees(contrib, person) {
     const src = person?.source?.toLowerCase();
-    if (src === "manual" || src === "mixed") {
-      const storedId = contrib.committee || "";
-      // If the stored committee still matches a current assignment, keep it
-      if (storedId && Array.isArray(person.assignments)) {
-        const stillValid = person.assignments.some(
-          (a) => committeeNameToId(a?.committee || "") === storedId
-        );
-        if (stillValid) return storedId;
-      }
-      // Stored committee is stale/removed — fall back to first current assignment
-      const liveCommId = personCommitteeId(person);
-      if (liveCommId) return liveCommId;
+    if ((src === "manual" || src === "mixed") && Array.isArray(person?.assignments) && person.assignments.length > 0) {
+      const ids = person.assignments
+        .map((a) => committeeNameToId(a?.committee || ""))
+        .filter(Boolean);
+      if (ids.length > 0) return ids;
     }
-    return contrib.committee || "";
+    return [contrib.committee || ""].filter(Boolean);
   }
 
   /* ── Render ─────────────────────────────────────────── */
@@ -458,8 +451,8 @@ export default function PersonContributionView({ myEntriesOnly }) {
               ) : (
                 <AnimatePresence initial={false}>
                   {displayedContribs.map((c) => {
-                    const displayCommId = resolveDisplayCommittee(c, selectedUser);
-                    const color = committeeColor(displayCommId);
+                    const displayCommIds = resolveDisplayCommittees(c, selectedUser);
+                    const primaryColor = committeeColor(displayCommIds[0]);
                     const loggedByMe = c.loggedBy === user?.uid;
                     const editable   = canEditEntry(c);
                     return (
@@ -471,10 +464,10 @@ export default function PersonContributionView({ myEntriesOnly }) {
                         transition={{ duration: 0.15 }}
                         className="flex items-start gap-3 rounded border border-gc-steel/50 bg-gc-iron px-3.5 py-3"
                       >
-                        {/* Committee dot */}
+                        {/* Committee dot — keyed to primary committee */}
                         <div
                           className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
-                          style={{ background: color }}
+                          style={{ background: primaryColor }}
                         />
                         {/* Content */}
                         <div className="flex-1 min-w-0">
@@ -487,16 +480,22 @@ export default function PersonContributionView({ myEntriesOnly }) {
                             </p>
                           )}
                           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                            <span
-                              className="rounded px-1.5 py-0.5 text-[10px] font-semibold"
-                              style={{
-                                background: `${color}18`,
-                                color,
-                                border: `1px solid ${color}30`,
-                              }}
-                            >
-                              {committeeLabel(displayCommId)}
-                            </span>
+                            {displayCommIds.map((id) => {
+                              const col = committeeColor(id);
+                              return (
+                                <span
+                                  key={id}
+                                  className="rounded px-1.5 py-0.5 text-[10px] font-semibold"
+                                  style={{
+                                    background: `${col}18`,
+                                    color: col,
+                                    border: `1px solid ${col}30`,
+                                  }}
+                                >
+                                  {committeeLabel(id)}
+                                </span>
+                              );
+                            })}
                             {loggedByMe && (
                               <span className="rounded px-1.5 py-0.5 text-[10px] font-semibold bg-gc-crimson/10 text-gc-crimson border border-gc-crimson/20">
                                 Logged by you
