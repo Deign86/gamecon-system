@@ -288,7 +288,8 @@ export default function PersonContributionView({ myEntriesOnly }) {
    * (stale), fall back to the first current assignment.
    */
   function resolveDisplayCommittee(contrib, person) {
-    if (person?.source === "manual" || person?.source === "mixed") {
+    const src = person?.source?.toLowerCase();
+    if (src === "manual" || src === "mixed") {
       const storedId = contrib.committee || "";
       // If the stored committee still matches a current assignment, keep it
       if (storedId && Array.isArray(person.assignments)) {
